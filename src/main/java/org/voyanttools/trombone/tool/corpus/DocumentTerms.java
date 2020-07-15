@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
@@ -155,7 +155,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 						int docIndexInCorpus = corpusMapper.getDocumentPositionFromLuceneId(doc);
 						positionsMap.put(docIndexInCorpus, new ArrayList<Integer>());
 						int pos = spans.nextStartPosition();
-						while (pos!=spans.NO_MORE_POSITIONS) {
+						while (pos!=Spans.NO_MORE_POSITIONS) {
 							positionsMap.get(docIndexInCorpus).add(pos);
 							pos = spans.nextStartPosition();
 						}
@@ -198,7 +198,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 	private void runAllTermsFromDocumentTermVectors(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
 		int size = start+limit;
 		FlexibleQueue<DocumentTerm> queue = new FlexibleQueue<DocumentTerm>(comparator, size);
-		LeafReader reader = corpusMapper.getLeafReader();
+		IndexReader reader = corpusMapper.getIndexReader();
 		Corpus corpus = corpusMapper.getCorpus();
 		CorpusTermMinimalsDB corpusTermMinimalsDB = CorpusTermMinimalsDB.getInstance(corpusMapper, tokenType);
 		TermsEnum termsEnum = null;
