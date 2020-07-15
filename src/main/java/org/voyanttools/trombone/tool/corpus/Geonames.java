@@ -467,23 +467,23 @@ public class Geonames extends AbstractContextTerms {
 					words.clear();
 					break;
 				}
-			}
-			tokenStream.end();
-			tokenStream.close();
-			if (words.isEmpty()==false) {
-					if (words.size()==1) {phrases.add(words.get(0));} // add one word
-					else { // check to see if phrase is in the corpus
-						 PhraseQuery.Builder builder = new PhraseQuery.Builder();
-						 for (String w : words) {
-							 builder.add(new Term(TokenType.lexical.name(), w));
-						 }
-						 Query query = builder.build();
-						TopDocs topDocs = searcher.search(query, 1);
-						if (topDocs.totalHits>0) {
-							phrases.add(StringUtils.join(words, ' '));
-						}
-					}
-			}
+	        }
+	        tokenStream.end();
+	        tokenStream.close();
+	        if (words.isEmpty()==false) {
+	        		if (words.size()==1) {phrases.add(words.get(0));} // add one word
+	        		else { // check to see if phrase is in the corpus
+	        			 PhraseQuery.Builder builder = new PhraseQuery.Builder();
+	        			 for (String w : words) {
+	        				 builder.add(new Term(TokenType.lexical.name(), w));
+	        			 }
+	        			 Query query = builder.build();
+	        			TopDocs topDocs = searcher.search(query, 1);
+	        			if (topDocs.totalHits.value>0) {
+	        				phrases.add(StringUtils.join(words, ' '));
+	        			}   			
+	        		}
+	        }
 		}
 		
 		return phrases.isEmpty() ? null : phrases;
