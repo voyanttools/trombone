@@ -127,7 +127,7 @@ public class CorpusManager extends AbstractTool {
 			
 			// make sure we have permissions to do this
 			CorpusAccess corpusAccess = corpus.getValidatedCorpusAccess(parameters);
-			if (corpusAccess==CorpusAccess.NONCONSUMPTIVE) {
+			if (corpusAccess != CorpusAccess.ADMIN && corpusAccess != CorpusAccess.NORMAL) {
 				throw new CorpusAccessException("You aren't permitted to edit this corpus.");
 			}
 
@@ -194,6 +194,12 @@ public class CorpusManager extends AbstractTool {
 			
 			String corpusId = storage.storeStrings(keepers, Storage.Location.object);
 			FlexibleParameters params = new FlexibleParameters(new String[]{"storedId="+corpusId,"nextCorpusCreatorStep=index"}); // re-index in case we have per-corpus index
+			
+			// copy over access settings
+			params.addParameter("adminPassword", corpus.getCorpusMetadata().getAccessPasswords(CorpusAccess.ADMIN));
+			params.addParameter("accessPassword", corpus.getCorpusMetadata().getAccessPasswords(CorpusAccess.ACCESS));
+			params.addParameter("noPasswordAccess", corpus.getCorpusMetadata().getNoPasswordAccess().name());
+			
 			RealCorpusCreator realCorpusCreator = new RealCorpusCreator(storage, params);
 			realCorpusCreator.run(); // make sure to create corpus
 			this.id = realCorpusCreator.getStoredId();
