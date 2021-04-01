@@ -86,7 +86,8 @@ public class CorpusBuilder extends AbstractTool {
 			// check if we have an admin password and update the corpusId if so
 			if (parameters.getParameterValue("adminPassword", "").isEmpty()==false) {
 				// we'll generate a new random corpus ID to make sure this administered corpus is unique
-				corpusId = DigestUtils.md5Hex(corpusId+UUID.randomUUID().toString());
+// don't assign new ID since it breaks on "file-per-corpus" storage and also doesn't seem to be necessary				
+//				corpusId = DigestUtils.md5Hex(corpusId+UUID.randomUUID().toString());
 			}
 
 			CorpusMetadata metadata = new CorpusMetadata(corpusId);
