@@ -55,6 +55,8 @@ public interface Storage {
 	
 	public LuceneManager getLuceneManager() throws IOException;
 	
+	public LuceneManager getNotebookLuceneManager() throws IOException;
+	
 	/**
 	 * Destroy (delete) this storage.
 	 * 

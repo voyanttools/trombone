@@ -67,6 +67,7 @@ public class MemoryStorage implements Storage {
 	private CorpusStorage corpusStorage;
 	
 	private LuceneManager luceneManager = null;
+	private LuceneManager notebookLuceneManager = null;
 
 	private NlpFactory nlpAnnotatorFactory = new NlpFactory();
 
@@ -96,6 +97,14 @@ public class MemoryStorage implements Storage {
 			luceneManager = new SingleIndexLuceneManager(this, new MemoryDirectoryFactory());
 		}
 		return luceneManager;
+	}
+
+	@Override
+	public LuceneManager getNotebookLuceneManager() throws IOException {
+		if (notebookLuceneManager==null) {
+			notebookLuceneManager = new SingleIndexLuceneManager(this, new MemoryDirectoryFactory());
+		}
+		return notebookLuceneManager;
 	}
 
 	@Override

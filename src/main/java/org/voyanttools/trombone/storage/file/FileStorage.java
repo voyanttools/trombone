@@ -75,6 +75,7 @@ public class FileStorage implements Storage {
 	
 	private static final String LUCENE_DIRECTORY_NAME = "lucene";
 	private static final String LUCENE_PER_CORPUS_DIRECTORY_NAME = "lucene-per-corpus";
+	private static final String LUCENE_NOTEBOOK_DIRECTORY_NAME = "lucene-notebook";
 	
 	/**
 	 * the actual base directory used for storage
@@ -90,6 +91,8 @@ public class FileStorage implements Storage {
 	private CorpusStorage corpusStorage = null;
 	
 	private LuceneManager luceneManager = null;
+	
+	private LuceneManager notebookLuceneManager = null;
 	
 	private NlpFactory nlpAnnotatorFactory = new NlpFactory();
 	
@@ -188,6 +191,16 @@ public class FileStorage implements Storage {
 			}
 		}
 		return luceneManager;
+	}
+
+	@Override
+	public LuceneManager getNotebookLuceneManager() throws IOException {
+		if (notebookLuceneManager==null) {
+			Path path = Paths.get(storageLocation.getPath(), LUCENE_NOTEBOOK_DIRECTORY_NAME);
+			DirectoryFactory directoryFactory = new SingleDirectoryFactory(path);
+			notebookLuceneManager = new SingleIndexLuceneManager(this, directoryFactory);
+		}
+		return notebookLuceneManager;
 	}
 	
 	@Override
