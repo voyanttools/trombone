@@ -55,6 +55,7 @@ import org.jsoup.select.Elements;
 import org.voyanttools.trombone.mail.Mailer;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.storage.Storage.Location;
+import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.storage.git.RepositoryManager;
 import org.voyanttools.trombone.tool.util.AbstractTool;
 import org.voyanttools.trombone.util.FlexibleParameters;
@@ -293,9 +294,11 @@ public class GitNotebookManager extends AbstractTool {
 						notebookSources.add(new StoredNotebookSource(notebookId, notebookContents, notebookMetadata));
 					} catch (IncorrectObjectTypeException | NullPointerException e) {
 						System.out.println("no note for "+notebook);
-						String metadata = getMetadataFromNotebook(rm, notebook.replaceFirst(".html$", ""));
-						if (metadata != null) {
-							rm.addNoteToCommit(NOTEBOOK_REPO_NAME, rc, metadata);
+						String notebookMetadata = getMetadataFromNotebook(rm, notebook.replaceFirst(".html$", ""));
+						if (notebookMetadata != null) {
+							rm.addNoteToCommit(NOTEBOOK_REPO_NAME, rc, notebookMetadata);
+							String notebookContents = RepositoryManager.getRepositoryFile(rm.getRepository(NOTEBOOK_REPO_NAME), notebook);
+							notebookSources.add(new StoredNotebookSource(notebookId, notebookContents, notebookMetadata));
 						}
 					}
 				}
@@ -308,9 +311,13 @@ public class GitNotebookManager extends AbstractTool {
 
 	private RepositoryManager getRepositoryManager() throws IOException {
 		if (repoManager == null) {
-			 // TODO check here if we need to init a memory storage version instead
 			try {
-				repoManager = new RepositoryManager();
+				if (storage instanceof FileStorage) {
+					repoManager = new RepositoryManager(((FileStorage)storage).storageLocation);
+				} else {
+					// TODO memory storage version
+					throw new IOException("Only FileStorage is supported for RepositoryManager");
+				}
 				try {
 					repoManager.getRepository(NOTEBOOK_REPO_NAME);
 				} catch (RefNotFoundException e) {

@@ -91,6 +91,10 @@ public class CatalogueFacets extends AbstractTool {
 	    }
 	}
 	
+	public Map<String, LabelAndValue[]> getFacetResults() {
+		return facetResults;
+	}
+
 	public static class CatalogueFacetsConverter implements Converter {
 
 		@Override
