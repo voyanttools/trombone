@@ -5,11 +5,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.voyant-tools</groupId>
 	<artifactId>trombone</artifactId>
-	<version>5.2.0-SNAPSHOT</version>
+	<version>5.2.1-SNAPSHOT</version>
 	<name>Voyant Tools</name>
-	<url>https://github.com/sgsinclair/trombone</url>
+	<url>https://github.com/voyanttools/trombone</url>
 	<issueManagement>
-		<url>https://github.com/sgsinclair/trombone/issues</url>
+		<url>https://github.com/voyanttools/trombone/issues</url>
 		<system>GitHub Issues</system>
 	</issueManagement>
 	<licenses>
@@ -20,23 +20,23 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://github.com/sgsinclair/trombone</url>
-		<connection>scm:git:git://github.com/sgsinclair/trombone.git</connection>
-		<developerConnection>scm:git:git@github.com:sgsinclair/trombone.git</developerConnection>
+		<url>https://github.com/voyanttools/trombone</url>
+		<connection>scm:git:https://github.com/voyanttools/trombone.git</connection>
+		<developerConnection>scm:git:git@github.com:voyanttools/trombone.git</developerConnection>
 	</scm>
 	<developers>
 		<developer>
-			<email>sgsinclair@gmail.com</email>
-			<name>Stéfan Sinclair</name>
-			<url>http://stefansinclair.name/</url>
-			<id>sgsinclair</id>
+			<email>voyanttools@gmail.com</email>
+			<name>Voyant Tools</name>
+			<url>https://voyant-tools.org</url>
+			<id>voyanttools</id>
 		</developer>
 	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- see http://stackoverflow.com/questions/14013644/hosting-a-maven-repository-on-github -->
-		<github.global.server>github</github.global.server>
+		<github.global.server>github-oauth</github.global.server>
 		<dkpro.core.version>1.8.0</dkpro.core.version>
 		<dl4j.version>1.0.0-beta6</dl4j.version>
 	</properties>
@@ -80,7 +80,7 @@
 						<include>**/*</include>
 					</includes>
 					<repositoryName>trombone</repositoryName>      <!-- github repo name -->
-					<repositoryOwner>sgsinclair</repositoryOwner>    <!-- github username -->
+					<repositoryOwner>voyanttools</repositoryOwner>    <!-- github username -->
 				</configuration>
 				<executions>
 					<!-- run site-maven-plugin's 'site' target as part of the build's normal 
