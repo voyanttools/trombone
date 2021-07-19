@@ -12,6 +12,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -257,24 +258,14 @@ public class XlsExpander implements Expander {
 		Cell cell = row.getCell(cellIndex);
 		if (cell==null) return "";
 		
-		if (cell.getCellType()==Cell.CELL_TYPE_STRING) {
-			String value = getValue(cell);
-			return value == null ? "" : value.trim();
-		}
-		else  return "";
+		String value = getValue(cell);
+		return value == null ? "" : value.trim();
 		
 	}
 	
 	private String getValue(Cell cell) {
 		if (cell!=null) {
-			switch (cell.getCellType()) {
-				case Cell.CELL_TYPE_STRING:
-					return cell.getStringCellValue().trim();
-				case Cell.CELL_TYPE_FORMULA:
-					return cell.getCellFormula().trim();
-				case Cell.CELL_TYPE_NUMERIC:
-					return String.valueOf(cell.getNumericCellValue()).trim();
-			}
+			return new DataFormatter().formatCellValue(cell);
 		}
 		return null;
 	}
