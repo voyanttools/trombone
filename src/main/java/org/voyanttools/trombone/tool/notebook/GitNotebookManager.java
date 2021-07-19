@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,8 +23,10 @@ import java.util.stream.Stream;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 import javax.mail.MessagingException;
@@ -48,13 +51,8 @@ import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.notes.Note;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.voyanttools.trombone.mail.Mailer;
 import org.voyanttools.trombone.storage.Storage;
-import org.voyanttools.trombone.storage.Storage.Location;
 import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.storage.git.RepositoryManager;
 import org.voyanttools.trombone.tool.util.AbstractTool;
@@ -122,7 +120,7 @@ public class GitNotebookManager extends AbstractTool {
 				while(true) {
 					id = RandomStringUtils.randomAlphanumeric(6);
 					try {
-						if (doesNotebookFileExist(rm, id+".html") == false) {
+						if (doesNotebookFileExist(rm, id+".json") == false) {
 							break;
 						}
 					} catch (GitAPIException e) {
@@ -140,7 +138,7 @@ public class GitNotebookManager extends AbstractTool {
 			
 			if (storedAccessCode.isEmpty() || storedAccessCode.equals(accessCode)) {
 				try {
-					RevCommit commit = rm.addFile(NOTEBOOK_REPO_NAME, id+".html", notebookData);
+					RevCommit commit = rm.addFile(NOTEBOOK_REPO_NAME, id+".json", notebookData);
 					rm.addNoteToCommit(NOTEBOOK_REPO_NAME, commit, notebookMetadata);
 					rm.addFile(NOTEBOOK_REPO_NAME, id, accessCode);
 				} catch (IOException | GitAPIException e) {
@@ -169,7 +167,7 @@ public class GitNotebookManager extends AbstractTool {
 			id = parameters.getParameterValue("id","");
 			if (id.trim().isEmpty() == false) {
 				try {
-					data = doesNotebookFileExist(rm, id+".html") ? "true" : "false";
+					data = doesNotebookFileExist(rm, id+".json") ? "true" : "false";
 				} catch (GitAPIException e) {
 					throw new IOException(e.toString());
 				}
@@ -204,19 +202,9 @@ public class GitNotebookManager extends AbstractTool {
 				data = parameters.getParameterValue("data"); // has been set by server
 			} else {
 				try {
-					data = RepositoryManager.getRepositoryFile(rm.getRepository(NOTEBOOK_REPO_NAME), id+".html");
+					data = RepositoryManager.getRepositoryFile(rm.getRepository(NOTEBOOK_REPO_NAME), id+".json");
 				} catch (IOException | GitAPIException e) {
-					// try old notebook location
-					NotebookManager nm = new NotebookManager(storage, parameters);
-					nm.run();
-					data = nm.data;
-					
-					try {
-						log("Migrating notebook '"+id+"'.");
-						migrateNotebook(rm, id, data);
-					} catch (GitAPIException e1) {
-						log("Tried to migrate '"+id+"' notebook but failed.");
-					}
+					throw new IOException("Unable to retrieve notebook: "+id);
 				}
 			}
 			if (data==null) {
@@ -233,7 +221,7 @@ public class GitNotebookManager extends AbstractTool {
 				File repoDir = notebookRepo.getWorkTree();
 				List<String> files = listFilesNewestFirst(repoDir);
 //				List<String> files = RepositoryManager.getRepositoryContents(notebookRepo);
-				List<String> notebooks = files.stream().filter(f -> f.endsWith(".html")).collect(Collectors.toList());
+				List<String> notebooks = files.stream().filter(f -> f.endsWith(".json")).collect(Collectors.toList());
 				
 				List<String> notes = new ArrayList<String>();
 				
@@ -252,7 +240,7 @@ public class GitNotebookManager extends AbstractTool {
 						notes.add(noteContents);
 					} catch (IncorrectObjectTypeException | NullPointerException e) {
 //						System.out.println("no note for "+notebook);
-						String metadata = getMetadataFromNotebook(rm, notebook.replaceFirst(".html$", ""));
+						String metadata = getMetadataFromNotebook(rm, notebook.replaceFirst(".json$", ""));
 						if (metadata != null) {
 							rm.addNoteToCommit(NOTEBOOK_REPO_NAME, rc, metadata);
 							notes.add(metadata);
@@ -276,13 +264,13 @@ public class GitNotebookManager extends AbstractTool {
 				File repoDir = notebookRepo.getWorkTree();
 				List<String> files = listFilesNewestFirst(repoDir);
 //				List<String> files = RepositoryManager.getRepositoryContents(notebookRepo);
-				List<String> notebooks = files.stream().filter(f -> f.endsWith(".html")).collect(Collectors.toList());
+				List<String> notebooks = files.stream().filter(f -> f.endsWith(".json")).collect(Collectors.toList());
 				
 				List<StoredNotebookSource> notebookSources = new ArrayList<>();
 				for (String notebook : notebooks) {
 					RevCommit rc = RepositoryManager.getMostRecentCommitForFile(notebookRepo, notebook);
 					
-					String notebookId = notebook.replaceFirst(".html$", "");
+					String notebookId = notebook.replaceFirst(".json$", "");
 					
 					try (Git git = new Git(notebookRepo)) {
 						String notebookContents = RepositoryManager.getRepositoryFile(rm.getRepository(NOTEBOOK_REPO_NAME), notebook);
@@ -294,7 +282,7 @@ public class GitNotebookManager extends AbstractTool {
 						notebookSources.add(new StoredNotebookSource(notebookId, notebookContents, notebookMetadata));
 					} catch (IncorrectObjectTypeException | NullPointerException e) {
 						System.out.println("no note for "+notebook);
-						String notebookMetadata = getMetadataFromNotebook(rm, notebook.replaceFirst(".html$", ""));
+						String notebookMetadata = getMetadataFromNotebook(rm, notebook.replaceFirst(".json$", ""));
 						if (notebookMetadata != null) {
 							rm.addNoteToCommit(NOTEBOOK_REPO_NAME, rc, notebookMetadata);
 							String notebookContents = RepositoryManager.getRepositoryFile(rm.getRepository(NOTEBOOK_REPO_NAME), notebook);
@@ -363,7 +351,7 @@ public class GitNotebookManager extends AbstractTool {
 				try (Git git = new Git(repo)) {
 					git.add().addFilepattern(filename).call();
 					RevCommit commit = git.commit().setMessage("Added file: "+filename).call();
-					if (filename.endsWith(".html")) {
+					if (filename.endsWith(".json")) {
 						String notebookMetadata = getMetadataFromNotebook(rm, filename);
 						if (notebookMetadata != null) {
 							rm.addNoteToCommit(NOTEBOOK_REPO_NAME, commit, notebookMetadata);
@@ -374,49 +362,44 @@ public class GitNotebookManager extends AbstractTool {
 		}
 	}
 	
-	private void migrateNotebook(RepositoryManager rm, String id, String data) throws IOException, GitAPIException {
-		if (doesNotebookFileExist(rm, id+".html")) {
-			return; // this should never happen, because if there was a collision, the git notebook would be loaded instead
-		}
-		
-		String accessCode = storage.retrieveString(id, Location.notebook);
-		
-		RevCommit commit = rm.addFile(NOTEBOOK_REPO_NAME, id+".html", data);
-		String notebookMetadata = getMetadataFromNotebook(rm, id);
-		if (notebookMetadata != null) {
-			rm.addNoteToCommit(NOTEBOOK_REPO_NAME, commit, notebookMetadata);
-		}
-		rm.addFile(NOTEBOOK_REPO_NAME, id, accessCode);
-	}
-	
 	private static String getMetadataFromNotebook(RepositoryManager rm, String notebookId) {
-		String notebookHtml;
+		String notebookJson;
 		try {
-			notebookHtml = RepositoryManager.getRepositoryFile(rm.getRepository(NOTEBOOK_REPO_NAME), notebookId+".html");
+			notebookJson = RepositoryManager.getRepositoryFile(rm.getRepository(NOTEBOOK_REPO_NAME), notebookId+".json");
 		} catch (IOException | GitAPIException e) {
 			return null;
 		}
 		
-		Document doc;
-		try {
-			doc = Jsoup.parse(notebookHtml);
-		} catch (Exception e) {
-			return null;
-		}
-		
-		Elements metaEls = doc.select("head > meta");
 		StringBuilder metadata = new StringBuilder("{\"id\":\""+notebookId+"\"");
-		for (int i=0, len=metaEls.size(); i<len; i++) {
-			Element meta = metaEls.get(i);
-			if (meta.hasAttr("name") && meta.hasAttr("content")) {
-				String field = meta.attr("name");
-				String value = meta.attr("content");
-				if (field.equals("title") || field.equals("description")) {
-					value = value.replaceAll("<\\/?\\w+.*?>", ""); // remove possible tags
+		
+		JsonParser jsonParser = Json.createParser(new StringReader(notebookJson));
+		while(jsonParser.hasNext()) {
+			Event e = jsonParser.next();
+			if (e == Event.KEY_NAME) {
+				String key = jsonParser.getString();
+				jsonParser.next();
+				
+				if (key.equals("metadata")) {
+					JsonObject jobject = jsonParser.getObject();
+					for (Entry<String, JsonValue> entry : jobject.entrySet()) {
+						String e_key = entry.getKey();
+						if (e_key.equals("keywords")) {
+							String value = entry.getValue().asJsonArray().toString();
+							metadata.append(",\""+e_key+"\":"+value+"");
+						} else {
+							String value = ((JsonString) entry.getValue()).getString();
+							if (e_key.equals("title") || e_key.equals("description")) {
+								value = value.replaceAll("<\\/?\\w+.*?>", ""); // remove possible tags
+							}
+							metadata.append(",\""+e_key+"\":\""+value+"\"");
+						}
+					}
+					
+					break;
 				}
-				metadata.append(",\""+field+"\":\""+value+"\"");
 			}
 		}
+		
 		metadata.append("}");
 		return metadata.toString();
 	}
@@ -518,29 +501,29 @@ public class GitNotebookManager extends AbstractTool {
 				
 				document.add(new StringField("id", notebookId, Field.Store.YES));
 				
-				Document doc;
-				try {
-					doc = Jsoup.parse(notebookContents);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
+				JsonParser jsonParser = Json.createParser(new StringReader(notebookContents));
+				while(jsonParser.hasNext()) {
+					Event e = jsonParser.next();
+					if (e == Event.KEY_NAME) {
+						String key = jsonParser.getString();
+						
+						jsonParser.next();
+						JsonValue jsonValue = jsonParser.getValue();
+						
+						if (key.equals("content")) {
+							if (jsonValue.getValueType() == ValueType.STRING) {
+								String content = ((JsonString) jsonValue).getString();
+								document.add(new TextField("lexical", content, Field.Store.NO));
+							} else {
+								// it's a code or data cell
+							}
+						}
+					}
 				}
-				Elements textCells = doc.select("div.notebook-text-editor");
-				for (int i=0, len=textCells.size(); i<len; i++) {
-					Element cell = textCells.get(i);
-					String contents = cell.text();
-					document.add(new TextField("lexical", contents, Field.Store.NO));
-				}
-//				Elements codeCells = doc.select("pre.notebook-code-editor-raw");
-//				for (int i=0, len=codeCells.size(); i<len; i++) {
-//					Element cell = codeCells.get(i);
-//					String contents = cell.text();
-//					document.add(new TextField("code", contents, Field.Store.NO));
-//				}
-				
 				
 				FacetsConfig config = new FacetsConfig();
 				
-				JsonParser jsonParser = Json.createParser(new StringReader(notebookMetadata));
+				jsonParser = Json.createParser(new StringReader(notebookMetadata));
 				while(jsonParser.hasNext()) {
 					Event e = jsonParser.next();
 					if (e == Event.KEY_NAME) {

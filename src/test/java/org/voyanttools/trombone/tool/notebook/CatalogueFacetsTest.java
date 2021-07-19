@@ -29,7 +29,7 @@ public class CatalogueFacetsTest {
 	}
 
 	private void index(FileStorage storage) throws IOException {
-		File notebookFile = TestHelper.getResource("html/notebook.html");
+		File notebookFile = TestHelper.getResource("json/notebook.json");
 		File notebookStorage = new File(storage.storageLocation, Storage.Location.notebook.toString());
 		FileUtils.copyFileToDirectory(notebookFile, notebookStorage);
 		
