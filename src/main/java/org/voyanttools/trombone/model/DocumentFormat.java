@@ -125,9 +125,9 @@ public enum DocumentFormat {
 	TOUCHER("docx", "doc"),
 	
 	/**
-	 * An MS Excel file (.xslx).
+	 * An MS Excel file (.xlsx).
 	 */
-	XLSX("xlsx"),
+	XLSX("xlsx", "xls"),
 	
 	/**
 	 * An RTF file (.rtf).
