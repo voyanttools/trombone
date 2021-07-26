@@ -37,10 +37,11 @@ import org.voyanttools.trombone.util.FlexibleParameters;
 public class StoredDocumentSource {
 	
 	enum Sort {
-		TITLEASC, TITLEDESC, AUTHORASC, AUTHORDESC, PUBDATEASC, PUBDATEDESC;
+		TITLEASC, TITLEDESC, AUTHORASC, AUTHORDESC, PUBDATEASC, PUBDATEDESC, NOCHANGE;
 		
 		public static Sort getForgivingly(FlexibleParameters parameters) {
 			String sort = parameters.getParameterValue("sort", "").toUpperCase();
+			if (sort.equals("NOCHANGE")) return NOCHANGE;
 			String sortPrefix = "TITLE";
 			if (sort.startsWith("AUTHOR")) {sortPrefix="AUTHOR";}
 			else if (sort.startsWith("PUBDATE")) {sortPrefix="PUBDATE";}
@@ -110,6 +111,8 @@ public class StoredDocumentSource {
 				return PubDateDescendingComparator;	
 			case TITLEDESC:
 				return TitleDescendingComparator;
+			case NOCHANGE:
+				return NoChangeComparator;
 			default:
 				return TitleAscendingComparator;
 			}
@@ -155,6 +158,13 @@ public class StoredDocumentSource {
 		@Override
 		public int compare(StoredDocumentSource doc1, StoredDocumentSource doc2) {
 			return DocumentMetadata.TitleDescendingComparator.compare(doc1.metadata, doc2.metadata);
+		}
+	};
+	
+	private static Comparator<StoredDocumentSource> NoChangeComparator =  new Comparator<StoredDocumentSource>() {
+		@Override
+		public int compare(StoredDocumentSource doc1, StoredDocumentSource doc2) {
+			return 0;
 		}
 	};
 
