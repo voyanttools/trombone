@@ -32,6 +32,23 @@ While awaiting more detailed documentation, here's a quick overview of how to us
 		* **docIndex**: *number* the location of the document(s) in the corpus
 		* **docId**: the document ID
 
+## Build an executable jar ##
+
+To build an executable jar run the command :
+```bash
+$ mvn clean compile assembly:single
+```
+A `.jar` named `trombone-<version>-jar-with-dependencies.jar` should be created.
+You can now run the jar with the desired tool, for example, with the `corpus.DocumentContexts` :
+```bash
+$ java -jar \
+    ./target/trombone-5.2.1-SNAPSHOT-jar-with-dependencies.jar \
+    tool=corpus.DocumentContexts \
+    query=cash \
+    query=mine \
+    file=path/to/file-or-directory \
+    outputFile=path/to/output/output.json
+```
 
 License
 -------
