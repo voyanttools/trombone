@@ -140,7 +140,7 @@ public class StanfordNlpAnnotator implements NlpAnnotator {
 	    for(CoreMap sentence: sentences) {
 	    	for (CoreMap entity : sentence.get(MentionsAnnotation.class)) {
 	    		EntityType type = EntityType.getForgivingly(entity.get(NamedEntityTagAnnotation.class));
-	    		if (type!=EntityType.unknnown && (types.isEmpty() || types.contains(type))) {
+	    		if (type!=EntityType.unknown && (types.isEmpty() || types.contains(type))) {
 	    			entities.add(entity);
 	    		}
 	    	}
