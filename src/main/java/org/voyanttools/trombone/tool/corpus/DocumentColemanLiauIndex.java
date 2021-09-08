@@ -4,7 +4,6 @@ import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.ColemanLiauIndex;
 import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.storage.Storage;
-import org.voyanttools.trombone.tool.corpus.AbstractCorpusTool;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
 import java.io.IOException;
