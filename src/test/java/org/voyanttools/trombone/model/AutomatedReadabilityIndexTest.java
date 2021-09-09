@@ -35,9 +35,9 @@ public class AutomatedReadabilityIndexTest {
 
 
     public static void assertAutomatedReadabilityIndexValues(AutomatedReadabilityIndex automatedReadabilityIndex) {
-        assert automatedReadabilityIndex.nbrOfLetters == EXPECTED_NUMBER_OF_LETTERS;
-        assert automatedReadabilityIndex.nbrOfWords == EXPECTED_NUMBER_OF_WORDS;
-        assert automatedReadabilityIndex.nbrOfSentences == EXPECTED_NUMBER_OF_SENTENCES;
-        assert automatedReadabilityIndex.automatedReadabilityIndex == EXPECTED_AUTOMATED_READABILITY_INDEX;
+        assert automatedReadabilityIndex.getNbrOfLetters() == EXPECTED_NUMBER_OF_LETTERS;
+        assert automatedReadabilityIndex.getNbrOfWords() == EXPECTED_NUMBER_OF_WORDS;
+        assert automatedReadabilityIndex.getNbrOfSentences() == EXPECTED_NUMBER_OF_SENTENCES;
+        assert automatedReadabilityIndex.getAutomatedReadabilityIndex() == EXPECTED_AUTOMATED_READABILITY_INDEX;
     }
 }

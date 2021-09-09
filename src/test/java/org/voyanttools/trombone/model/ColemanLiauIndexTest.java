@@ -35,9 +35,9 @@ public class ColemanLiauIndexTest {
 
 
     public static void assertColemanLiauIndexValues(ColemanLiauIndex colemanLiauIndex) {
-        assert colemanLiauIndex.nbrOfLetters == EXPECTED_NUMBER_OF_LETTERS;
-        assert colemanLiauIndex.nbrOfWords == EXPECTED_NUMBER_OF_WORDS;
-        assert colemanLiauIndex.nbrOfSentences == EXPECTED_NUMBER_OF_SENTENCES;
-        assert colemanLiauIndex.colemanLiauIndex == EXPECTED_COLEMAN_LIAU_INDEX;
+        assert colemanLiauIndex.getNbrOfLetters() == EXPECTED_NUMBER_OF_LETTERS;
+        assert colemanLiauIndex.getNbrOfWords() == EXPECTED_NUMBER_OF_WORDS;
+        assert colemanLiauIndex.getNbrOfSentences() == EXPECTED_NUMBER_OF_SENTENCES;
+        assert colemanLiauIndex.getColemanLiauIndex() == EXPECTED_COLEMAN_LIAU_INDEX;
     }
 }
