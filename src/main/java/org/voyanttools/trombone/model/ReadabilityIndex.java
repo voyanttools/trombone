@@ -19,17 +19,4 @@ public abstract class ReadabilityIndex implements Serializable {
     }
 
     abstract protected double calculateIndex(TextParser text);
-
-    public int getNbrOfLetters() {
-        return text.getNbrOfLetters();
-    }
-
-    public int getNbrOfWords() {
-        return text.getNbrOfWords();
-    }
-
-    public int getNbrOfSentences() {
-        return text.getNbrOfSentences();
-    }
-
 }

@@ -5,12 +5,14 @@ public class TextParser {
     private int nbrOfLetters = 0;
     private int nbrOfWords = 0;
     private int nbrOfSentences = 0;
+    private int nbrOfWordsWithMoreThanSixLetters = 0;
 
     public TextParser(String text) {
         parseText(text);
     }
 
     private void parseText(String text) {
+        int charCount = 0;
         int spaceCount = 0;
 
         text = cleanText(text);
@@ -19,23 +21,38 @@ public class TextParser {
         for (int i = 0; i < length; i++) {
             char c = text.charAt(i);
 
-            if (Character.isLetterOrDigit(c))
+            if (Character.isLetterOrDigit(c)) {
                 nbrOfLetters++;
 
-            else if (c == ' ')
-                spaceCount++;
+                charCount++;
+                if (charCount == 7)
+                    nbrOfWordsWithMoreThanSixLetters++;
+            }
 
-            else if (c == '.')
+            else if (c == ' ') {
+                spaceCount++;
+                charCount = 0;
+            }
+
+            else if (c == '.') {
                 if (i == length - 1) // This is the end of the text
                     nbrOfSentences++;
 
                 // This logic excludes the acronym with two dot (e.g. "The U.S. Office is here.").
                 // It looks for another dot two characters before a dot with a following space ". ".
-                else if (text.charAt(i + 1) == ' ')
-                    if (i != 1 && i != 2)
+                else if (text.charAt(i + 1) == ' ') {
+                    if (i != 1 && i != 2) {
                         if (!text.substring(i - 2, i).contains("."))
                             nbrOfSentences++;
+                    }
+                }
+                charCount = 0;
+            }
+
+            else
+                charCount = 0;
         }
+
         nbrOfWords = spaceCount + 1;
     }
 
@@ -69,5 +86,9 @@ public class TextParser {
 
     public int getNbrOfSentences() {
         return nbrOfSentences;
+    }
+
+    public int getNbrOfWordsWithMoreThanSixLetters() {
+        return nbrOfWordsWithMoreThanSixLetters;
     }
 }
