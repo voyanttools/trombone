@@ -78,7 +78,7 @@ public class TextParser {
             count++;
         }
 
-        // Cover cases where the a "y" is between 2 vowels. E.g. "payable" has 3 syllables, but count as 2 with the above.
+        // Cover cases where the a "y" is between 2 vowels. E.g. "payable" has 3 syllables, but count as 2 with the above logic.
         regex = "[aioue]y[aioue][^$]";
         matcher = Pattern.compile(regex).matcher(word);
         while (matcher.find()) {
