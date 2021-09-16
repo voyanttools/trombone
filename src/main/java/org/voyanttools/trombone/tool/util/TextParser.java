@@ -2,10 +2,10 @@ package org.voyanttools.trombone.tool.util;
 
 public class TextParser {
 
-    private int nbrOfLetters = 0;
-    private int nbrOfWords = 0;
-    private int nbrOfSentences = 0;
-    private int nbrOfWordsWithMoreThanSixLetters = 0;
+    private int lettersCount = 0;
+    private int wordsCount = 0;
+    private int sentencesCount = 0;
+    private int wordsWithMoreThanSixLettersCount = 0;
 
     public TextParser(String text) {
         parseText(text);
@@ -22,11 +22,11 @@ public class TextParser {
             char c = text.charAt(i);
 
             if (Character.isLetterOrDigit(c)) {
-                nbrOfLetters++;
+                lettersCount++;
 
                 charCount++;
                 if (charCount == 7)
-                    nbrOfWordsWithMoreThanSixLetters++;
+                    wordsWithMoreThanSixLettersCount++;
             }
 
             else if (c == ' ') {
@@ -36,14 +36,14 @@ public class TextParser {
 
             else if (c == '.') {
                 if (i == length - 1) // This is the end of the text
-                    nbrOfSentences++;
+                    sentencesCount++;
 
                 // This logic excludes the acronym with two dot (e.g. "The U.S. Office is here.").
                 // It looks for another dot two characters before a dot with a following space ". ".
                 else if (text.charAt(i + 1) == ' ') {
                     if (i != 1 && i != 2) {
                         if (!text.substring(i - 2, i).contains("."))
-                            nbrOfSentences++;
+                            sentencesCount++;
                     }
                 }
                 charCount = 0;
@@ -53,7 +53,7 @@ public class TextParser {
                 charCount = 0;
         }
 
-        nbrOfWords = spaceCount + 1;
+        wordsCount = spaceCount + 1;
     }
 
     private String cleanText(String text) {
@@ -76,19 +76,19 @@ public class TextParser {
         return text;
     }
 
-    public int getNbrOfLetters() {
-        return nbrOfLetters;
+    public int getLettersCount() {
+        return lettersCount;
     }
 
-    public int getNbrOfWords() {
-        return nbrOfWords;
+    public int getWordsCount() {
+        return wordsCount;
     }
 
-    public int getNbrOfSentences() {
-        return nbrOfSentences;
+    public int getSentencesCount() {
+        return sentencesCount;
     }
 
-    public int getNbrOfWordsWithMoreThanSixLetters() {
-        return nbrOfWordsWithMoreThanSixLetters;
+    public int getWordsWithMoreThanSixLettersCount() {
+        return wordsWithMoreThanSixLettersCount;
     }
 }

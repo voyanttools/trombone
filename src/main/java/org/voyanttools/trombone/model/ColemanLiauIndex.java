@@ -14,8 +14,8 @@ public class ColemanLiauIndex extends ReadabilityIndex {
 
     @Override
     protected double calculateIndex(TextParser text) {
-        double l = (double) text.getNbrOfLetters() / (double) text.getNbrOfWords() * 100;
-        double s = (double) text.getNbrOfSentences() / (double) text.getNbrOfWords() * 100;
+        double l = (double) text.getLettersCount() / text.getWordsCount() * 100;
+        double s = (double) text.getSentencesCount() / text.getWordsCount() * 100;
 
         return 0.0588 * l - 0.296 * s - 15.8;
     }

@@ -14,11 +14,11 @@ public class LIXIndex extends ReadabilityIndex {
 
     @Override
     protected double calculateIndex(TextParser text) {
-        double a = text.getNbrOfWords();
-        double b = text.getNbrOfSentences();
-        double c = text.getNbrOfWordsWithMoreThanSixLetters();
+        double wordsCount = text.getWordsCount();
+        double sentencesCount = text.getSentencesCount();
+        double longWords = text.getWordsWithMoreThanSixLettersCount();
 
-        return a / b + c * 100.0 / a;
+        return wordsCount / sentencesCount + longWords * 100.0 / wordsCount;
     }
 
     public double getLIXIndex() {
