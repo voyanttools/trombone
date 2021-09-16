@@ -2,6 +2,7 @@ package org.voyanttools.trombone.model;
 
 import org.voyanttools.trombone.tool.util.TextParser;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 public abstract class ReadabilityIndex implements Serializable {
@@ -18,5 +19,5 @@ public abstract class ReadabilityIndex implements Serializable {
         docId = documentId;
     }
 
-    abstract protected double calculateIndex(TextParser text);
+    abstract protected double calculateIndex(TextParser text) throws IOException;
 }
