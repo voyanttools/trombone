@@ -17,7 +17,13 @@ public class AutomatedReadabilityIndex extends ReadabilityIndex {
         double lettersPerWord = (double) text.getLettersCount() / text.getWordsCount();
         double wordsPerSentence = (double) text.getWordsCount() / text.getSentencesCount();
 
-        return 4.71 * lettersPerWord + 0.5 * wordsPerSentence - 21.43;
+        double result = 4.71 * lettersPerWord + 0.5 * wordsPerSentence - 21.43;
+
+        if (Double.isFinite(result))
+            return result;
+
+        // When the calculation fails (result is not a finite number)
+        return -999;
     }
 
     public double getAutomatedReadabilityIndex() {

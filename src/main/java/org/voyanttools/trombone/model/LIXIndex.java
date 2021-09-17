@@ -18,7 +18,13 @@ public class LIXIndex extends ReadabilityIndex {
         double sentencesCount = text.getSentencesCount();
         double longWords = text.getWordsWithMoreThanSixLettersCount();
 
-        return wordsCount / sentencesCount + longWords * 100.0 / wordsCount;
+        double result =  wordsCount / sentencesCount + longWords * 100.0 / wordsCount;
+
+        if (Double.isFinite(result))
+            return result;
+
+        // When the calculation fails (result is not a finite number)
+        return -999;
     }
 
     public double getLIXIndex() {
