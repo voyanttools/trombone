@@ -67,7 +67,7 @@ public class StanfordNlpAnnotator implements NlpAnnotator {
 			String term = entity.get(TextAnnotation.class);
 			EntityType type = EntityType.getForgivingly(entity.get(NamedEntityTagAnnotation.class));
 			if (types.isEmpty()==false && types.contains(type)==false) {continue;}
-			String key = term+" --" +type.name(); 
+			String key = term+" -- " +type.name(); 
 			if (!stringEntitiesMap.containsKey(key)) {
 				stringEntitiesMap.put(key, new ArrayList<CoreMap>());
 			}
@@ -159,9 +159,18 @@ public class StanfordNlpAnnotator implements NlpAnnotator {
 		return annotation.get(SentencesAnnotation.class);
 	}
 	
-//	public static void main(String[] args) {
-//		StanfordNlpAnnotator annotator = new StanfordNlpAnnotator("en");
-//		annotator.getEntities("October 1, 2015. This is a test from yesterday in London, UK.");
-//	}
+	// public static void main(String[] args) {
+	// 	StanfordNlpAnnotator annotator = new StanfordNlpAnnotator("en");
+	// 	Set<EntityType> types =  new HashSet<EntityType>();
+	// 	types.add(EntityType.date);
+	// 	types.add(EntityType.location);
+	// 	List<CoreMap> entitiesMap = annotator.getEntities("October 1, 2015. This is a test from yesterday in London, UK.", types);
+	// 	for (CoreMap entity : entitiesMap) {
+	// 		String term = entity.get(TextAnnotation.class);
+	// 		EntityType type = EntityType.getForgivingly(entity.get(NamedEntityTagAnnotation.class));
+	// 		System.out.println(term+" -- " +type.name());
+	// 	}
+		
+	// }
 
 }
