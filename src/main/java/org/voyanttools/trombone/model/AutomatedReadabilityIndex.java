@@ -14,7 +14,16 @@ public class AutomatedReadabilityIndex extends ReadabilityIndex {
 
     @Override
     protected double calculateIndex(TextParser text) {
-        return 4.71 * ((double) text.getNbrOfLetters() / (double) text.getNbrOfWords()) + 0.5 * ((double) text.getNbrOfWords() / (double) text.getNbrOfSentences()) - 21.43;
+        double lettersPerWord = (double) text.getLettersCount() / text.getWordsCount();
+        double wordsPerSentence = (double) text.getWordsCount() / text.getSentencesCount();
+
+        double result = 4.71 * lettersPerWord + 0.5 * wordsPerSentence - 21.43;
+
+        if (Double.isFinite(result))
+            return result;
+
+        // When the calculation fails (result is not a finite number)
+        return -999;
     }
 
     public double getAutomatedReadabilityIndex() {

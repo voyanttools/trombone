@@ -61,26 +61,26 @@ public class TextParserTest {
     }
 
     private static void assertText1ParserValues(TextParser textParser) {
-        assert textParser.getNbrOfLetters() == EXPECTED_1_NUMBER_OF_LETTERS;
-        assert textParser.getNbrOfWords() == EXPECTED_1_NUMBER_OF_WORDS;
-        assert textParser.getNbrOfSentences() == EXPECTED_1_NUMBER_OF_SENTENCES;
-        assert textParser.getNbrOfWordsWithMoreThanSixLetters() == EXPECTED_1_NUMBER_OF_WORDS_WITH_MORE_THAN_SIX_LETTERS;
-        assert textParser.getNbrOfWordsWithMoreThanTwoSyllables() == EXPECTED_1_NUMBER_OF_WORDS_WITH_MORE_THAN_TWO_SYLLABLES;
+        assert textParser.getLettersCount() == EXPECTED_1_NUMBER_OF_LETTERS;
+        assert textParser.getWordsCount() == EXPECTED_1_NUMBER_OF_WORDS;
+        assert textParser.getSentencesCount() == EXPECTED_1_NUMBER_OF_SENTENCES;
+        assert textParser.getWordsWithMoreThanSixLettersCount() == EXPECTED_1_NUMBER_OF_WORDS_WITH_MORE_THAN_SIX_LETTERS;
+        assert textParser.getWordsWithMoreThanTwoSyllablesCount() == EXPECTED_1_NUMBER_OF_WORDS_WITH_MORE_THAN_TWO_SYLLABLES;
     }
 
     private static void assertText2ParserValues(TextParser textParser) {
-        assert textParser.getNbrOfLetters() == EXPECTED_2_NUMBER_OF_LETTERS;
-        assert textParser.getNbrOfWords() == EXPECTED_2_NUMBER_OF_WORDS;
-        assert textParser.getNbrOfSentences() == EXPECTED_2_NUMBER_OF_SENTENCES;
-        assert textParser.getNbrOfWordsWithMoreThanSixLetters() == EXPECTED_2_NUMBER_OF_WORDS_WITH_MORE_THAN_SIX_LETTERS;
-        assert textParser.getNbrOfWordsWithMoreThanTwoSyllables() == EXPECTED_2_NUMBER_OF_WORDS_WITH_MORE_THAN_TWO_SYLLABLES;
+        assert textParser.getLettersCount() == EXPECTED_2_NUMBER_OF_LETTERS;
+        assert textParser.getWordsCount() == EXPECTED_2_NUMBER_OF_WORDS;
+        assert textParser.getSentencesCount() == EXPECTED_2_NUMBER_OF_SENTENCES;
+        assert textParser.getWordsWithMoreThanSixLettersCount() == EXPECTED_2_NUMBER_OF_WORDS_WITH_MORE_THAN_SIX_LETTERS;
+        assert textParser.getWordsWithMoreThanTwoSyllablesCount() == EXPECTED_2_NUMBER_OF_WORDS_WITH_MORE_THAN_TWO_SYLLABLES;
     }
 
     private static void assertText3ParserValues(TextParser textParser) {
-        assert textParser.getNbrOfLetters() == EXPECTED_3_NUMBER_OF_LETTERS;
-        assert textParser.getNbrOfWords() == EXPECTED_3_NUMBER_OF_WORDS;
-        assert textParser.getNbrOfSentences() == EXPECTED_3_NUMBER_OF_SENTENCES;
-        assert textParser.getNbrOfWordsWithMoreThanSixLetters() == EXPECTED_3_NUMBER_OF_WORDS_WITH_MORE_THAN_SIX_LETTERS;
-        assert textParser.getNbrOfWordsWithMoreThanTwoSyllables() == EXPECTED_3_NUMBER_OF_WORDS_WITH_MORE_THAN_TWO_SYLLABLES;
+        assert textParser.getLettersCount() == EXPECTED_3_NUMBER_OF_LETTERS;
+        assert textParser.getWordsCount() == EXPECTED_3_NUMBER_OF_WORDS;
+        assert textParser.getSentencesCount() == EXPECTED_3_NUMBER_OF_SENTENCES;
+        assert textParser.getWordsWithMoreThanSixLettersCount() == EXPECTED_3_NUMBER_OF_WORDS_WITH_MORE_THAN_SIX_LETTERS;
+        assert textParser.getWordsWithMoreThanTwoSyllablesCount() == EXPECTED_3_NUMBER_OF_WORDS_WITH_MORE_THAN_TWO_SYLLABLES;
     }
 }

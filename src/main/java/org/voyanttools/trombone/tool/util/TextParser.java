@@ -5,11 +5,11 @@ import java.util.regex.Pattern;
 
 public class TextParser {
 
-    private int nbrOfLetters = 0;
-    private int nbrOfWords = 0;
-    private int nbrOfSentences = 0;
-    private int nbrOfWordsWithMoreThanSixLetters = 0;
-    private int nbrOfWordsWithMoreThanTwoSyllables = 0;
+    private int lettersCount = 0;
+    private int wordsCount = 0;
+    private int sentencesCount = 0;
+    private int wordsWithMoreThanSixLettersCount = 0;
+    private int wordsWithMoreThanTwoSyllablesCount = 0;
 
     public TextParser(String text) {
         parseText(text);
@@ -27,20 +27,20 @@ public class TextParser {
             char c = text.charAt(i);
 
             if (Character.isLetterOrDigit(c)) {
-                nbrOfLetters++;
+
+                lettersCount++;
                 wordBuilder.append(c);
 
                 charCount++;
                 if (charCount == 7)
-                    nbrOfWordsWithMoreThanSixLetters++;
-
+                    wordsWithMoreThanSixLettersCount++;
             } else {
                 // Word is now ended, reset char counter to 0 and check syllables
                 charCount = 0;
 
                 String word = wordBuilder.toString();
                 if (hasMoreThanTwoSyllables(word)) {
-                    nbrOfWordsWithMoreThanTwoSyllables++;
+                    wordsWithMoreThanTwoSyllablesCount++;
                 }
                 wordBuilder = new StringBuilder();
 
@@ -49,7 +49,7 @@ public class TextParser {
 
                 } else if (c == '.') {
                     if (i == length - 1) // This is the end of the text
-                        nbrOfSentences++;
+                        sentencesCount++;
 
                     /* This logic excludes the acronym with two dot (e.g. "The U.S. Office is here.").
                        It looks for another dot two characters before a dot with a following space ". ".
@@ -57,14 +57,14 @@ public class TextParser {
                     else if (text.charAt(i + 1) == ' ') {
                         if (i != 1 && i != 2) {
                             if (!text.substring(i - 2, i).contains("."))
-                                nbrOfSentences++;
+                                sentencesCount++;
                         }
                     }
                 }
             }
         }
 
-        nbrOfWords = spaceCount + 1;
+        wordsCount = spaceCount + 1;
     }
 
     private boolean hasMoreThanTwoSyllables(String word) {
@@ -108,24 +108,23 @@ public class TextParser {
         return text;
     }
 
-
-    public int getNbrOfLetters() {
-        return nbrOfLetters;
+    public int getLettersCount() {
+        return lettersCount;
     }
 
-    public int getNbrOfWords() {
-        return nbrOfWords;
+    public int getWordsCount() {
+        return wordsCount;
     }
 
-    public int getNbrOfSentences() {
-        return nbrOfSentences;
+    public int getSentencesCount() {
+        return sentencesCount;
     }
 
-    public int getNbrOfWordsWithMoreThanSixLetters() {
-        return nbrOfWordsWithMoreThanSixLetters;
+    public int getWordsWithMoreThanSixLettersCount() {
+        return wordsWithMoreThanSixLettersCount;
     }
 
-    public int getNbrOfWordsWithMoreThanTwoSyllables() {
-        return nbrOfWordsWithMoreThanTwoSyllables;
+    public int getWordsWithMoreThanTwoSyllablesCount() {
+        return wordsWithMoreThanTwoSyllablesCount;
     }
 }
