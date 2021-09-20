@@ -37,14 +37,17 @@ public class DaleChallIndex extends ReadabilityIndex {
         double percentageOfDifficultWords = (double) nbrOfDifficultWords / text.getNbrOfWords() * 100;
         double averageSentenceLength = (double) text.getNbrOfWords() / text.getNbrOfSentences();
 
-        double readingGrade = 0.1579 * percentageOfDifficultWords + 0.0496 * averageSentenceLength;
+        double readingScore = 0.1579 * percentageOfDifficultWords + 0.0496 * averageSentenceLength;
+
+        if (!Double.isFinite(readingScore))
+            return -999;
 
         if (percentageOfDifficultWords > 5) {
-            // This is the ajusted score, from the new Dale-Chall method.
-            return readingGrade + 3.6365;
+            // This is the adjusted score, from the new Dale-Chall method.
+            return readingScore + 3.6365;
         }
 
-        return readingGrade;
+        return readingScore;
     }
 
     public double getDaleChallIndex() {
