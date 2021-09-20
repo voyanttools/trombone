@@ -14,8 +14,8 @@ public class FOGIndex extends ReadabilityIndex {
 
     @Override
     protected double calculateIndex(TextParser text) {
-        double a = (double) text.getNbrOfWords() / (double) text.getNbrOfSentences();
-        double b = (double) text.getNbrOfWordsWithMoreThanTwoSyllables() / (double) text.getNbrOfWords();
+        double a = (double) text.getWordsCount() / text.getSentencesCount();
+        double b = (double) text.getWordsWithMoreThanTwoSyllablesCount() / text.getWordsCount();
 
         return 0.4 * (a + 100 * b);
     }
