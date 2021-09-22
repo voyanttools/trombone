@@ -14,7 +14,7 @@ import java.util.List;
 public class DocumentFOGIndexTest {
 
     private static final String FILE_PATH_FR = "udhr/udhr-fr.txt";
-    private static final double EXPECTED_FR_FOG_INDEX = 13.786107774841861;
+    private static final double EXPECTED_FR_FOG_INDEX = 15.627728400992874;
 
     private static final String FILE_PATH_EN = "udhr/udhr-en.txt";
     private static final double EXPECTED_EN_FOG_INDEX = 11.036356849570737;
@@ -24,9 +24,10 @@ public class DocumentFOGIndexTest {
         for (Storage storage : TestHelper.getDefaultTestStorages()) {
             System.out.println("Testing with "+storage.getClass().getSimpleName()+": "+storage.getLuceneManager().getClass().getSimpleName());
 
-            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+FOGIndexTest.TEXT}), FOGIndexTest.EXPECTED_FOG_INDEX);
-            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_FR)}), EXPECTED_FR_FOG_INDEX);
+            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+FOGIndexTest.TEXT_EN}), FOGIndexTest.EXPECTED_FOG_INDEX_EN);
+            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+FOGIndexTest.TEXT_FR}), FOGIndexTest.EXPECTED_FOG_INDEX_FR);
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_EN)}), EXPECTED_EN_FOG_INDEX);
+            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_FR)}), EXPECTED_FR_FOG_INDEX);
         }
     }
 

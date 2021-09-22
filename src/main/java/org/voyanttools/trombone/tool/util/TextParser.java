@@ -27,15 +27,15 @@ public class TextParser {
             char c = text.charAt(i);
 
             if (Character.isLetterOrDigit(c)) {
-
                 lettersCount++;
                 wordBuilder.append(c);
 
                 charCount++;
                 if (charCount == 7)
                     wordsWithMoreThanSixLettersCount++;
+
             } else {
-                // Word is now ended, reset char counter to 0 and check syllables
+                // The word has ended, reset char counter to 0 and check syllables
                 charCount = 0;
 
                 String word = wordBuilder.toString();
@@ -69,7 +69,7 @@ public class TextParser {
 
     private boolean hasMoreThanTwoSyllables(String word) {
         // This regex method has been found here https://stackoverflow.com/a/46879336
-        String regex = "[aiouy]+e*|e(?!d$|ly).|[td]ed|le$";
+        String regex = "[aiouyéêèï]+e*|e(?!d$|ly).|[td]ed|le$";
         Matcher matcher = Pattern.compile(regex).matcher(word);
 
         int count = 0;
@@ -79,7 +79,7 @@ public class TextParser {
         }
 
         // Cover cases where the a "y" is between 2 vowels. E.g. "payable" has 3 syllables, but count as 2 with the above logic.
-        regex = "[aioue]y[aioue][^$]";
+        regex = "[aioueéêèï]y[aioueéêèï][^$]";
         matcher = Pattern.compile(regex).matcher(word);
         while (matcher.find()) {
             count++;
