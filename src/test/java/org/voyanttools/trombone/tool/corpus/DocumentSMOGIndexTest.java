@@ -14,7 +14,7 @@ import java.util.List;
 public class DocumentSMOGIndexTest {
 
     private static final String FILE_PATH_FR = "udhr/udhr-fr.txt";
-    private static final double EXPECTED_FR_SMOG_INDEX = 12.96994396234918;
+    private static final double EXPECTED_FR_SMOG_INDEX = 14.239780114587749;
 
     private static final String FILE_PATH_EN = "udhr/udhr-en.txt";
     private static final double EXPECTED_EN_SMOG_INDEX = 10.227310004160055;
