@@ -1,14 +1,12 @@
 package ca.lincsproject.nssi;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Properties;
 
 import org.apache.commons.io.Charsets;
 import org.apache.http.Header;
@@ -25,12 +23,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.joda.time.Instant;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.voyanttools.trombone.tool.progress.Progress;
-import org.voyanttools.trombone.tool.progress.Progress.Status;
 
 public class VoyantNssiClient {
 
@@ -42,6 +37,7 @@ public class VoyantNssiClient {
 	
 	private final static String PROJECT_NAME = "Voyant Project";
 	private final static String WORKFLOW = "stanford_ner";
+	private static String clientSecret = null;
 	
 	private final static long DEFAULT_POLLING_INTERVAL = 30000;
 	
@@ -58,12 +54,16 @@ public class VoyantNssiClient {
 	
 	private static void setAccessToken() throws IOException {
 		if (debug) System.out.println("setting access token");
+		if (clientSecret == null) {
+			String[] nssiConfig = readConfiguration();
+			clientSecret = nssiConfig[0];
+		}
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost("https://keycloak.stage.lincsproject.ca/auth/realms/lincs/protocol/openid-connect/token");
 
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("client_id", "voyant"));
-            params.add(new BasicNameValuePair("client_secret", ""));
+            params.add(new BasicNameValuePair("client_secret", clientSecret));
             params.add(new BasicNameValuePair("grant_type", "client_credentials"));
             httpPost.setEntity(new UrlEncodedFormEntity(params));
             
@@ -262,6 +262,31 @@ public class VoyantNssiClient {
 	        }
         }
 	}
+	
+	private static String[] readConfiguration() {
+        Properties prop = new Properties();
+        InputStream input = null;
+        String[] nssiConfig = new String[1];
+
+        try {
+            input = ClassLoader.class.getResourceAsStream("/ca/lincsproject/nssi/config.properties");
+            prop.load(input);
+            nssiConfig[0] = prop.getProperty("client_secret");
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        return nssiConfig;
+    }
 	
 	public static void printResults(NssiResult nssiResult) {
 		for (NssiResult nr : nssiResult) {
