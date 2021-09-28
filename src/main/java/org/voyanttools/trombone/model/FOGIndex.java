@@ -17,7 +17,13 @@ public class FOGIndex extends ReadabilityIndex {
         double a = (double) text.getWordsCount() / text.getSentencesCount();
         double b = (double) text.getWordsWithMoreThanTwoSyllablesCount() / text.getWordsCount();
 
-        return 0.4 * (a + 100 * b);
+        double result =  0.4 * (a + 100 * b);
+
+        if (Double.isFinite(result))
+            return result;
+
+        // When the calculation fails (result is not a finite number)
+        return -999;
     }
 
     public double getFOGIndex() {
