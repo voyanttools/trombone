@@ -68,8 +68,8 @@ public class TextParser {
     }
 
     private boolean hasMoreThanTwoSyllables(String word) {
-        // This regex method has been found here https://stackoverflow.com/a/46879336
-        String regex = "[aiouyéêèï]+e*|e(?!d$|ly).|[td]ed|le$";
+        // This regex method has been inspired from here: https://stackoverflow.com/a/46879336
+        String regex = "[aâàáäiîìíïoôòóöuûùúüyêèéë]+e*|e(?!d$|ly).|[td]ed|le$";
         Matcher matcher = Pattern.compile(regex).matcher(word);
 
         int count = 0;
@@ -79,7 +79,7 @@ public class TextParser {
         }
 
         // Cover cases where the a "y" is between 2 vowels. E.g. "payable" has 3 syllables, but count as 2 with the above logic.
-        regex = "[aioueéêèï]y[aioueéêèï][^$]";
+        regex = "[aâàáäiîìíïoôòóöuûùúüyeêèéë]y[aâàáäiîìíïoôòóöuûùúüyeêèéë][^$]";
         matcher = Pattern.compile(regex).matcher(word);
         while (matcher.find()) {
             count++;

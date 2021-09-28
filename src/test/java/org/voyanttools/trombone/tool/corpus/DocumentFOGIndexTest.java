@@ -14,7 +14,7 @@ import java.util.List;
 public class DocumentFOGIndexTest {
 
     private static final String FILE_PATH_FR = "udhr/udhr-fr.txt";
-    private static final double EXPECTED_FR_FOG_INDEX = 15.627728400992874;
+    private static final double EXPECTED_FR_FOG_INDEX = 15.65228334267489;
 
     private static final String FILE_PATH_EN = "udhr/udhr-en.txt";
     private static final double EXPECTED_EN_FOG_INDEX = 11.036356849570737;
