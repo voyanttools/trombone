@@ -19,7 +19,13 @@ public class SMOGIndex extends ReadabilityIndex {
     protected double calculateIndex(TextParser text) {
         double polysyllablesWordsPerSentence = (double) text.getWordsWithMoreThanTwoSyllablesCount() / text.getSentencesCount();
 
-        return 1.043 * Math.sqrt(30 * polysyllablesWordsPerSentence) + 3.1291;
+        double result = 1.043 * Math.sqrt(30 * polysyllablesWordsPerSentence) + 3.1291;
+
+        if (Double.isFinite(result))
+            return result;
+
+        // When the calculation fails (result is not a finite number)
+        return -999;
     }
 
     public double getSMOGIndex() {
