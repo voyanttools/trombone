@@ -7,14 +7,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DaleChallIndex extends ReadabilityIndex {
 
     protected double daleChallIndex;
-    protected int nbrOfDifficultWords = 0;
-    protected int nbrOfEasyWords = 0;
+    protected int difficultWordsCount = 0;
+    protected int easyWordsCount = 0;
 
     public DaleChallIndex(int documentIndex, String documentId, String textToParse) throws IOException {
         super(documentIndex, documentId, textToParse);
@@ -25,17 +26,22 @@ public class DaleChallIndex extends ReadabilityIndex {
     @Override
     protected double calculateIndex(TextParser text) throws IOException {
         List<String> easyWords = getEasyWords();
-        String[] words = text.getText().split(" ");
+        List<String> words = Arrays.asList(text.getText().split(" "));
 
-        for (String word: words) {
-            if (easyWords.contains(word))
-                nbrOfEasyWords++;
-            else
-                nbrOfDifficultWords++;
+        // Cleaning words from ".", ",", etc.
+        words = words.stream().map(this::cleanWord).collect(Collectors.toList());
+        words = words.stream().filter(this::isAWord).collect(Collectors.toList());
+
+        for (String word : words) {
+            if (easyWords.contains(word) || easyWords.contains(removeSCharAtEndOfWordIfAny(word))) {
+                easyWordsCount++;
+            } else {
+                difficultWordsCount++;
+            }
         }
 
-        double percentageOfDifficultWords = (double) nbrOfDifficultWords / text.getNbrOfWords() * 100;
-        double averageSentenceLength = (double) text.getNbrOfWords() / text.getNbrOfSentences();
+        double percentageOfDifficultWords = (double) difficultWordsCount / text.getWordsCount() * 100;
+        double averageSentenceLength = (double) text.getWordsCount() / text.getSentencesCount();
 
         double readingScore = 0.1579 * percentageOfDifficultWords + 0.0496 * averageSentenceLength;
 
@@ -50,6 +56,7 @@ public class DaleChallIndex extends ReadabilityIndex {
         return readingScore;
     }
 
+
     public double getDaleChallIndex() {
         return daleChallIndex;
     }
@@ -60,7 +67,7 @@ public class DaleChallIndex extends ReadabilityIndex {
         try {
             uri = this.getClass().getResource("/org/voyanttools/trombone/keywords/easywords.en.txt").toURI();
         } catch (URISyntaxException e) {
-           throw new IOException("Failed to retrieved the easy words list.");
+            throw new IOException("Failed to retrieved the easy words list.");
         }
 
         File file = new File(uri);
@@ -72,5 +79,35 @@ public class DaleChallIndex extends ReadabilityIndex {
                 .collect(Collectors.toList());
 
         return easyWords;
+    }
+
+    private String cleanWord(String word) {
+        return word.replace(".", "")
+                .replace(",", "")
+                .replace(";", "")
+                .replace(":", "")
+                .toLowerCase();
+    }
+
+    private String removeSCharAtEndOfWordIfAny(String word) {
+        if (word.charAt(word.length() - 1) == 's')
+            return word.substring(0, word.length() - 1);
+
+        return word;
+    }
+
+    private boolean isAWord(String word) {
+        if (word.length() == 0) {
+            return false;
+        }
+
+        for (char c: word.toCharArray()) {
+            if (Character.isDigit(c))
+                return false;
+        }
+
+
+        return true;
+
     }
 }
