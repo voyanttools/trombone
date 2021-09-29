@@ -106,8 +106,6 @@ public class DaleChallIndex extends ReadabilityIndex {
                 return false;
         }
 
-
         return true;
-
     }
 }

@@ -16,9 +16,6 @@ public class DocumentDaleChallIndexTest {
     private static final String FILE_PATH_EN = "udhr/udhr-en.txt";
     private static final double EXPECTED_EN_DALE_CHALL_INDEX = 6.353838036580814;
 
-    private static final String FILE_PATH_FR = "udhr/udhr-fr.txt";
-    private static final double EXPECTED_FR_DaleChall_INDEX = -1;
-
     @Test
     public void test() throws IOException {
         for (Storage storage : TestHelper.getDefaultTestStorages()) {
@@ -27,7 +24,6 @@ public class DocumentDaleChallIndexTest {
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+DaleChallIndexTest.TEXT_1}), DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_1);
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+DaleChallIndexTest.TEXT_2}), DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_2);
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_EN)}), EXPECTED_EN_DALE_CHALL_INDEX);
-            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_FR)}), EXPECTED_FR_DaleChall_INDEX);
         }
     }
 
