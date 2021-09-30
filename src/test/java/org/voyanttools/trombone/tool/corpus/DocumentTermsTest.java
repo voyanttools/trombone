@@ -28,7 +28,7 @@ public class DocumentTermsTest {
 		}
 	}
 
-	public void test(Storage storage) throws CorruptIndexException, IOException {
+	public void test(Storage storage) throws IOException {
 		
 		// add an additional document to the corpus
 		Document document = new Document();

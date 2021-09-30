@@ -100,9 +100,21 @@ public class Progress {
 	public boolean isNew() {
 		return isNew;
 	}
+
+	public boolean isActive() {
+		return status!=null && (status==Status.LAUNCH || status==Status.RUNNING);
+	}
 	
 	public String getId() {
 		return id;
+	}
+	
+	public String getCode() {
+		return code;
+	}
+	
+	public String getMessage() {
+		return message;
 	}
 	
 	public boolean checkStart(int max) throws IOException {
@@ -116,14 +128,11 @@ public class Progress {
 	private boolean check(int max, long val, String code, String message) throws IOException {
 		long now = Calendar.getInstance().getTimeInMillis();
 		if (Calendar.getInstance().getTimeInMillis()-val>max) {
+			// TODO review this, in the case of jobs that were interrupted and then resumed
 			this.update(-1, Status.ABORTED, code, "Too much time elapsed since start");
 			return false;
 		} else {
 			return true;
 		}
-	}
-
-	public boolean isActive() {
-		return status!=null && (status==Status.LAUNCH || status==Status.RUNNING);
 	}
 }

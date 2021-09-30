@@ -68,7 +68,7 @@ public class DocumentEntities extends AbstractCorpusTool {
 				if (parameters.containsKey("entityType")) {
 					for (String entityType : parameters.getParameterValues("entityType")) {
 						EntityType type = EntityType.getForgivingly(entityType);
-						if (type!=EntityType.unknnown) {
+						if (type!=EntityType.unknown) {
 							types.add(type);
 						}
 					}
@@ -88,7 +88,7 @@ public class DocumentEntities extends AbstractCorpusTool {
 			for (String type : parameters.getParameterValues("type")) {
 				for (String t : type.split(",\\s*")) {
 					EntityType et = EntityType.getForgivingly(t);
-					if (et!=EntityType.unknnown) {
+					if (et!=EntityType.unknown) {
 						types.add(et);
 					}
 				}
