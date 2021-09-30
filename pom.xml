@@ -83,7 +83,7 @@
 					<repositoryOwner>voyanttools</repositoryOwner>    <!-- github username -->
 				</configuration>
 				<executions>
-					<!-- run site-maven-plugin's 'site' target as part of the build's normal 
+					<!-- run site-maven-plugin's 'site' target as part of the build's normal
 						'deploy' phase -->
 					<execution>
 						<goals>
@@ -92,6 +92,19 @@
 						<phase>deploy</phase>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.voyanttools.trombone.Controller</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
