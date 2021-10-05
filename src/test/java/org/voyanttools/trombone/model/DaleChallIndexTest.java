@@ -1,8 +1,12 @@
 package org.voyanttools.trombone.model;
 
 import org.junit.Test;
+import org.voyanttools.trombone.tool.corpus.DocumentDaleChallIndex;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
 public class DaleChallIndexTest {
 
@@ -17,7 +21,9 @@ public class DaleChallIndexTest {
 
     @Test
     public void testWithText1() throws IOException {
-        DaleChallIndex daleChallIndex = new DaleChallIndex(A_DOCUMENT_INDEX, A_DOCUMENT_ID, TEXT_1);
+        List<String> easyWords = retrieveEasyWordsList();
+
+        DaleChallIndex daleChallIndex = new DaleChallIndex(A_DOCUMENT_INDEX, A_DOCUMENT_ID, TEXT_1, easyWords);
 
         assert daleChallIndex.docIndex == A_DOCUMENT_INDEX;
         assert daleChallIndex.docId.equals(A_DOCUMENT_ID);
@@ -26,10 +32,24 @@ public class DaleChallIndexTest {
 
     @Test
     public void testWithText2() throws IOException {
-        DaleChallIndex daleChallIndex = new DaleChallIndex(A_DOCUMENT_INDEX, A_DOCUMENT_ID, TEXT_2);
+        List<String> easyWords = retrieveEasyWordsList();
+
+        DaleChallIndex daleChallIndex = new DaleChallIndex(A_DOCUMENT_INDEX, A_DOCUMENT_ID, TEXT_2, easyWords);
 
         assert daleChallIndex.docIndex == A_DOCUMENT_INDEX;
         assert daleChallIndex.docId.equals(A_DOCUMENT_ID);
         assert daleChallIndex.getDaleChallIndex() == EXPECTED_DALE_CHALL_INDEX_2;
+    }
+
+    private List<String> retrieveEasyWordsList() throws IOException {
+        URI easyWordsURI;
+
+        try {
+            easyWordsURI = this.getClass().getResource(DocumentDaleChallIndex.DEFAULT_EASY_WORDS_FILE_PATH).toURI();
+        } catch (NullPointerException | URISyntaxException e) {
+            throw new RuntimeException("Failed to retrieved the easy words list.");
+        }
+
+        return DocumentDaleChallIndex.getEasyWords(easyWordsURI);
     }
 }

@@ -1,31 +1,32 @@
 package org.voyanttools.trombone.model;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import org.voyanttools.trombone.tool.util.TextParser;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DaleChallIndex extends ReadabilityIndex {
 
+    @XStreamOmitField
+    private List<String> easyWords;
+
     protected double daleChallIndex;
     protected int difficultWordsCount = 0;
     protected int easyWordsCount = 0;
 
-    public DaleChallIndex(int documentIndex, String documentId, String textToParse) throws IOException {
+    public DaleChallIndex(int documentIndex, String documentId, String textToParse, List<String> easyWords) throws IOException {
         super(documentIndex, documentId, textToParse);
+
+        this.easyWords = easyWords;
 
         daleChallIndex = calculateIndex(text);
     }
 
     @Override
     protected double calculateIndex(TextParser text) throws IOException {
-        List<String> easyWords = getEasyWords();
         List<String> words = Arrays.asList(text.getText().split(" "));
 
         // Cleaning words from ".", ",", etc.
@@ -61,25 +62,6 @@ public class DaleChallIndex extends ReadabilityIndex {
         return daleChallIndex;
     }
 
-    private List<String> getEasyWords() throws IOException {
-        URI uri;
-
-        try {
-            uri = this.getClass().getResource("/org/voyanttools/trombone/keywords/easywords.en.txt").toURI();
-        } catch (URISyntaxException e) {
-            throw new IOException("Failed to retrieved the easy words list.");
-        }
-
-        File file = new File(uri);
-        List<String> easyWords = Files.readAllLines(file.toPath());
-
-        // Remove comments in the files
-        easyWords = easyWords.stream()
-                .filter(word -> !word.contains("#"))
-                .collect(Collectors.toList());
-
-        return easyWords;
-    }
 
     private String cleanWord(String word) {
         return word.replace(".", "")
@@ -101,7 +83,7 @@ public class DaleChallIndex extends ReadabilityIndex {
             return false;
         }
 
-        for (char c: word.toCharArray()) {
+        for (char c : word.toCharArray()) {
             if (Character.isDigit(c))
                 return false;
         }

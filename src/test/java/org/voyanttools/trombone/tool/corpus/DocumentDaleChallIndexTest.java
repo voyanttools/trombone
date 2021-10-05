@@ -10,6 +10,8 @@ import org.voyanttools.trombone.util.TestHelper;
 import java.io.IOException;
 import java.util.List;
 
+import static org.junit.Assert.fail;
+
 
 public class DocumentDaleChallIndexTest {
 
@@ -17,13 +19,65 @@ public class DocumentDaleChallIndexTest {
     private static final double EXPECTED_EN_DALE_CHALL_INDEX = 6.353838036580814;
 
     @Test
-    public void test() throws IOException {
+    public void testWithDefaultEasyWordsList() throws IOException {
         for (Storage storage : TestHelper.getDefaultTestStorages()) {
             System.out.println("Testing with "+storage.getClass().getSimpleName()+": "+storage.getLuceneManager().getClass().getSimpleName());
 
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+DaleChallIndexTest.TEXT_1}), DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_1);
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+DaleChallIndexTest.TEXT_2}), DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_2);
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_EN)}), EXPECTED_EN_DALE_CHALL_INDEX);
+        }
+    }
+
+    @Test
+    public void testWithGivenEasyWordsList() throws IOException {
+        String easyWordsPath = "./src/test/resources/org/voyanttools/trombone/texts/keywords/easywords.en.txt";
+
+        for (Storage storage : TestHelper.getDefaultTestStorages()) {
+            System.out.println("Testing with "+storage.getClass().getSimpleName()+": "+storage.getLuceneManager().getClass().getSimpleName());
+
+            testWithGivenParameters(
+                    storage,
+                    new FlexibleParameters(new String[]{
+                            "string="+DaleChallIndexTest.TEXT_1,
+                            "easy-words-file="+easyWordsPath
+                    }),
+                    DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_1
+            );
+            testWithGivenParameters(
+                    storage,
+                    new FlexibleParameters(new String[]{
+                            "string="+DaleChallIndexTest.TEXT_2,
+                            "easy-words-file="+easyWordsPath
+                    }),
+                    DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_2
+            );
+            testWithGivenParameters(
+                    storage,
+                    new FlexibleParameters(new String[]{
+                            "file="+TestHelper.getResource(FILE_PATH_EN),
+                            "easy-words-file="+easyWordsPath
+                    }),
+                    EXPECTED_EN_DALE_CHALL_INDEX
+            );
+        }
+    }
+
+    @Test
+    public void testWithNonExistingPath() throws IOException {
+        String nonExistingEasyWordsPath = "./non-existing-path";
+
+        for (Storage storage : TestHelper.getDefaultTestStorages()) {
+            FlexibleParameters parameters = new FlexibleParameters(new String[]{
+                    "string="+DaleChallIndexTest.TEXT_1,
+                    "easy-words-file="+nonExistingEasyWordsPath
+            });
+
+            try {
+                DocumentDaleChallIndex documentDaleChallIndex = new DocumentDaleChallIndex(storage, parameters);
+                documentDaleChallIndex.run();
+                fail("Should have raise RuntimeException");
+            } catch (RuntimeException ignored) {}
         }
     }
 
