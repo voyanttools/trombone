@@ -40,7 +40,7 @@ public class DocumentDaleChallIndexTest {
                     storage,
                     new FlexibleParameters(new String[]{
                             "string="+DaleChallIndexTest.TEXT_1,
-                            "easy-words-file="+easyWordsPath
+                            "easyWordsFile="+easyWordsPath
                     }),
                     DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_1
             );
@@ -48,7 +48,7 @@ public class DocumentDaleChallIndexTest {
                     storage,
                     new FlexibleParameters(new String[]{
                             "string="+DaleChallIndexTest.TEXT_2,
-                            "easy-words-file="+easyWordsPath
+                            "easyWordsFile="+easyWordsPath
                     }),
                     DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_2
             );
@@ -56,7 +56,7 @@ public class DocumentDaleChallIndexTest {
                     storage,
                     new FlexibleParameters(new String[]{
                             "file="+TestHelper.getResource(FILE_PATH_EN),
-                            "easy-words-file="+easyWordsPath
+                            "easyWordsFile="+easyWordsPath
                     }),
                     EXPECTED_EN_DALE_CHALL_INDEX
             );
@@ -70,7 +70,7 @@ public class DocumentDaleChallIndexTest {
         for (Storage storage : TestHelper.getDefaultTestStorages()) {
             FlexibleParameters parameters = new FlexibleParameters(new String[]{
                     "string="+DaleChallIndexTest.TEXT_1,
-                    "easy-words-file="+nonExistingEasyWordsPath
+                    "easyWordsFile="+nonExistingEasyWordsPath
             });
 
             try {

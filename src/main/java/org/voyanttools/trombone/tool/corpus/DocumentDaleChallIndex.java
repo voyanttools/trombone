@@ -34,9 +34,9 @@ public class DocumentDaleChallIndex extends AbstractCorpusTool {
     public void run(CorpusMapper corpusMapper) throws IOException {
         List<String> easyWords;
 
-        if (parameters.containsKey("easy-words-file")) {
+        if (parameters.containsKey("easyWordsFile")) {
             try {
-                String easyWordsPath = parameters.getParameterValue("easy-words-file");
+                String easyWordsPath = parameters.getParameterValue("easyWordsFile");
 
                 easyWords = getEasyWords(easyWordsPath);
             } catch (NoSuchFileException e) {
@@ -65,7 +65,6 @@ public class DocumentDaleChallIndex extends AbstractCorpusTool {
     public List<DaleChallIndex> getDaleChallIndexes() {
         return daleChallIndexes;
     }
-
 
     public static List<String> getEasyWords(URI easyWordsUri) throws IOException {
         File file = new File(easyWordsUri);
