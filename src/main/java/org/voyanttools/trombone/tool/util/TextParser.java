@@ -1,9 +1,14 @@
 package org.voyanttools.trombone.tool.util;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextParser {
+
+    @XStreamOmitField
+    private final String text;
 
     private int lettersCount = 0;
     private int wordsCount = 0;
@@ -11,7 +16,9 @@ public class TextParser {
     private int wordsWithMoreThanSixLettersCount = 0;
     private int wordsWithMoreThanTwoSyllablesCount = 0;
 
-    public TextParser(String text) {
+    public TextParser(String textToParse) {
+        text = cleanText(textToParse);
+
         parseText(text);
     }
 
@@ -20,7 +27,6 @@ public class TextParser {
         int charCount = 0;
         int spaceCount = 0;
 
-        text = cleanText(text);
         int length = text.length();
 
         for (int i = 0; i < length; i++) {
@@ -126,5 +132,9 @@ public class TextParser {
 
     public int getWordsWithMoreThanTwoSyllablesCount() {
         return wordsWithMoreThanTwoSyllablesCount;
+    }
+
+    public String getText() {
+        return text;
     }
 }
