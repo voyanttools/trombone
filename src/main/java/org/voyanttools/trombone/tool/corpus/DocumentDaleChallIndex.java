@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class DocumentDaleChallIndex extends AbstractCorpusTool {
 
     @XStreamOmitField
-    public static String DEFAULT_EASY_WORDS_FILE_PATH = "/org/voyanttools/trombone/keywords/easywords.en.txt";
+    public static String DEFAULT_EASY_WORDS_FILE_PATH = "/org/voyanttools/trombone/readability/easywords.en.txt";
 
     private List<DaleChallIndex> daleChallIndexes;
 

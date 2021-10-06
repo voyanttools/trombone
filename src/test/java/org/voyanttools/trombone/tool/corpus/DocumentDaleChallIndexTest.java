@@ -31,7 +31,7 @@ public class DocumentDaleChallIndexTest {
 
     @Test
     public void testWithGivenEasyWordsList() throws IOException {
-        String easyWordsPath = "./src/test/resources/org/voyanttools/trombone/texts/keywords/easywords.en.txt";
+        String easyWordsPath = "./src/test/resources/org/voyanttools/trombone/texts/readability/easywords.en.txt";
 
         for (Storage storage : TestHelper.getDefaultTestStorages()) {
             System.out.println("Testing with "+storage.getClass().getSimpleName()+": "+storage.getLuceneManager().getClass().getSimpleName());
