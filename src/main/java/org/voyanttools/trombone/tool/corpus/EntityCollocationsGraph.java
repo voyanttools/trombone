@@ -46,11 +46,17 @@ public class EntityCollocationsGraph extends AbstractTerms {
 		return super.getVersion()+1;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.voyanttools.trombone.tool.corpus.AbstractCorpusTool#run(org.voyanttools.trombone.lucene.CorpusMapper)
-	 */
 	@Override
-	public void run(CorpusMapper corpusMapper) throws IOException {
+	protected void runQueries(CorpusMapper corpusMapper, Keywords stopwords, String[] queries) throws IOException {
+		doRun(corpusMapper, stopwords);
+	}
+
+	@Override
+	protected void runAllTerms(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
+		doRun(corpusMapper, stopwords);
+	}
+
+	private void doRun(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
 		DocumentEntities documentEntitiesTool = new DocumentEntities(storage, parameters);
 		documentEntitiesTool.run(corpusMapper);
 		List<DocumentEntity> documentEntities = documentEntitiesTool.getDocumentEntities();
@@ -59,11 +65,13 @@ public class EntityCollocationsGraph extends AbstractTerms {
 		// organize by document and track counts
 		Map<Integer, List<DocumentEntity>> entitesByDocumentMap = new HashMap<Integer, List<DocumentEntity>>();
 		for (DocumentEntity entity : documentEntities) {
-			int docIndex = entity.getDocIndex();
-			if (!entitesByDocumentMap.containsKey(docIndex)) {
-				entitesByDocumentMap.put(docIndex, new ArrayList<DocumentEntity>());
+			if (stopwords.isKeyword(entity.getTerm().toLowerCase()) == false) {
+				int docIndex = entity.getDocIndex();
+				if (!entitesByDocumentMap.containsKey(docIndex)) {
+					entitesByDocumentMap.put(docIndex, new ArrayList<DocumentEntity>());
+				}
+				entitesByDocumentMap.get(docIndex).add(entity);
 			}
-			entitesByDocumentMap.get(docIndex).add(entity);
 		}
 		
 		// create intra-document links
@@ -91,7 +99,9 @@ public class EntityCollocationsGraph extends AbstractTerms {
 		List<CorpusEntity> candidateNodes = corpusEntitiesTool.getCorpusEntities(documentEntities);
 		Map<String, CorpusEntity> corpusEntitiesMap = new HashMap<String, CorpusEntity>();
 		for (CorpusEntity corpusEntity : candidateNodes) {
-			corpusEntitiesMap.put(getEntityKey(corpusEntity.getTerm(), corpusEntity.getType()), corpusEntity);
+			if (stopwords.isKeyword(corpusEntity.getTerm().toLowerCase()) == false) {
+				corpusEntitiesMap.put(getEntityKey(corpusEntity.getTerm(), corpusEntity.getType()), corpusEntity);
+			}
 		}
 		
 		FlexibleQueue<Edge> edgesQueue = new FlexibleQueue<Edge>(new Comparator<Edge>() {
@@ -126,8 +136,6 @@ public class EntityCollocationsGraph extends AbstractTerms {
 		}
 		
 		nodes.addAll(corpusEntitiesToIndexMap.keySet());
-		
-		
 	}
 	
 	private String getEntityKey(String term, EntityType type) {
@@ -156,18 +164,6 @@ public class EntityCollocationsGraph extends AbstractTerms {
 				return i;
 			}
 		}
-	}
-
-	@Override
-	protected void runQueries(CorpusMapper corpusMapper, Keywords stopwords,
-			String[] queries) throws IOException {
-		run(corpusMapper);
-	}
-
-	@Override
-	protected void runAllTerms(CorpusMapper corpusMapper, Keywords stopwords)
-			throws IOException {
-		run(corpusMapper);
 	}
 
 }
