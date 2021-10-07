@@ -269,7 +269,7 @@ public class VoyantNssiClient {
         String[] nssiConfig = new String[1];
 
         try {
-            input = ClassLoader.class.getResourceAsStream("/ca/lincsproject/nssi/config.properties");
+            input = VoyantNssiClient.class.getResourceAsStream("/ca/lincsproject/nssi/config.properties");
             prop.load(input);
             nssiConfig[0] = prop.getProperty("client_secret");
 
