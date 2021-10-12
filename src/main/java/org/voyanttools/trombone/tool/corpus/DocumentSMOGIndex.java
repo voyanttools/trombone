@@ -1,5 +1,6 @@
 package org.voyanttools.trombone.tool.corpus;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.model.SMOGIndex;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@XStreamAlias("documentSMOGIndex")
 public class DocumentSMOGIndex extends AbstractCorpusTool {
 
     private List<SMOGIndex> smogIndexes;
