@@ -3,6 +3,7 @@ package org.voyanttools.trombone.model;
 import org.junit.Test;
 import org.voyanttools.trombone.tool.corpus.DocumentDaleChallIndex;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,14 +43,16 @@ public class DaleChallIndexTest {
     }
 
     private List<String> retrieveEasyWordsList() throws IOException {
-        URI easyWordsURI;
+        File easyWordsFile;
 
         try {
-            easyWordsURI = this.getClass().getResource(DocumentDaleChallIndex.DEFAULT_EASY_WORDS_FILE_PATH).toURI();
+            URI easyWordsURI = this.getClass().getResource(DocumentDaleChallIndex.DEFAULT_EASY_WORDS_FILE_PATH).toURI();
+            easyWordsFile = new File(easyWordsURI);
+
         } catch (NullPointerException | URISyntaxException e) {
             throw new RuntimeException("Failed to retrieved the easy words list.");
         }
 
-        return DocumentDaleChallIndex.getEasyWords(easyWordsURI);
+        return DocumentDaleChallIndex.getEasyWords(easyWordsFile);
     }
 }

@@ -1,6 +1,7 @@
 package org.voyanttools.trombone.tool.corpus;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import org.apache.commons.io.FileUtils;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.model.DaleChallIndex;
@@ -9,8 +10,7 @@ import org.voyanttools.trombone.util.FlexibleParameters;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
@@ -37,18 +37,23 @@ public class DocumentDaleChallIndex extends AbstractCorpusTool {
         if (parameters.containsKey("easyWordsFile")) {
             try {
                 String easyWordsPath = parameters.getParameterValue("easyWordsFile");
+                File easyWordsFile = new File(easyWordsPath);
 
-                easyWords = getEasyWords(easyWordsPath);
+                easyWords = getEasyWords(easyWordsFile);
             } catch (NoSuchFileException e) {
                 throw new RuntimeException("Failed to find the easy words list file.");
             }
 
         } else
             try {
-                URI easyWordsUri = this.getClass().getResource(DEFAULT_EASY_WORDS_FILE_PATH).toURI();
+                File easyWordsFile = File.createTempFile("tmp", "tmp");
+                easyWordsFile.deleteOnExit();
 
-                easyWords = getEasyWords(easyWordsUri);
-            } catch (NullPointerException | URISyntaxException e) {
+                InputStream inputStream = this.getClass().getResourceAsStream(DEFAULT_EASY_WORDS_FILE_PATH);
+                FileUtils.copyInputStreamToFile(inputStream, easyWordsFile);
+
+                easyWords = getEasyWords(easyWordsFile);
+            } catch (NullPointerException e) {
                 throw new RuntimeException("Failed to retrieved the easy words list.");
             }
 
@@ -66,18 +71,8 @@ public class DocumentDaleChallIndex extends AbstractCorpusTool {
         return daleChallIndexes;
     }
 
-    public static List<String> getEasyWords(URI easyWordsUri) throws IOException {
-        File file = new File(easyWordsUri);
-        List<String> easyWords = Files.readAllLines(file.toPath());
-
-        easyWords = removeComments(easyWords);
-
-        return easyWords;
-    }
-
-    public static List<String> getEasyWords(String easyWordsPath) throws IOException {
-        File file = new File(easyWordsPath);
-        List<String> easyWords = Files.readAllLines(file.toPath());
+    public static List<String> getEasyWords(File easyWordsFile) throws IOException {
+        List<String> easyWords = Files.readAllLines(easyWordsFile.toPath());
 
         easyWords = removeComments(easyWords);
 
