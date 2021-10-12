@@ -1,5 +1,6 @@
 package org.voyanttools.trombone.tool.corpus;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import org.apache.commons.io.FileUtils;
 import org.voyanttools.trombone.lucene.CorpusMapper;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@XStreamAlias("documentDaleChallIndex")
 public class DocumentDaleChallIndex extends AbstractCorpusTool {
 
     @XStreamOmitField
