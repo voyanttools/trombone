@@ -170,7 +170,7 @@ public class FlexibleParameters implements Cloneable, Serializable {
 		}
 	}
 	
-	private static XStream secureXStream(XStream xs) {
+	public static XStream secureXStream(XStream xs) {
 		xs.addPermission(NoTypePermission.NONE);
 		xs.addPermission(NullPermission.NULL);
 		xs.addPermission(PrimitiveTypePermission.PRIMITIVES);

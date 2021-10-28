@@ -128,7 +128,8 @@ class FileTrombone3_0Migrator extends AbstractFileMigrator {
 	}
 
 	private FlexibleParameters getOldFlexibleParameters(File file) {
-		final XStream xstream = new XStream();
+		final XStream xstream = FlexibleParameters.secureXStream(new XStream());
+		xstream.allowTypes(new Class[] { ca.hermeneuti.trombone.util.FlexibleParameters.class });
 		ca.hermeneuti.trombone.util.FlexibleParameters oldFlexibleParameters = (ca.hermeneuti.trombone.util.FlexibleParameters) xstream.fromXML(file);
 		FlexibleParameters params = new FlexibleParameters();
 		for (String key : oldFlexibleParameters.getKeys()) {
