@@ -23,7 +23,6 @@ package org.voyanttools.trombone.util;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +48,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.security.NoTypePermission;
+import com.thoughtworks.xstream.security.NullPermission;
+import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 
 /**
  * This class encapsulates flexible parameters that map keys to values, except
@@ -137,7 +139,7 @@ public class FlexibleParameters implements Cloneable, Serializable {
 	}
 
 	public static FlexibleParameters loadFlexibleParameters(File parametersFile) throws IOException {
-		XStream xstream = new XStream();		
+		XStream xstream = FlexibleParameters.secureXStream(new XStream());
 		InputStream in = null;
 		FlexibleParameters parameters = new FlexibleParameters();
 		try {
@@ -161,11 +163,21 @@ public class FlexibleParameters implements Cloneable, Serializable {
 		OutputStream outputStream = null;
 		outputStream = new FileOutputStream(file);
 		Writer writer = new OutputStreamWriter(outputStream, Charset.forName("UTF-8"));
-		XStream xStream = new XStream();
+		XStream xStream = FlexibleParameters.secureXStream(new XStream());
 		xStream.toXML(this, writer);
 		if (outputStream!=null) {
 			outputStream.close();
 		}
+	}
+	
+	private static XStream secureXStream(XStream xs) {
+		xs.addPermission(NoTypePermission.NONE);
+		xs.addPermission(NullPermission.NULL);
+		xs.addPermission(PrimitiveTypePermission.PRIMITIVES);
+		xs.allowTypeHierarchy(Collection.class);
+		xs.allowTypeHierarchy(Map.class);
+		xs.allowTypes(new Class[] { FlexibleParameters.class, String.class });
+		return xs;
 	}
 	
 

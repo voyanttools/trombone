@@ -25,7 +25,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.voyanttools.trombone.util.FlexibleParameters;
 
@@ -33,6 +35,9 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonWriter;
+import com.thoughtworks.xstream.security.NoTypePermission;
+import com.thoughtworks.xstream.security.NullPermission;
+import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 
 /**
  * @author sgs
@@ -79,6 +84,15 @@ public class ToolSerializer implements RunnableTool {
 			});
 		}
 		if (xs == null) return; // don't serialize results, therefore no output data is emitted
+	
+		// xstream whitelist
+		xs.addPermission(NoTypePermission.NONE);
+		xs.addPermission(NullPermission.NULL);
+		xs.addPermission(PrimitiveTypePermission.PRIMITIVES);
+		xs.allowTypeHierarchy(Collection.class);
+		xs.allowTypeHierarchy(Map.class);
+		xs.allowTypes(new Class[] { String.class });
+		xs.allowTypesByWildcard(new String[] {"org.voyanttools.trombone.**"});
 		
 		xs.autodetectAnnotations(true);
 //		xs.setMode(XStream.NO_REFERENCES);
