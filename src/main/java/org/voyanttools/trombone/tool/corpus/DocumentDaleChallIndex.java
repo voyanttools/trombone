@@ -1,22 +1,24 @@
 package org.voyanttools.trombone.tool.corpus;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-import org.apache.commons.io.FileUtils;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.model.DaleChallIndex;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 @XStreamAlias("documentDaleChallIndex")
 public class DocumentDaleChallIndex extends AbstractCorpusTool {
@@ -47,14 +49,8 @@ public class DocumentDaleChallIndex extends AbstractCorpusTool {
             }
 
         } else
-            try {
-                File easyWordsFile = File.createTempFile("tmp", "tmp");
-                easyWordsFile.deleteOnExit();
-
-                InputStream inputStream = this.getClass().getResourceAsStream(DEFAULT_EASY_WORDS_FILE_PATH);
-                FileUtils.copyInputStreamToFile(inputStream, easyWordsFile);
-
-                easyWords = getEasyWords(easyWordsFile);
+            try(InputStream inputStream = this.getClass().getResourceAsStream(DEFAULT_EASY_WORDS_FILE_PATH)) {
+                easyWords = removeComments(IOUtils.readLines(inputStream, Charset.forName("UTF-8")));
             } catch (NullPointerException e) {
                 throw new RuntimeException("Failed to retrieved the easy words list.");
             }
