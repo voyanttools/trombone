@@ -1,11 +1,13 @@
 package org.voyanttools.trombone.model;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,6 +22,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.storage.Storage;
 
 public class Categories {
@@ -49,10 +52,12 @@ public class Categories {
 		}
 		
 		if (id.equals("auto")) {
-			File resourcesDir = new File(Categories.class.getResource("/org/voyanttools/trombone/categories").getFile());
 			for (String lang : corpus.getLanguageCodes()) {
-				if (new File(resourcesDir, "categories."+lang+".txt").exists()) {
-					return getCategories(storage, corpus, "categories."+lang+".txt");
+				try(InputStream inputStream = Categories.class.getResourceAsStream("/org/voyanttools/trombone/categories/categories."+lang+".txt")) {
+					StringWriter writer = new StringWriter();
+					IOUtils.copy(inputStream, writer, Charset.forName("UTF-8"));
+					return getCategories(writer.toString());
+				} catch (Exception e) {
 				}
 			}
 			// we've tried all the language codes and none match, so return empty categories

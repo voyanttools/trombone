@@ -1,10 +1,11 @@
 package org.voyanttools.trombone.tool.resource;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.model.Categories;
 import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.storage.Storage;
@@ -25,15 +26,15 @@ public class StoredCategories extends StoredResource {
 		String id = parameters.getParameterValue("retrieveResourceId", "");
 		if (id.isEmpty()==false) {
 			String localId = null;
-			File resourcesDir = new File(Categories.class.getResource("/org/voyanttools/trombone/categories").getFile());
 			if (id.equals("auto")) {
 				localId = "categories.en.txt"; // default
 				if (parameters.containsKey("corpus")) {
 					Corpus corpus = CorpusManager.getCorpus(storage, parameters);
 					for (String lang : corpus.getLanguageCodes()) {
-						// assume it's a language code, but do a check for the file
-						if (new File(resourcesDir, "categories."+lang+".txt").exists()) {
+						try {
+							Categories.class.getResourceAsStream("/org/voyanttools/trombone/categories/categories."+lang+".txt");
 							localId = "categories."+lang+".txt";
+						} catch (NullPointerException e) {
 						}
 					}
 				}
@@ -43,11 +44,13 @@ public class StoredCategories extends StoredResource {
 				localId = id;
 			}
 			if (localId!=null) {
-				File resourcesFile = new File(resourcesDir, localId);
-				if (resourcesFile.exists()) {
-					resource = FileUtils.readFileToString(resourcesFile, Charset.forName("UTF-8"));
+				try(InputStream inputStream = Categories.class.getResourceAsStream("/org/voyanttools/trombone/categories/"+localId)) {
+					StringWriter writer = new StringWriter();
+					IOUtils.copy(inputStream, writer, Charset.forName("UTF-8"));
+					resource = writer.toString();
 					this.id = id;
 					return;
+				} catch (Exception e) {
 				}
 			}
 		}
