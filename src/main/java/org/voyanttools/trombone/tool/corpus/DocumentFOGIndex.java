@@ -26,7 +26,11 @@ public class DocumentFOGIndex extends AbstractCorpusTool {
     public void run(CorpusMapper corpusMapper) throws IOException {
         Corpus corpus = corpusMapper.getCorpus();
 
+        List<String> idsList = this.getCorpusStoredDocumentIdsFromParameters(corpus);
+
         for (String documentId : corpus.getDocumentIds()) {
+            if (idsList.contains(documentId) == false) { continue; }
+
             int documentIndex = corpus.getDocumentPosition(documentId);
             String text = corpus.getDocument(documentId).getDocumentString();
 

@@ -61,7 +61,11 @@ public class DocumentDaleChallIndex extends AbstractCorpusTool {
 
         Corpus corpus = corpusMapper.getCorpus();
 
+        List<String> idsList = this.getCorpusStoredDocumentIdsFromParameters(corpus);
+
         for (String documentId : corpus.getDocumentIds()) {
+            if (idsList.contains(documentId) == false) { continue; }
+
             int documentIndex = corpus.getDocumentPosition(documentId);
             String text = corpus.getDocument(documentId).getDocumentString();
 
