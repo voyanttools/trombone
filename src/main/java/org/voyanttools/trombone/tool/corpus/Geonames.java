@@ -467,23 +467,23 @@ public class Geonames extends AbstractContextTerms {
 					words.clear();
 					break;
 				}
-	        }
-	        tokenStream.end();
-	        tokenStream.close();
-	        if (words.isEmpty()==false) {
-	        		if (words.size()==1) {phrases.add(words.get(0));} // add one word
-	        		else { // check to see if phrase is in the corpus
-	        			 PhraseQuery.Builder builder = new PhraseQuery.Builder();
-	        			 for (String w : words) {
-	        				 builder.add(new Term(TokenType.lexical.name(), w));
-	        			 }
-	        			 Query query = builder.build();
-	        			TopDocs topDocs = searcher.search(query, 1);
-	        			if (topDocs.totalHits>0) {
-	        				phrases.add(StringUtils.join(words, ' '));
-	        			}   			
-	        		}
-	        }
+			}
+			tokenStream.end();
+			tokenStream.close();
+			if (words.isEmpty()==false) {
+					if (words.size()==1) {phrases.add(words.get(0));} // add one word
+					else { // check to see if phrase is in the corpus
+						 PhraseQuery.Builder builder = new PhraseQuery.Builder();
+						 for (String w : words) {
+							 builder.add(new Term(TokenType.lexical.name(), w));
+						 }
+						 Query query = builder.build();
+						TopDocs topDocs = searcher.search(query, 1);
+						if (topDocs.totalHits>0) {
+							phrases.add(StringUtils.join(words, ' '));
+						}
+					}
+			}
 		}
 		
 		return phrases.isEmpty() ? null : phrases;
@@ -653,45 +653,37 @@ public class Geonames extends AbstractContextTerms {
 		public void marshal(Object arg0, HierarchicalStreamWriter writer, MarshallingContext context) {
 			CityOccurrence cityOccurrence = (CityOccurrence) arg0;
 			
-			ToolSerializer.startNode(writer, "docIndex", Integer.class);
-			writer.setValue(String.valueOf(cityOccurrence.docIndex));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "docIndex", cityOccurrence.docIndex);
 			
-			ToolSerializer.startNode(writer, "position", Integer.class);
-			writer.setValue(String.valueOf(cityOccurrence.position));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "position", cityOccurrence.position);
 			
 			writer.startNode("id");
-			writer.setValue(String.valueOf(cityOccurrence.id));
+			writer.setValue(cityOccurrence.id);
 			writer.endNode();
 			
 			writer.startNode("form");
-			writer.setValue(String.valueOf(cityOccurrence.form));
+			writer.setValue(cityOccurrence.form);
 			writer.endNode();
 			
 			writer.startNode("left");
-			writer.setValue(String.valueOf(cityOccurrence.left));
+			writer.setValue(cityOccurrence.left);
 			writer.endNode();
 			
 			writer.startNode("middle");
-			writer.setValue(String.valueOf(cityOccurrence.middle));
+			writer.setValue(cityOccurrence.middle);
 			writer.endNode();
 			
 			writer.startNode("right");
-			writer.setValue(String.valueOf(cityOccurrence.right));
+			writer.setValue(cityOccurrence.right);
 			writer.endNode();
 			
 			writer.startNode("confidences");
 			for (Confidence confidence : cityOccurrence.confidences) {
 				writer.startNode(confidence.name());
 				
-				ToolSerializer.startNode(writer, "value", Float.class);
-				writer.setValue(String.valueOf(confidence.getValue()));
-				ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericNode(writer, "value", confidence.getValue());
 				
-				ToolSerializer.startNode(writer, "weight", Float.class);
-				writer.setValue(String.valueOf(confidence.getWeight()));
-				ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericNode(writer, "weight", confidence.getWeight());
 				
 				writer.endNode();
 			}
@@ -741,50 +733,42 @@ public class Geonames extends AbstractContextTerms {
 			}
 			
 			
-	        writer.startNode("cities");
-	        
-	        ToolSerializer.startNode(writer, "total", Integer.class);
-			writer.setValue(String.valueOf(String.valueOf(geonames.cityTotal)));
-			ToolSerializer.endNode(writer);
-	        
-	        writer.startNode("cities");
+			writer.startNode("cities");
+			
+			ToolSerializer.setNumericNode(writer, "total", geonames.cityTotal);
+			
+			writer.startNode("cities");
 			for (Map.Entry<City, Integer> cityCount : geonames.citiesCountList) {
 				City city = cityCount.getKey();
 				
-		        writer.startNode(city.id); // not written in JSON
+				writer.startNode(city.id); // not written in JSON
+				
+				ToolSerializer.setNumericNode(writer, "rawFreq", cityCount.getValue());
 
-		        ToolSerializer.startNode(writer, "rawFreq", Integer.class);
-				writer.setValue(String.valueOf(cityCount.getValue()));
-				ToolSerializer.endNode(writer);
-
-		        writer.startNode("label");
-				writer.setValue(String.valueOf(city.label));
+				writer.startNode("label");
+				writer.setValue(city.label);
 				writer.endNode();
 				
-				ToolSerializer.startNode(writer, "latitude", Float.class);
-				writer.setValue(String.valueOf(city.latitude));
-				ToolSerializer.endNode(writer);
+				writer.startNode("latitude");
+				writer.setValue(city.latitude);
+				writer.endNode();
 				
-				ToolSerializer.startNode(writer, "longitude", Float.class);
-				writer.setValue(String.valueOf(city.longitude));
-				ToolSerializer.endNode(writer);
+				writer.startNode("longitude");
+				writer.setValue(city.longitude);
+				writer.endNode();
 				
-				ToolSerializer.startNode(writer, "population", Integer.class);
-				writer.setValue(String.valueOf(city.population));
-				ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericNode(writer, "population", city.population);
 				
 				ToolSerializer.startNode(writer, "forms", List.class);
-		        context.convertAnother(city.forms);
-		        ToolSerializer.endNode(writer);
-				
-		        ToolSerializer.startNode(writer, "confidence", Integer.class);
-				writer.setValue(String.valueOf(Confidence.getConfidence(city.confidences)));
+				context.convertAnother(city.forms);
 				ToolSerializer.endNode(writer);
-		        
+				
+				ToolSerializer.setNumericNode(writer, "confidence", Confidence.getConfidence(city.confidences));
+				
 				writer.startNode("confidences");
-		        for (Confidence confidence : city.confidences) {
-		        		context.convertAnother(confidence);
-		        }
+				for (Confidence confidence : city.confidences) {
+					context.convertAnother(confidence);
+				}
 				writer.endNode();
 				
 				writer.endNode();
@@ -794,43 +778,35 @@ public class Geonames extends AbstractContextTerms {
 			writer.endNode();
 			
 			
-	        writer.startNode("connectionCounts");
-	        
-	        ToolSerializer.startNode(writer, "total", Integer.class);
-			writer.setValue(String.valueOf(String.valueOf(geonames.connectionsTotal)));
-			ToolSerializer.endNode(writer);
+			writer.startNode("connectionCounts");
 			
-	        writer.startNode("connectionCounts");
+			ToolSerializer.setNumericNode(writer, "total", geonames.connectionsTotal);
+			
+			writer.startNode("connectionCounts");
 			for (Map.Entry<String, AtomicInteger> connectionCount : geonames.connectionsCount) {
-				ToolSerializer.startNode(writer, connectionCount.getKey(), Integer.class);
-				writer.setValue(String.valueOf(String.valueOf(connectionCount.getValue().get())));
-				ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericNode(writer, connectionCount.getKey(), connectionCount.getValue().get());
 			}
 			writer.endNode();
 			
 			writer.endNode();
 
 			
-	        writer.startNode("connections");
-	        
-	        ToolSerializer.startNode(writer, "total", Integer.class);
-			writer.setValue(String.valueOf(String.valueOf(geonames.total)));
-			ToolSerializer.endNode(writer);
+			writer.startNode("connections");
+			
+			ToolSerializer.setNumericNode(writer, "total", geonames.total);
 
 			ToolSerializer.startNode(writer, "connections", Map.class);
 			for (ConnectionOccurrence occurrence : geonames.connectionOccurrences) {
-		        writer.startNode("connection");
-		        
-		        ToolSerializer.startNode(writer, "docIndex", Integer.class);
-		        writer.setValue(String.valueOf(occurrence.docIndex));
-		        ToolSerializer.endNode(writer);
-		        
-		        writer.startNode("source");
-		        context.convertAnother(occurrence.left);
+				writer.startNode("connection");
+				
+				ToolSerializer.setNumericNode(writer, "docIndex", occurrence.docIndex);
+				
+				writer.startNode("source");
+				context.convertAnother(occurrence.left);
 				writer.endNode();
 				
-		        writer.startNode("target");
-		        context.convertAnother(occurrence.right);			
+				writer.startNode("target");
+				context.convertAnother(occurrence.right);
 				writer.endNode();
 				
 				writer.endNode();

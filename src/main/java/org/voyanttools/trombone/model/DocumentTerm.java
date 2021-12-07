@@ -429,64 +429,42 @@ public class DocumentTerm {
 			int bins = Integer.parseInt(String.valueOf(context.get("bins")));
 			
 			writer.startNode("term"); // not written in JSON
-	        
-	        writer.startNode("term");
+			
+			writer.startNode("term");
 			writer.setValue(documentTerm.getTerm());
 			writer.endNode();
 			
-	        ToolSerializer.startNode(writer, "rawFreq", Integer.class);
-			writer.setValue(String.valueOf(documentTerm.getRawFrequency()));
-			ToolSerializer.endNode(writer);
-
-			ToolSerializer.startNode(writer, "relativeFreq", Float.class);
-			writer.setValue(String.valueOf(documentTerm.getRelativeFrequency()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "rawFreq", documentTerm.getRawFrequency());
 			
-			ToolSerializer.startNode(writer, "zscore", Float.class);
-			writer.setValue(String.valueOf(documentTerm.getZscore()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "relativeFreq", documentTerm.getRelativeFrequency());
 			
-			ToolSerializer.startNode(writer, "zscoreRatio", Float.class);
-			writer.setValue(String.valueOf(documentTerm.getZscoreRatio()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "zscore", documentTerm.getZscore());
 			
-			ToolSerializer.startNode(writer, "tfidf", Float.class);
-			writer.setValue(String.valueOf(documentTerm.getTfIdf()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "zscoreRatio", documentTerm.getZscoreRatio());
 			
-			ToolSerializer.startNode(writer, "totalTermsCount", Integer.class);
-			writer.setValue(String.valueOf(documentTerm.getTotalTermsCount()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "tfidf", documentTerm.getTfIdf());
 			
-			ToolSerializer.startNode(writer, "docIndex", Integer.class);
-			writer.setValue(String.valueOf(documentTerm.getDocIndex()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "totalTermsCount", documentTerm.getTotalTermsCount());
 			
-	        writer.startNode("docId");
+			ToolSerializer.setNumericNode(writer, "docIndex", documentTerm.getDocIndex());
+			
+			writer.startNode("docId");
 			writer.setValue(documentTerm.getDocId());
 			writer.endNode();
 
 			if (withRawDistributions) {
-				ToolSerializer.startNode(writer, "distributions", List.class);
-		        context.convertAnother(documentTerm.getRawDistributions(bins));
-		        ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericList(writer, "distributions", documentTerm.getRawDistributions(bins));
 			}
 			if (withRelativeDistributions) {
-				ToolSerializer.startNode(writer, "distributions", List.class);
-		        context.convertAnother(documentTerm.getRelativeDistributions(bins));
-		        ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericList(writer, "distributions", documentTerm.getRelativeDistributions(bins));
 			}
 			
 			if (withOffsets) {
-				ToolSerializer.startNode(writer, "offsets", List.class);
-		        context.convertAnother(documentTerm.getOffsets());
-		        ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericList(writer, "offsets", documentTerm.getOffsets());
 			}
 			
 			if (withPositions) {
-				ToolSerializer.startNode(writer, "positions", List.class);
-		        context.convertAnother(documentTerm.getPositions());
-		        ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericList(writer, "positions", documentTerm.getPositions());
 			}
 			
 			writer.endNode();

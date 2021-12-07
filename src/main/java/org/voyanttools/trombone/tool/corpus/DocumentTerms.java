@@ -306,7 +306,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			DocumentTerms documentTerms = (DocumentTerms) source;
 			
-	        ToolSerializer.startNode(writer, "total", Integer.class);
+			ToolSerializer.startNode(writer, "total", Integer.class);
 			writer.setValue(String.valueOf(documentTerms.getTotal()));
 			ToolSerializer.endNode(writer);
 			
@@ -326,7 +326,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 			
 			ToolSerializer.startNode(writer, "terms", Map.class);
 			for (DocumentTerm documentTerm : documentTerms) {
-		        context.convertAnother(documentTerm);
+				context.convertAnother(documentTerm);
 			}
 			ToolSerializer.endNode(writer);
 		}

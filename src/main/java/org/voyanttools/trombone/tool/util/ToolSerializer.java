@@ -130,6 +130,50 @@ public class ToolSerializer implements RunnableTool {
 			writer.endNode();
 		}
 	}
+	
+	public static void setNumericNode(HierarchicalStreamWriter writer, String nodeName, float value) {
+		startNode(writer, nodeName, Float.class);
+		if (Float.isNaN(value) || Float.isInfinite(value)) {
+			writer.setValue("null");
+		} else {
+			writer.setValue(String.valueOf(value));
+		}
+		endNode(writer);
+	}
+	
+	public static void setNumericNode(HierarchicalStreamWriter writer, String nodeName, double value) {
+		setNumericNode(writer, nodeName, (float)value);
+	}
+	
+	public static void setNumericNode(HierarchicalStreamWriter writer, String nodeName, int value) {
+		startNode(writer, nodeName, Integer.class);
+		writer.setValue(String.valueOf(value));
+		endNode(writer);
+	}
+	
+	public static void setNumericList(HierarchicalStreamWriter writer, String nodeName, float[] list) {
+		startNode(writer, nodeName, List.class);
+		for (float value : list) {
+			setNumericNode(writer, "float", value);
+		}
+		endNode(writer);
+	}
+	
+	public static void setNumericList(HierarchicalStreamWriter writer, String nodeName, double[] list) {
+		startNode(writer, nodeName, List.class);
+		for (double value : list) {
+			setNumericNode(writer, "float", value);
+		}
+		endNode(writer);
+	}
+	
+	public static void setNumericList(HierarchicalStreamWriter writer, String nodeName, int[] list) {
+		startNode(writer, nodeName, List.class);
+		for (int value : list) {
+			setNumericNode(writer, "int", value);
+		}
+		endNode(writer);
+	}
 
 	@Override
 	public float getVersion() {

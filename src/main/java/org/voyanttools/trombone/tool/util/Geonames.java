@@ -74,37 +74,29 @@ public class Geonames extends AbstractTool {
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			Geonames geonames = (Geonames) source;
 			
-	        writer.startNode("locations");
-	        
-	        ToolSerializer.startNode(writer, "total", Integer.class);
-	        writer.setValue(String.valueOf(geonames.locations.size()));
-	        ToolSerializer.endNode(writer);
-	        
-	        writer.startNode("locations");
+			writer.startNode("locations");
+			
+			ToolSerializer.setNumericNode(writer, "total", geonames.locations.size());
+			
+			writer.startNode("locations");
 			for (Location location : geonames.locations) {
-		        writer.startNode(location.getId());
-		        
-		        writer.startNode("id");
-		        writer.setValue(location.getId());
-		        writer.endNode();
-		        
-		        writer.startNode("label");
-		        writer.setValue(location.getFullName());
-		        writer.endNode();
-		        
-		        ToolSerializer.startNode(writer, "lat", Float.class);
-		        writer.setValue(String.valueOf(location.getLat()));
-		        ToolSerializer.endNode(writer);
-		        
-		        ToolSerializer.startNode(writer, "lng", Float.class);
-		        writer.setValue(String.valueOf(location.getLng()));
-		        ToolSerializer.endNode(writer);
-		        
-		        ToolSerializer.startNode(writer, "population", Float.class);
-		        writer.setValue(String.valueOf(location.getPopulation()));
-		        ToolSerializer.endNode(writer);
-		        
-		        writer.endNode();
+				writer.startNode(location.getId());
+				
+				writer.startNode("id");
+				writer.setValue(location.getId());
+				writer.endNode();
+				
+				writer.startNode("label");
+				writer.setValue(location.getFullName());
+				writer.endNode();
+				
+				ToolSerializer.setNumericNode(writer, "lat", location.getLat());
+				
+				ToolSerializer.setNumericNode(writer, "lng", location.getLng());
+				
+				ToolSerializer.setNumericNode(writer, "population", location.getPopulation());
+				
+				writer.endNode();
 			}
 			writer.endNode();
 			

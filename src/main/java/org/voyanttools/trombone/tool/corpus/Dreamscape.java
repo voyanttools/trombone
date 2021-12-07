@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.json.JSONObject;
 import org.voyanttools.trombone.lucene.CorpusMapper;
@@ -327,51 +326,41 @@ public class Dreamscape extends AbstractCorpusTool implements Progressable {
 			Dreamscape dreamscape = (Dreamscape) source;
 			
 			if (dreamscape.progress!=null) {
-		        writer.startNode("progress");
+				writer.startNode("progress");
 				context.convertAnother(dreamscape.progress);
 				writer.endNode();
 			}
 			
 			
-	        writer.startNode("locations");
-	        
-	        ToolSerializer.startNode(writer, "total", Integer.class);
-	        writer.setValue(String.valueOf(dreamscape.locations.size()));
-	        ToolSerializer.endNode(writer);
-	        
-	        writer.startNode("locations");
+			writer.startNode("locations");
+			
+			ToolSerializer.setNumericNode(writer, "total", dreamscape.locations.size());
+			
+			writer.startNode("locations");
 			for (CorpusLocation location : dreamscape.locations) {
 				writer.startNode(location.getId());
-		        
-		        writer.startNode("id");
-		        writer.setValue(location.getId());
-		        writer.endNode();
-		        
-		        ToolSerializer.startNode(writer, "rawFreq", Integer.class);
-		        writer.setValue(String.valueOf(location.getRawFreq()));
-		        ToolSerializer.endNode(writer);
-		        
-		        writer.startNode("label");
-		        writer.setValue(location.getLocation().getName());
-		        writer.endNode();
-		        
-		        ToolSerializer.startNode(writer, "forms", Map.class);
-		        context.convertAnother(location.getForms());
-		        ToolSerializer.endNode(writer);
-		        
-		        ToolSerializer.startNode(writer, "lat", Float.class);
-		        writer.setValue(String.valueOf(location.getLocation().getLat()));
-		        ToolSerializer.endNode(writer);
-		        
-		        ToolSerializer.startNode(writer, "lng", Float.class);
-		        writer.setValue(String.valueOf(location.getLocation().getLng()));
-		        ToolSerializer.endNode(writer);
-		        
-		        ToolSerializer.startNode(writer, "population", Float.class);
-		        writer.setValue(String.valueOf(location.getLocation().getPopulation()));
-		        ToolSerializer.endNode(writer);
-		        
-		        writer.endNode();
+				
+				writer.startNode("id");
+				writer.setValue(location.getId());
+				writer.endNode();
+				
+				ToolSerializer.setNumericNode(writer, "rawFreq", location.getRawFreq());
+				
+				writer.startNode("label");
+				writer.setValue(location.getLocation().getName());
+				writer.endNode();
+				
+				ToolSerializer.startNode(writer, "forms", Map.class);
+				context.convertAnother(location.getForms());
+				ToolSerializer.endNode(writer);
+				
+				ToolSerializer.setNumericNode(writer, "lat", location.getLocation().getLat());
+				
+				ToolSerializer.setNumericNode(writer, "lng", location.getLocation().getLng());
+				
+				ToolSerializer.setNumericNode(writer, "population", location.getLocation().getPopulation());
+				
+				writer.endNode();
 			}
 			writer.endNode();
 			
@@ -379,61 +368,49 @@ public class Dreamscape extends AbstractCorpusTool implements Progressable {
 
 			
 
-	        writer.startNode("occurrences");
-	        
-	        ToolSerializer.startNode(writer, "total", Integer.class);
-	        writer.setValue(String.valueOf(dreamscape.occurrences.size()));
-	        ToolSerializer.endNode(writer);
-	        
-	        ToolSerializer.startNode(writer, "occurrences", Map.class);
+			writer.startNode("occurrences");
+			
+			ToolSerializer.setNumericNode(writer, "total", dreamscape.occurrences.size());
+			
+			ToolSerializer.startNode(writer, "occurrences", Map.class);
 			for (DocumentKwicLocationToken token : dreamscape.occurrences) {
-		        writer.startNode("occurrence");
-		        
-		        writer.startNode("term");
-		        writer.setValue(token.getTerm());
-		        writer.endNode();
-		        
-		        ToolSerializer.startNode(writer, "docIndex", Integer.class);
-		        writer.setValue(String.valueOf(token.getDocIndex()));			        
-		        ToolSerializer.endNode(writer);
-		        
-		        ToolSerializer.startNode(writer, "position", Integer.class);
-		        writer.setValue(String.valueOf(token.getPosition()));	       
-		        ToolSerializer.endNode(writer);
-		        
-		        writer.startNode("location");
-		        writer.setValue(token.getLocation().getId());
-		        writer.endNode();
-		        
-		        ToolSerializer.startNode(writer, "confidence", Integer.class);
-		        writer.setValue(String.valueOf(token.getConfidence()));	       
-		        ToolSerializer.endNode(writer);
-		        
-		        writer.startNode("confidences");
-		        for (Confidence confidence : token.getConfidences()) {
-		        	writer.startNode(confidence.name());
-			        
-			        ToolSerializer.startNode(writer, "value", Float.class);
-			        writer.setValue(String.valueOf(confidence.getValue()));	       
-			        ToolSerializer.endNode(writer);
-			        
-			        ToolSerializer.startNode(writer, "weight", Float.class);
-			        writer.setValue(String.valueOf(confidence.getWeight()));	       
-			        ToolSerializer.endNode(writer);
-			        
-		        	writer.endNode();
-		        }
-		        writer.endNode();
-		        
-		        writer.startNode("left");
-		        writer.setValue(token.getLeft());
-		        writer.endNode();
-		        
-		        writer.startNode("right");
-		        writer.setValue(token.getRight());
-		        writer.endNode();
-		        
-		        writer.endNode();
+				writer.startNode("occurrence");
+				
+				writer.startNode("term");
+				writer.setValue(token.getTerm());
+				writer.endNode();
+				
+				ToolSerializer.setNumericNode(writer, "docIndex", token.getDocIndex());
+				
+				ToolSerializer.setNumericNode(writer, "position", token.getPosition());
+				
+				writer.startNode("location");
+				writer.setValue(token.getLocation().getId());
+				writer.endNode();
+				
+				ToolSerializer.setNumericNode(writer, "confidence", token.getConfidence());
+				
+				writer.startNode("confidences");
+				for (Confidence confidence : token.getConfidences()) {
+					writer.startNode(confidence.name());
+					
+					ToolSerializer.setNumericNode(writer, "value", confidence.getValue());
+					
+					ToolSerializer.setNumericNode(writer, "weight", confidence.getWeight());
+					
+					writer.endNode();
+				}
+				writer.endNode();
+				
+				writer.startNode("left");
+				writer.setValue(token.getLeft());
+				writer.endNode();
+				
+				writer.startNode("right");
+				writer.setValue(token.getRight());
+				writer.endNode();
+				
+				writer.endNode();
 			}
 			ToolSerializer.endNode(writer);
 			
@@ -443,65 +420,53 @@ public class Dreamscape extends AbstractCorpusTool implements Progressable {
 			
 			writer.startNode("connectionOccurrences");
 			
-			ToolSerializer.startNode(writer, "total", Integer.class);
-	        writer.setValue(String.valueOf(dreamscape.total));
-	        ToolSerializer.endNode(writer);
-	        
-	        ToolSerializer.startNode(writer, "connectionOccurrences", Map.class);
+			ToolSerializer.setNumericNode(writer, "total", dreamscape.total);
+			
+			ToolSerializer.startNode(writer, "connectionOccurrences", Map.class);
 			for (DocumentKwicLocationToken[] tokens : dreamscape.connectionOccurrences) {
-		        writer.startNode("connectionOccurrence");
-		        
-		        int i = 0;
-		        for (DocumentKwicLocationToken token : tokens) {
-			        writer.startNode(i++==0 ? "source" : "target");
-			        
-			        writer.startNode("term");
-			        writer.setValue(token.getTerm());
-			        writer.endNode();
-			        
-			        ToolSerializer.startNode(writer, "docIndex", Integer.class);
-			        writer.setValue(String.valueOf(token.getDocIndex()));			        
-			        ToolSerializer.endNode(writer);
-			        
-			        ToolSerializer.startNode(writer, "position", Integer.class);
-			        writer.setValue(String.valueOf(token.getPosition()));	       
-			        ToolSerializer.endNode(writer);
-			        
-			        writer.startNode("location");
-			        writer.setValue(token.getLocation().getId());
-			        writer.endNode();
-			        
-			        ToolSerializer.startNode(writer, "confidence", Integer.class);
-			        writer.setValue(String.valueOf(token.getConfidence()));	       
-			        ToolSerializer.endNode(writer);
-			        
-			        writer.startNode("confidences");
-			        for (Confidence confidence : token.getConfidences()) {
-			        	writer.startNode(confidence.name());
-				        
-				        ToolSerializer.startNode(writer, "value", Float.class);
-				        writer.setValue(String.valueOf(confidence.getValue()));	       
-				        ToolSerializer.endNode(writer);
-				        
-				        ToolSerializer.startNode(writer, "weight", Float.class);
-				        writer.setValue(String.valueOf(confidence.getWeight()));	       
-				        ToolSerializer.endNode(writer);
-				        
-			        	writer.endNode();
-			        }
-			        writer.endNode();
-			        
-			        writer.startNode("left");
-			        writer.setValue(token.getLeft());
-			        writer.endNode();
-			        
-			        writer.startNode("right");
-			        writer.setValue(token.getRight());
-			        writer.endNode();
-			        
-			        writer.endNode();
-		        }
-		        
+				writer.startNode("connectionOccurrence");
+				
+				int i = 0;
+				for (DocumentKwicLocationToken token : tokens) {
+					writer.startNode(i++==0 ? "source" : "target");
+					
+					writer.startNode("term");
+					writer.setValue(token.getTerm());
+					writer.endNode();
+					
+					ToolSerializer.setNumericNode(writer, "docIndex", token.getDocIndex());
+					
+					ToolSerializer.setNumericNode(writer, "position", token.getPosition());
+					
+					writer.startNode("location");
+					writer.setValue(token.getLocation().getId());
+					writer.endNode();
+					
+					ToolSerializer.setNumericNode(writer, "confidence", token.getConfidence());
+					
+					writer.startNode("confidences");
+					for (Confidence confidence : token.getConfidences()) {
+						writer.startNode(confidence.name());
+						
+						ToolSerializer.setNumericNode(writer, "value", confidence.getValue());
+						
+						ToolSerializer.setNumericNode(writer, "weight", confidence.getWeight());
+						
+						writer.endNode();
+					}
+					writer.endNode();
+					
+					writer.startNode("left");
+					writer.setValue(token.getLeft());
+					writer.endNode();
+					
+					writer.startNode("right");
+					writer.setValue(token.getRight());
+					writer.endNode();
+					
+					writer.endNode();
+				}
+				
 				writer.endNode();
 			}
 			ToolSerializer.endNode(writer);
@@ -510,31 +475,27 @@ public class Dreamscape extends AbstractCorpusTool implements Progressable {
 			
 			
 			
-	        writer.startNode("connections");
-	        
-	        ToolSerializer.startNode(writer, "total", Integer.class);
-	        writer.setValue(String.valueOf(dreamscape.connections.size()));
-	        ToolSerializer.endNode(writer);
-	        
-	        ToolSerializer.startNode(writer, "connections", Map.class);
+			writer.startNode("connections");
+			
+			ToolSerializer.setNumericNode(writer, "total", dreamscape.connections.size());
+			
+			ToolSerializer.startNode(writer, "connections", Map.class);
 			for (CorpusLocationConnection connection : dreamscape.connections) {
-		        writer.startNode("connection");
-		        
+				writer.startNode("connection");
+				
 				Location[] locations = connection.getLocations();
 				
 				writer.startNode("source");
-		        writer.setValue(locations[0].getId());
-		        writer.endNode();
-		        
+				writer.setValue(locations[0].getId());
+				writer.endNode();
+				
 				writer.startNode("target");
-		        writer.setValue(locations[1].getId());
-		        writer.endNode();
-		        
-		        ToolSerializer.startNode(writer, "rawFreq", Integer.class);
-		        writer.setValue(String.valueOf(connection.getRawFreq()));
-		        ToolSerializer.endNode(writer);
-		        
-		        writer.endNode();
+				writer.setValue(locations[1].getId());
+				writer.endNode();
+				
+				ToolSerializer.setNumericNode(writer, "rawFreq", connection.getRawFreq());
+				
+				writer.endNode();
 			}
 			ToolSerializer.endNode(writer);
 			

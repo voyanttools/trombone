@@ -187,22 +187,14 @@ public final class AnalysisUtils {
 				writer.setValue(String.valueOf(((RawCATerm)term).getCategory()).toLowerCase());
 				writer.endNode();
 				
-				ToolSerializer.startNode(writer, "docIndex", Integer.class);
-				writer.setValue(String.valueOf(((RawCATerm)term).getDocIndex()));
-				ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericNode(writer, "docIndex", ((RawCATerm)term).getDocIndex());
 			}
 			
-			ToolSerializer.startNode(writer, "rawFreq", Integer.class);
-			writer.setValue(String.valueOf(term.getRawFrequency()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "rawFreq", term.getRawFrequency());
 			
-			ToolSerializer.startNode(writer, "relativeFreq", Float.class);
-			writer.setValue(String.valueOf(term.getRelativeFrequency()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "relativeFreq", (float)term.getRelativeFrequency());
 			
-			ToolSerializer.startNode(writer, "cluster", Integer.class);
-			writer.setValue(String.valueOf(term.getCluster()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "cluster", term.getCluster());
 			
 			ToolSerializer.startNode(writer, "clusterCenter", Boolean.class);
 			writer.setValue(String.valueOf(term.isClusterCenter()));
@@ -210,14 +202,12 @@ public final class AnalysisUtils {
 			
 			double[] vectorDouble = term.getVector();
 			float[] vectorFloat = new float[vectorDouble.length];
-			for (int i = 0, size = vectorDouble.length; i < size; i++) 
+			for (int i = 0, size = vectorDouble.length; i < size; i++) { 
 				vectorFloat[i] = (float) vectorDouble[i];
+			}
+			ToolSerializer.setNumericList(writer, "vector", vectorFloat);
 			
-			ToolSerializer.startNode(writer, "vector", vectorFloat.getClass());
-            context.convertAnother(vectorFloat);
-            ToolSerializer.endNode(writer);
-			
-        	writer.endNode();
+			writer.endNode();
 		}
 		ToolSerializer.endNode(writer);
 	}

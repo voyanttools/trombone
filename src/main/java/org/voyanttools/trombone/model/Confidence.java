@@ -116,16 +116,12 @@ public class Confidence implements Serializable {
 		@Override
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			Confidence confidence = (Confidence) source;
-	        
-	        writer.startNode(confidence.type.name());
-	        
-	        ToolSerializer.startNode(writer, "value", Float.class);
-			writer.setValue(String.valueOf(confidence.value));
-			ToolSerializer.endNode(writer);
 			
-			ToolSerializer.startNode(writer, "weight", Float.class);
-			writer.setValue(String.valueOf(confidence.weight));
-			ToolSerializer.endNode(writer);
+			writer.startNode(confidence.type.name());
+			
+			ToolSerializer.setNumericNode(writer, "value", confidence.value);
+			
+			ToolSerializer.setNumericNode(writer, "weight", confidence.weight);
 			
 			writer.endNode();
 

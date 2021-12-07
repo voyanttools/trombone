@@ -4,9 +4,7 @@
 package org.voyanttools.trombone.model;
 
 import java.util.Comparator;
-import java.util.List;
 
-import org.voyanttools.trombone.model.CorpusTerm.Sort;
 import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
@@ -164,49 +162,35 @@ public class CorpusTermsCorrelation {
 			boolean termsOnly = Boolean.TRUE.equals(context.get("termsOnly"));
 			
 			writer.startNode("correlation");
-	        
-	        int i = 0;
-	        for (CorpusTerm corpusTerm : corpusTermCorrelation.getCorpusTerms()) {
-		        writer.startNode(i++==0 ? "source" : "target");
-		        if (termsOnly) {
+			
+			int i = 0;
+			for (CorpusTerm corpusTerm : corpusTermCorrelation.getCorpusTerms()) {
+				writer.startNode(i++==0 ? "source" : "target");
+				if (termsOnly) {
 					writer.setValue(corpusTerm.getTerm());
-		        } else {
-			        writer.startNode("term");
+				} else {
+					writer.startNode("term");
 					writer.setValue(corpusTerm.getTerm());
 					writer.endNode();
 					
-					ToolSerializer.startNode(writer, "inDocumentsCount", Integer.class);
-					writer.setValue(String.valueOf(corpusTerm.getInDocumentsCount()));
-					ToolSerializer.endNode(writer);
-			        
-					ToolSerializer.startNode(writer, "rawFreq", Integer.class);
-					writer.setValue(String.valueOf(corpusTerm.getRawFrequency()));
-					ToolSerializer.endNode(writer);
-			        
-					ToolSerializer.startNode(writer, "relativePeakedness", Float.class);
-					writer.setValue(String.valueOf(corpusTerm.getPeakedness()));
-					ToolSerializer.endNode(writer);
-			        
-					ToolSerializer.startNode(writer, "relativeSkewness", Float.class);
-					writer.setValue(String.valueOf(corpusTerm.getSkewness()));
-					ToolSerializer.endNode(writer);
+					ToolSerializer.setNumericNode(writer, "inDocumentsCount", corpusTerm.getInDocumentsCount());
+					
+					ToolSerializer.setNumericNode(writer, "rawFreq", corpusTerm.getRawFrequency());
+					
+					ToolSerializer.setNumericNode(writer, "relativePeakedness", corpusTerm.getPeakedness());
+					
+					ToolSerializer.setNumericNode(writer, "relativeSkewness", corpusTerm.getSkewness());
 					
 					if (withDistributions) {
-						ToolSerializer.startNode(writer, "distributions", List.class);
-				        context.convertAnother(corpusTerm.getRelativeDistributions());
-				        ToolSerializer.endNode(writer);
+						ToolSerializer.setNumericList(writer, "distributions", corpusTerm.getRelativeDistributions());
 					}
-		        }
+				}
 				writer.endNode();
-	        }
-	        
-	        ToolSerializer.startNode(writer, "correlation", Float.class);
-			writer.setValue(String.valueOf(corpusTermCorrelation.getCorrelation()));
-			ToolSerializer.endNode(writer);
-	        
-			ToolSerializer.startNode(writer, "significance", Float.class);
-			writer.setValue(String.valueOf(corpusTermCorrelation.getSignificance()));
-			ToolSerializer.endNode(writer);
+			}
+			
+			ToolSerializer.setNumericNode(writer, "correlation", corpusTermCorrelation.getCorrelation());
+			
+			ToolSerializer.setNumericNode(writer, "significance", corpusTermCorrelation.getSignificance());
 			
 			writer.endNode();
 		}

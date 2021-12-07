@@ -3,7 +3,6 @@ package org.voyanttools.trombone.model;
 import java.io.Serializable;
 import java.text.Normalizer;
 import java.util.Comparator;
-import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -371,7 +370,7 @@ public class CorpusTerm implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "{"+term+": "+rawFreq+" ("+getRelativeFreq()+")";
+		return "{"+term+": "+rawFreq+" ("+getRelativeFrequency()+")";
 	}
 	
 	public static class CorpusTermConverter implements Converter {
@@ -388,50 +387,35 @@ public class CorpusTerm implements Serializable {
 			boolean withRawDistributions = Boolean.TRUE.equals(context.get("withRawDistributions"));
 			boolean withRelativeDistributions = Boolean.TRUE.equals(context.get("withRelativeDistributions"));
 			boolean inDocumentsCountOnly = Boolean.TRUE.equals(context.get("inDocumentsCountOnly"));
-	        
+			
 			writer.startNode("term");
 			
-	        writer.startNode("term");
+			writer.startNode("term");
 			writer.setValue(corpusTerm.getTerm());
 			writer.endNode();
 			
-	        ToolSerializer.startNode(writer, "inDocumentsCount", Integer.class);
-			writer.setValue(String.valueOf(corpusTerm.getInDocumentsCount()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "inDocumentsCount", corpusTerm.getInDocumentsCount());
 			
 			if (!inDocumentsCountOnly) {
 				
-		        ToolSerializer.startNode(writer, "rawFreq", Integer.class);
-				writer.setValue(String.valueOf(corpusTerm.getRawFrequency()));
-				ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericNode(writer, "rawFreq", corpusTerm.getRawFrequency());
+				
+				ToolSerializer.setNumericNode(writer, "relativeFreq", corpusTerm.getRelativeFrequency());
 
-		        ToolSerializer.startNode(writer, "relativeFreq", Float.class);
-				writer.setValue(String.valueOf((float) corpusTerm.getRelativeFrequency()));	
-				ToolSerializer.endNode(writer);
-
-		        ToolSerializer.startNode(writer, "comparisonRelativeFreqDifference", Float.class);
-		        float ccrfdval = corpusTerm.getComparisonCorpusRelativeFrequencyDifference();
-				writer.setValue(Float.isNaN(ccrfdval) ? "0" :  String.valueOf(ccrfdval));
-				ToolSerializer.endNode(writer);
+				ToolSerializer.setNumericNode(writer, "comparisonRelativeFreqDifference", corpusTerm.getComparisonCorpusRelativeFrequencyDifference());
 				
 				
 				if (withRawDistributions || withRelativeDistributions) {
 					
-			        ToolSerializer.startNode(writer, "relativePeakedness", Float.class);
-					writer.setValue(String.valueOf(corpusTerm.getPeakedness()));
-					ToolSerializer.endNode(writer);
+					ToolSerializer.setNumericNode(writer, "relativePeakedness", corpusTerm.getPeakedness());
 					
-			        ToolSerializer.startNode(writer, "relativeSkewness", Float.class);
-					writer.setValue(String.valueOf(corpusTerm.getSkewness()));
-					ToolSerializer.endNode(writer);
+					ToolSerializer.setNumericNode(writer, "relativeSkewness", corpusTerm.getSkewness());
 					
-					ToolSerializer.startNode(writer, "distributions", List.class);
 					if (withRawDistributions) {
-				        context.convertAnother(corpusTerm.getRawDistributions());
+						ToolSerializer.setNumericList(writer, "distributions", corpusTerm.getRawDistributions());
 					} else {
-				        context.convertAnother(corpusTerm.getRelativeDistributions());
+						ToolSerializer.setNumericList(writer, "distributions", corpusTerm.getRelativeDistributions());
 					}
-					ToolSerializer.endNode(writer);
 				}
 
 			}

@@ -1,7 +1,6 @@
 package org.voyanttools.trombone.model;
 
 import java.util.Comparator;
-import java.util.List;
 
 import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.util.FlexibleParameters;
@@ -151,69 +150,50 @@ public class DocumentTermsCorrelation {
 			int distributionBins = Integer.parseInt(String.valueOf(context.get("distributionBins")));
 			
 			writer.startNode("correlation"); // not written in JSON
-	        
-	        int i = 0;
-	        for (DocumentTerm documentTerm : documentTermCorrelation.getDocumentTerms()) {
-		        writer.startNode(i++==0 ? "source" : "target");
-		        
-		        if (termsOnly) {
+			
+			int i = 0;
+			for (DocumentTerm documentTerm : documentTermCorrelation.getDocumentTerms()) {
+				writer.startNode(i++==0 ? "source" : "target");
+				
+				if (termsOnly) {
 					writer.setValue(documentTerm.getTerm());
-		        } else {
-			        writer.startNode("term");
+				} else {
+					writer.startNode("term");
 					writer.setValue(documentTerm.getTerm());
 					writer.endNode();
 					
-			        ToolSerializer.startNode(writer, "rawFreq", Integer.class);
-					writer.setValue(String.valueOf(documentTerm.getRawFrequency()));
-					ToolSerializer.endNode(writer);
-
-					ToolSerializer.startNode(writer, "relativeFreq", Float.class);
-					writer.setValue(String.valueOf(documentTerm.getRelativeFrequency()));
-					ToolSerializer.endNode(writer);
+					ToolSerializer.setNumericNode(writer, "rawFreq", documentTerm.getRawFrequency());
 					
-					ToolSerializer.startNode(writer, "zscore", Float.class);
-					writer.setValue(String.valueOf(documentTerm.getZscore()));
-					ToolSerializer.endNode(writer);
+					ToolSerializer.setNumericNode(writer, "relativeFreq", documentTerm.getRelativeFrequency());
 					
-					ToolSerializer.startNode(writer, "zscoreRatio", Float.class);
-					writer.setValue(String.valueOf(documentTerm.getZscoreRatio()));
-					ToolSerializer.endNode(writer);
+					ToolSerializer.setNumericNode(writer, "zscore", documentTerm.getZscore());
 					
-					ToolSerializer.startNode(writer, "tfidf", Float.class);
-					writer.setValue(String.valueOf(documentTerm.getTfIdf()));
-					ToolSerializer.endNode(writer);
+					ToolSerializer.setNumericNode(writer, "zscoreRatio", documentTerm.getZscoreRatio());
 					
-					ToolSerializer.startNode(writer, "totalTermsCount", Integer.class);
-					writer.setValue(String.valueOf(documentTerm.getTotalTermsCount()));
-					ToolSerializer.endNode(writer);
+					ToolSerializer.setNumericNode(writer, "tfidf", documentTerm.getTfIdf());
 					
-					ToolSerializer.startNode(writer, "docIndex", Integer.class);
-					writer.setValue(String.valueOf(documentTerm.getDocIndex()));
-					ToolSerializer.endNode(writer);
+					ToolSerializer.setNumericNode(writer, "totalTermsCount", documentTerm.getTotalTermsCount());
 					
-			        writer.startNode("docId");
+					ToolSerializer.setNumericNode(writer, "docIndex", documentTerm.getDocIndex());
+					
+					writer.startNode("docId");
 					writer.setValue(documentTerm.getDocId());
 					writer.endNode();
 
 					if (withDistributions) {
-						ToolSerializer.startNode(writer, "distributions", List.class);
-				        float[] distributions = documentTerm.getRelativeDistributions(distributionBins).clone();
-				        // clone to avoid empty on subsequent instances 
-				        context.convertAnother(distributions.clone());
-				        ToolSerializer.endNode(writer);
+						// clone to avoid empty on subsequent instances
+						// TODO review if clone is necessary
+						float[] distributions = documentTerm.getRelativeDistributions(distributionBins).clone();
+						ToolSerializer.setNumericList(writer, "distributions", distributions);
 					}
-		        }
-		        
+				}
+				
 				writer.endNode();
-	        }
-	        
-	        ToolSerializer.startNode(writer, "correlation", Float.class);
-			writer.setValue(String.valueOf(documentTermCorrelation.getCorrelation()));
-			ToolSerializer.endNode(writer);
+			}
 			
-			ToolSerializer.startNode(writer, "significance", Float.class);
-			writer.setValue(String.valueOf(documentTermCorrelation.getSignificance()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericNode(writer, "correlation", documentTermCorrelation.getCorrelation());
+			
+			ToolSerializer.setNumericNode(writer, "significance", documentTermCorrelation.getSignificance());
 			
 			writer.endNode();
 		}
