@@ -94,6 +94,7 @@ public class CorpusTermCorrelations extends AbstractTerms {
 						regression.addData(outerCounts[i], innerCounts[i]);
 					}
 					queue.offer(new CorpusTermsCorrelation(inner, outer, (float) regression.getR(), (float) regression.getSignificance()));
+					total++;
 				}
 			}
 		}
