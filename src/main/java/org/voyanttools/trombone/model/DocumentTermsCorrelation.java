@@ -181,10 +181,7 @@ public class DocumentTermsCorrelation {
 					writer.endNode();
 
 					if (withDistributions) {
-						// clone to avoid empty on subsequent instances
-						// TODO review if clone is necessary
-						float[] distributions = documentTerm.getRelativeDistributions(distributionBins).clone();
-						ToolSerializer.setNumericList(writer, "distributions", distributions);
+						ToolSerializer.setNumericList(writer, "distributions", documentTerm.getRelativeDistributions(distributionBins));
 					}
 				}
 				

@@ -50,7 +50,6 @@ public class DocumentTermCorrelations extends AbstractTerms {
 		DocumentTerms documentTermsTool = getDocumentTermsTool(null);
 		documentTermsTool.runQueries(corpusMapper, stopwords, queries);
 		List<DocumentTerm> outerList = documentTermsTool.getDocumentTerms();
-		//populate(documentTermsTool.getDocumentTerms(), documentTermsTool.getDocumentTerms(), true);
 		Comparator<DocumentTermsCorrelation> comparator = DocumentTermsCorrelation.getComparator(DocumentTermsCorrelation.Sort.getForgivingly(parameters));
 		FlexibleQueue<DocumentTermsCorrelation> queue = new FlexibleQueue<DocumentTermsCorrelation>(comparator, start+limit);
 		for (String id : ids) {
@@ -72,7 +71,6 @@ public class DocumentTermCorrelations extends AbstractTerms {
 		for (String id : ids) {
 			DocumentTerms documentTermsTool = getDocumentTermsTool(id);
 			documentTermsTool.runAllTerms(corpusMapper, stopwords);
-			getDocumentTermsCorrelationList(documentTermsTool.getDocumentTerms(), documentTermsTool.getDocumentTerms(), true);
 			List<DocumentTermsCorrelation> dtc = getDocumentTermsCorrelationList(documentTermsTool.getDocumentTerms(), documentTermsTool.getDocumentTerms(), true);
 			for (DocumentTermsCorrelation d : dtc) {
 				queue.offer(d);
@@ -111,7 +109,7 @@ public class DocumentTermCorrelations extends AbstractTerms {
 				}
 			}
 		}
-		return queue.getOrderedList(start);
+		return queue.getOrderedList();
 	}
 
 	public static class DocumentTermCorrelationsConverter implements Converter {
@@ -131,7 +129,7 @@ public class DocumentTermCorrelations extends AbstractTerms {
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			DocumentTermCorrelations documentTermCorrelations = (DocumentTermCorrelations) source;
 			
-	        ToolSerializer.startNode(writer, "total", Integer.class);
+			ToolSerializer.startNode(writer, "total", Integer.class);
 			writer.setValue(String.valueOf(documentTermCorrelations.getTotal()));
 			ToolSerializer.endNode(writer);
 			
@@ -146,7 +144,7 @@ public class DocumentTermCorrelations extends AbstractTerms {
 			
 			ToolSerializer.startNode(writer, "correlations", Map.class);
 			for (DocumentTermsCorrelation documentTermCorrelation : documentTermCorrelations.correlations) {
-		        context.convertAnother(documentTermCorrelation);
+				context.convertAnother(documentTermCorrelation);
 			}
 			ToolSerializer.endNode(writer);
 		}
