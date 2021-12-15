@@ -110,4 +110,7 @@ public class DocumentEntities extends AbstractCorpusTool {
 		return entities;
 	}
 
+	public static void shutdownThreadPools() {
+	}
+
 }
