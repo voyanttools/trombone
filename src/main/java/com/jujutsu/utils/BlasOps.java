@@ -16,6 +16,8 @@ import com.github.fommil.netlib.LAPACK;
 
 public class BlasOps {
 	
+	private boolean verbose = false;
+
 	void benchmark(int size) {
 		int m = (int) Math.sqrt(size);
 
@@ -30,7 +32,7 @@ public class BlasOps {
 		a[8] = 2;
 		DoubleMatrix pInv = new DoubleMatrix(a);
 
-		System.out.println("Start is: " + pInv.reshape(m, m));
+		if (verbose) System.out.println("Start is: " + pInv.reshape(m, m));
 
 		double[] aOrig = Arrays.copyOf(a, a.length);
 		double[] b = new double[1];
@@ -53,9 +55,9 @@ public class BlasOps {
 		BLAS.getInstance().dgemm("N", "N", m, m, m, 1, aOrig, m, a, m, 0, c, m);
 		pInv = new DoubleMatrix(a);
 
-		System.out.println("Result is: " + pInv.reshape(m, m));
+		if (verbose) System.out.println("Result is: " + pInv.reshape(m, m));
 
-		System.out.println("BlasInvert Result is: " + blasInvert(new DoubleMatrix(a)));
+		if (verbose) System.out.println("BlasInvert Result is: " + blasInvert(new DoubleMatrix(a)));
 	}
 
 	public static DoubleMatrix blasInvert(DoubleMatrix myPrecision) {

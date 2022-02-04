@@ -46,6 +46,8 @@ public class BHTSne implements BarnesHutTSne {
 
 	protected final Distance distance = new EuclideanDistance();
 	protected volatile boolean abort = false;
+	
+	protected boolean verbose = false;
 
 	@Override
 	public double[][] tsne(TSneConfiguration config) {
@@ -87,7 +89,7 @@ public class BHTSne implements BarnesHutTSne {
 			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
 			Xin = pca.pca(Xin, parameterObject.getInitialDims());
 			D = parameterObject.getInitialDims();
-			System.out.println("X:Shape after PCA is = " + Xin.length + " x " + Xin[0].length);
+			if (verbose) System.out.println("X:Shape after PCA is = " + Xin.length + " x " + Xin[0].length);
 		}
 		
 		double [] X = flatten(Xin);	
@@ -95,11 +97,11 @@ public class BHTSne implements BarnesHutTSne {
 		int no_dims = parameterObject.getOutputDims();
 		
 		double [] Y = new double[N*no_dims];
-		System.out.println("X:Shape is = " + N + " x " + D);
+		if (verbose) System.out.println("X:Shape is = " + N + " x " + D);
 		// Determine whether we are using an exact algorithm
 		double perplexity = parameterObject.getPerplexity();
 		if(N - 1 < 3 * perplexity) { throw new IllegalArgumentException("Perplexity too large for the number of data points!\n"); }
-		System.out.printf("Using no_dims = %d, perplexity = %f, and theta = %f\n", no_dims, perplexity, parameterObject.getTheta());
+		if (verbose) System.out.printf("Using no_dims = %d, perplexity = %f, and theta = %f\n", no_dims, perplexity, parameterObject.getTheta());
 
 		// Set learning parameters
 		double total_time = 0;
@@ -114,7 +116,7 @@ public class BHTSne implements BarnesHutTSne {
 		for(int i = 0; i < N * no_dims; i++) gains[i] = 1.0;
 
 		// Normalize input data (to prevent numerical problems)
-		System.out.println("Computing input similarities...");
+		if (verbose) System.out.println("Computing input similarities...");
 		long start = System.currentTimeMillis();
 		//zeroMean(X, N, D);
 		double max_X = .0;
@@ -140,7 +142,7 @@ public class BHTSne implements BarnesHutTSne {
 			computeGaussianPerplexity(X, N, D, P, perplexity);
 
 			// Symmetrize input similarities
-			System.out.println("Symmetrizing...");
+			if (verbose) System.out.println("Symmetrizing...");
 			int nN = 0;
 			for(int n = 0; n < N; n++) {
 				int mN = 0;
@@ -184,8 +186,10 @@ public class BHTSne implements BarnesHutTSne {
 		for(int i = 0; i < N * no_dims; i++) Y[i] = ThreadLocalRandom.current().nextDouble() * 0.0001;
 
 		// Perform main training loop
-		if(exact) System.out.printf("Done in %4.2f seconds!\nLearning embedding...\n", (end - start) / 1000.0);
-		else System.out.printf("Done in %4.2f seconds (sparsity = %f)!\nLearning embedding...\n", (end - start) / 1000.0, (double) row_P[N] / ((double) N * (double) N));
+		if (verbose) {
+			if(exact) System.out.printf("Done in %4.2f seconds!\nLearning embedding...\n", (end - start) / 1000.0);
+			else System.out.printf("Done in %4.2f seconds (sparsity = %f)!\nLearning embedding...\n", (end - start) / 1000.0, (double) row_P[N] / ((double) N * (double) N));
+		}
 		start = System.currentTimeMillis();
 		for(int iter = 0; iter < parameterObject.getMaxIter() && !abort; iter++) {
 
@@ -216,17 +220,17 @@ public class BHTSne implements BarnesHutTSne {
 					err_string = "" + C;
 				}
 				if(iter == 0)
-					System.out.printf("Iteration %d: error is %s\n", iter + 1, err_string);
+					if (verbose) System.out.printf("Iteration %d: error is %s\n", iter + 1, err_string);
 				else {
 					total_time += (end - start) / 1000.0;
-					System.out.printf("Iteration %d: error is %s (50 iterations in %4.2f seconds)\n", iter, err_string, (end - start) / 1000.0);
+					if (verbose) System.out.printf("Iteration %d: error is %s (50 iterations in %4.2f seconds)\n", iter, err_string, (end - start) / 1000.0);
 				}
 				start = System.currentTimeMillis();
 			}
 		}
 		end = System.currentTimeMillis(); total_time += (end - start) / 1000.0;
 
-		System.out.printf("Fitting performed in %4.2f seconds.\n", total_time);
+		if (verbose) System.out.printf("Fitting performed in %4.2f seconds.\n", total_time);
 		return expand(Y,N,no_dims);
 	}
 
@@ -436,7 +440,9 @@ public class BHTSne implements BarnesHutTSne {
 
 	// Compute input similarities with a fixed perplexity using ball trees
 	void computeGaussianPerplexity(double [] X, int N, int D, int [] _row_P, int [] _col_P, double [] _val_P, double perplexity, int K) {
-		if(perplexity > K) System.out.println("Perplexity should be lower than K!");
+		if (verbose) {
+			if(perplexity > K) System.out.println("Perplexity should be lower than K!");
+		}
 
 		// Allocate the memory we need
 		/**_row_P = (int*)    malloc((N + 1) * sizeof(int));
@@ -472,12 +478,14 @@ public class BHTSne implements BarnesHutTSne {
 		//			printer.printTreeHorizontal(tree.getRoot());
 
 		// Loop over all points to find nearest neighbors
-		System.out.println("Building tree...");
+		if (verbose) System.out.println("Building tree...");
 		List<DataPoint> indices = new ArrayList<>();
 		List<Double> distances = new ArrayList<>();
 		for(int n = 0; n < N; n++) {
 
-			if(n % 10000 == 0) System.out.printf(" - point %d of %d\n", n, N);
+			if (verbose) {
+				if(n % 10000 == 0) System.out.printf(" - point %d of %d\n", n, N);
+			}
 
 			// Find nearest neighbors
 			indices.clear();

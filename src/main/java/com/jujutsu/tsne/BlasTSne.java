@@ -35,6 +35,8 @@ public class BlasTSne implements TSne {
 	MatrixOps mo = new MatrixOps();
 	protected volatile boolean abort = false;
 
+	private boolean verbose = false;
+
 	@Override
 	public double [][] tsne(TSneConfiguration config) {
 		double[][] X      = config.getXin();
@@ -45,14 +47,14 @@ public class BlasTSne implements TSne {
 		boolean use_pca   = config.usePca();
 		
 		String IMPLEMENTATION_NAME = this.getClass().getSimpleName();
-		System.out.println("X:Shape is = " + X.length + " x " + X[0].length);
-		System.out.println("Running " + IMPLEMENTATION_NAME + ".");
+		if (verbose) System.out.println("X:Shape is = " + X.length + " x " + X[0].length);
+		if (verbose) System.out.println("Running " + IMPLEMENTATION_NAME + ".");
 		// Initialize variables
 		if(use_pca && X[0].length > initial_dims && initial_dims > 0) {
 			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
 			X = pca.pca(X, initial_dims);
 			//X = BlasOps.pca(new DoubleMatrix(X), initial_dims).toArray2();
-			System.out.println("X:Shape after PCA is = " + X.length + " x " + X[0].length);
+			if (verbose) System.out.println("X:Shape after PCA is = " + X.length + " x " + X[0].length);
 		}
 		int n                    = X.length;
 		double momentum          = .5;
@@ -73,7 +75,7 @@ public class BlasTSne implements TSne {
 		P = P.mul(4);					// early exaggeration
 		P = P.max(1e-12);
 
-		System.out.println("Y:Shape is = " + Y.rows + " x " + Y.columns);
+		if (verbose) System.out.println("Y:Shape is = " + Y.rows + " x " + Y.columns);
 		
 		// Run iterations
 		for (int iter = 0; iter < max_iter && !abort; iter++) {
@@ -118,13 +120,15 @@ public class BlasTSne implements TSne {
 			Y = Y.sub(BlasOps.tile(Y.columnMeans(), n, 1));
 
 			// Compute current value of cost function
-			if (iter % 100 == 0)   {
-				DoubleMatrix logdivide = BlasOps.log(P.div(Q));
-				logdivide = BlasOps.replaceNaN(logdivide,0);
-				double C = P.mul(logdivide).sum();
-				System.out.println("Iteration " + iter + ": error is " + C);
-			} else if(iter % 10 == 0) {
-				System.out.println("Iteration " + iter);
+			if (verbose) {
+				if (iter % 100 == 0)   {
+					DoubleMatrix logdivide = BlasOps.log(P.div(Q));
+					logdivide = BlasOps.replaceNaN(logdivide,0);
+					double C = P.mul(logdivide).sum();
+					System.out.println("Iteration " + iter + ": error is " + C);
+				} else if(iter % 10 == 0) {
+					System.out.println("Iteration " + iter);
+				}
 			}
 
 			// Stop lying about P-values
@@ -158,10 +162,11 @@ public class BlasTSne implements TSne {
 		double [][] P       = fillMatrix(n,n,0.0);
 		double [] beta      = fillMatrix(n,n,1.0)[0];
 		double logU         = Math.log(perplexity);
-		System.out.println("Starting x2p...");
+		if (verbose) System.out.println("Starting x2p...");
 		for (int i = 0; i < n; i++) {
-			if (i % 500 == 0)
-				System.out.println("Computing P-values for point " + i + " of " + n + "...");
+			if (verbose) {
+				if (i % 500 == 0) System.out.println("Computing P-values for point " + i + " of " + n + "...");
+			}
 			double betamin = Double.NEGATIVE_INFINITY;
 			double betamax = Double.POSITIVE_INFINITY;
 			double [][] Di = getValuesFromRow(D, i,concatenate(range(0,i),range(i+1,n)));
@@ -202,7 +207,7 @@ public class BlasTSne implements TSne {
 		r.beta = beta;
 		double sigma = mean(sqrt(scalarInverse(beta)));
 
-		System.out.println("Mean value of sigma: " + sigma);
+		if (verbose) System.out.println("Mean value of sigma: " + sigma);
 
 		return r;
 	}

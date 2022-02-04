@@ -16,6 +16,8 @@ public class SPTree {
 	protected int size;
 	protected int cum_size;
 	
+	protected boolean verbose = false;
+
 	 // Axis-aligned bounding box stored as a center with half-dimensions to represent the boundaries of this quad tree
     Cell boundary;
     

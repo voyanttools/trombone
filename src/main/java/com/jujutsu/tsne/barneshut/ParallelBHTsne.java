@@ -204,7 +204,9 @@ public class ParallelBHTsne extends BHTSne {
 	@Override
 	// Compute input similarities with a fixed perplexity using ball trees
 	void computeGaussianPerplexity(double [] X, int N, int D, int [] _row_P, int [] _col_P, double [] _val_P, double perplexity, int K) {
-		if(perplexity > K) System.out.println("Perplexity should be lower than K!");
+		if (verbose) {
+			if(perplexity > K) System.out.println("Perplexity should be lower than K!");
+		}
 
 		// Allocate the memory we need
 		/**_row_P = (int*)    malloc((N + 1) * sizeof(int));

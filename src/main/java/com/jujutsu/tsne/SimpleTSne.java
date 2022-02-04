@@ -47,6 +47,8 @@ public class SimpleTSne implements TSne {
 	MatrixOps mo = new MatrixOps();
 	protected volatile boolean abort = false;
 
+	private boolean verbose = false;
+
 	@Override
 	public double [][] tsne(TSneConfiguration config) {
 		double[][] X      = config.getXin();
@@ -57,13 +59,13 @@ public class SimpleTSne implements TSne {
 		boolean use_pca   = config.usePca();
 		
 		String IMPLEMENTATION_NAME = this.getClass().getSimpleName();
-		System.out.println("X:Shape is = " + X.length + " x " + X[0].length);
-		System.out.println("Running " + IMPLEMENTATION_NAME + ".");
+		if (verbose) System.out.println("X:Shape is = " + X.length + " x " + X[0].length);
+		if (verbose) System.out.println("Running " + IMPLEMENTATION_NAME + ".");
 		// Initialize variables
 		if(use_pca && X[0].length > initial_dims && initial_dims > 0) {
 			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
 			X = pca.pca(X, initial_dims);
-			System.out.println("X:Shape after PCA is = " + X.length + " x " + X[0].length);
+			if (verbose) System.out.println("X:Shape after PCA is = " + X.length + " x " + X[0].length);
 		}
 
 		int n = X.length;
@@ -84,7 +86,7 @@ public class SimpleTSne implements TSne {
 		P = scalarMult(P , 4);					// early exaggeration
 		P = maximum(P, 1e-12);
 
-		System.out.println("Y:Shape is = " + Y.length + " x " + Y[0].length);
+		if (verbose) System.out.println("Y:Shape is = " + Y.length + " x " + Y[0].length);
 		
 		// Run iterations
 		for (int iter = 0; iter < max_iter && !abort; iter++) {
@@ -120,13 +122,15 @@ public class SimpleTSne implements TSne {
 			Y = mo.minus(Y , tile(mean(Y, 0), n, 1));
 
 			// Compute current value of cost function
-			if ((iter % 100 == 0))   {
-				double [][] logdivide = log(scalarDivide(P , Q));
-				logdivide = replaceNaN(logdivide,0);
-				double C = sum(mo.scalarMultiply(P , logdivide));
-				System.out.println("Iteration " + (iter + 1) + ": error is " + C);
-			} else if((iter + 1) % 10 == 0) {
-				System.out.println("Iteration " + (iter + 1));
+			if (verbose) {
+				if ((iter % 100 == 0))   {
+					double [][] logdivide = log(scalarDivide(P , Q));
+					logdivide = replaceNaN(logdivide,0);
+					double C = sum(mo.scalarMultiply(P , logdivide));
+					System.out.println("Iteration " + (iter + 1) + ": error is " + C);
+				} else if((iter + 1) % 10 == 0) {
+					System.out.println("Iteration " + (iter + 1));
+				}
 			}
 
 			// Stop lying about P-values
@@ -159,10 +163,11 @@ public class SimpleTSne implements TSne {
 		double [][] P       = fillMatrix(n,n,0.0);
 		double [] beta      = fillMatrix(n,n,1.0)[0];
 		double logU         = Math.log(perplexity);
-		System.out.println("Starting x2p...");
+		if (verbose) System.out.println("Starting x2p...");
 		for (int i = 0; i < n; i++) {
-			if (i % 500 == 0)
-				System.out.println("Computing P-values for point " + i + " of " + n + "...");
+			if (verbose) {
+				if (i % 500 == 0) System.out.println("Computing P-values for point " + i + " of " + n + "...");
+			}
 			double betamin = Double.NEGATIVE_INFINITY;
 			double betamax = Double.POSITIVE_INFINITY;
 			double [][] Di = getValuesFromRow(D, i,concatenate(range(0,i),range(i+1,n)));
@@ -203,7 +208,7 @@ public class SimpleTSne implements TSne {
 		r.beta = beta;
 		double sigma = mean(sqrt(scalarInverse(beta)));
 
-		System.out.println("Mean value of sigma: " + sigma);
+		if (verbose) System.out.println("Mean value of sigma: " + sigma);
 
 		return r;
 	}

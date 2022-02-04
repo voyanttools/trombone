@@ -69,6 +69,8 @@ public class FastTSne implements TSne {
 	MatrixOps mo = new MatrixOps();
 	protected volatile boolean abort = false;
 
+	protected boolean verbose = false;
+
 	public static double[][] readBinaryDoubleMatrix(int rows, int columns, String fn) throws FileNotFoundException, IOException {
 		File matrixFile = new File(fn);
 		double [][] matrix = new double[rows][columns];
@@ -93,15 +95,15 @@ public class FastTSne implements TSne {
 		boolean use_pca   = config.usePca();
 		
 		String IMPLEMENTATION_NAME = this.getClass().getSimpleName();
-		System.out.println("X:Shape is = " + X.length + " x " + X[0].length);
-		System.out.println("Running " + IMPLEMENTATION_NAME + ".");
+		if (verbose) System.out.println("X:Shape is = " + X.length + " x " + X[0].length);
+		if (verbose) System.out.println("Running " + IMPLEMENTATION_NAME + ".");
 		long end = System.currentTimeMillis();
 		long start = System.currentTimeMillis();
 		// Initialize variables
 		if(use_pca && X[0].length > initial_dims && initial_dims > 0) {
 			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
 			X = pca.pca(X, initial_dims);
-			System.out.println("X:Shape after PCA is = " + X.length + " x " + X[0].length);
+			if (verbose) System.out.println("X:Shape after PCA is = " + X.length + " x " + X[0].length);
 		}
 		int n = X.length;
 		double momentum = .5;
@@ -131,7 +133,7 @@ public class FastTSne implements TSne {
 		scale(4.0,P);					// early exaggeration
 		maximize(P, 1e-12);
 		
-		System.out.println("Y:Shape is = " + Y.getNumRows() + " x " + Y.getNumCols());
+		if (verbose) System.out.println("Y:Shape is = " + Y.getNumRows() + " x " + Y.getNumCols());
 
 		DenseMatrix64F sqed  = new DenseMatrix64F(Y.numRows,Y.numCols);
 		DenseMatrix64F sum_Y = new DenseMatrix64F(1,Y.numRows);
@@ -211,14 +213,14 @@ public class FastTSne implements TSne {
 				replaceNaN(logdivide,Double.MIN_VALUE);
 				double C = elementSum(logdivide);
 				end = System.currentTimeMillis();
-				System.out.printf("Iteration %d: error is %f (50 iterations in %4.2f seconds)\n", iter, C, (end - start) / 1000.0);
+				if (verbose) System.out.printf("Iteration %d: error is %f (50 iterations in %4.2f seconds)\n", iter, C, (end - start) / 1000.0);
 				if(C < 0) {
-					System.err.println("Warning: Error is negative, this is usually a very bad sign!");
+					if (verbose) System.err.println("Warning: Error is negative, this is usually a very bad sign!");
 				}
 				start = System.currentTimeMillis();
 			} else if(iter % 10 == 0) {
 				end = System.currentTimeMillis();
-				System.out.printf("Iteration %d: (10 iterations in %4.2f seconds)\n", iter, (end - start) / 1000.0);
+				if (verbose) System.out.printf("Iteration %d: (10 iterations in %4.2f seconds)\n", iter, (end - start) / 1000.0);
 				start = System.currentTimeMillis();
 			}
 
@@ -256,10 +258,11 @@ public class FastTSne implements TSne {
 		double [][] P       = fillMatrix(n,n,0.0);
 		double [] beta      = fillMatrix(n,n,1.0)[0];
 		double logU         = Math.log(perplexity);
-		System.out.println("Starting x2p...");
+		if (verbose) System.out.println("Starting x2p...");
 		for (int i = 0; i < n; i++) {
-			if (i % 500 == 0)
-				System.out.println("Computing P-values for point " + i + " of " + n + "...");
+			if (verbose) {
+				if (i % 500 == 0) System.out.println("Computing P-values for point " + i + " of " + n + "...");
+			}
 			double betamin = Double.NEGATIVE_INFINITY;
 			double betamax = Double.POSITIVE_INFINITY;
 			double [][] Di = getValuesFromRow(D, i,concatenate(range(0,i),range(i+1,n)));
@@ -300,7 +303,7 @@ public class FastTSne implements TSne {
 		r.beta = beta;
 		double sigma = mean(sqrt(scalarInverse(beta)));
 
-		System.out.println("Mean value of sigma: " + sigma);
+		if (verbose) System.out.println("Mean value of sigma: " + sigma);
 
 		return r;
 	}

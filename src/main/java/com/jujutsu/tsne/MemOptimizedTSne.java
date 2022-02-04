@@ -58,16 +58,16 @@ public class MemOptimizedTSne extends FastTSne {
 		
 
 		String IMPLEMENTATION_NAME = this.getClass().getSimpleName();
-		System.out.println("X:Shape is = " + X.length + " x " + X[0].length);
-		System.out.println("Running " + IMPLEMENTATION_NAME + ".");
+		if (verbose) System.out.println("X:Shape is = " + X.length + " x " + X[0].length);
+		if (verbose) System.out.println("Running " + IMPLEMENTATION_NAME + ".");
 		long end = System.currentTimeMillis();
 		long start = System.currentTimeMillis();
 		// Initialize variables
 		if(use_pca && X[0].length > initial_dims && initial_dims > 0) {
 			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
 			X = pca.pca(X, initial_dims);
-			System.out.println("X:Shape after PCA is = " + X.length + " x " + X[0].length);
-			System.out.println(MatrixOps.doubleArrayToPrintString(X,10,10));
+			if (verbose) System.out.println("X:Shape after PCA is = " + X.length + " x " + X[0].length);
+			if (verbose) System.out.println(MatrixOps.doubleArrayToPrintString(X,10,10));
 		}
 		int n = X.length;
 		double momentum = .5;
@@ -95,8 +95,8 @@ public class MemOptimizedTSne extends FastTSne {
 		scale(4.0,P);					// early exaggeration
 		maximize(P, 1e-12);
 		
-		System.out.println("Using perplexity: " + perplexity);
-		System.out.println("Y:Shape is = " + Y.getNumRows() + " x " + Y.getNumCols());
+		if (verbose) System.out.println("Using perplexity: " + perplexity);
+		if (verbose) System.out.println("Y:Shape is = " + Y.getNumRows() + " x " + Y.getNumCols());
 
 		DenseMatrix64F sqed  = new DenseMatrix64F(Y.numRows,Y.numCols);  // sqed = n x n
 		DenseMatrix64F sum_Y = new DenseMatrix64F(1,Y.numRows);
@@ -174,14 +174,14 @@ public class MemOptimizedTSne extends FastTSne {
 				replaceNaN(Psized,Double.MIN_VALUE);
 				double C = elementSum(Psized);
 				end = System.currentTimeMillis();
-				System.out.printf("Iteration %d: error is %f (50 iterations in %4.2f seconds)\n", iter, C, (end - start) / 1000.0);
+				if (verbose) System.out.printf("Iteration %d: error is %f (50 iterations in %4.2f seconds)\n", iter, C, (end - start) / 1000.0);
 				if(C < 0) {
-					System.err.println("Warning: Error is negative, this is usually a very bad sign!");
+					if (verbose) System.err.println("Warning: Error is negative, this is usually a very bad sign!");
 				}
 				start = System.currentTimeMillis();
 			} else if(iter % 10 == 0) {
 				end = System.currentTimeMillis();
-				System.out.printf("Iteration %d: (10 iterations in %4.2f seconds)\n", iter, (end - start) / 1000.0);
+				if (verbose) System.out.printf("Iteration %d: (10 iterations in %4.2f seconds)\n", iter, (end - start) / 1000.0);
 				start = System.currentTimeMillis();
 			}
 
