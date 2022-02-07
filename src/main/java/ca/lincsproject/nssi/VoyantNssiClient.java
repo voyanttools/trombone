@@ -26,6 +26,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.voyanttools.trombone.model.DocumentEntity;
+import org.voyanttools.trombone.model.EntityType;
 
 public class VoyantNssiClient {
 
@@ -241,6 +243,34 @@ public class VoyantNssiClient {
 		});
 		
 		return nssiResult;
+	}
+
+	
+	private static List<DocumentEntity> jsonToDocumentEntities(JSONObject json) {
+		List<DocumentEntity> entities = new ArrayList<DocumentEntity>();
+		
+		JSONArray data = json.getJSONArray("data");
+		
+		data.forEach(item -> {
+			JSONObject obj = (JSONObject) item;
+			
+			String entity = obj.getString("entity");
+			String classification = obj.getString("classification");
+			
+			JSONArray selections = obj.getJSONArray("selections");
+			int rawFreq = selections.length();
+			selections.forEach(item2 -> {
+				JSONObject obj2 = (JSONObject) item2;
+				String lemma = obj2.getString("lemma");
+				
+				JSONObject selection = obj2.getJSONObject("selection");
+				int start = selection.getInt("start");
+				int end = selection.getInt("end");
+				entities.add(new DocumentEntity(-1, lemma, entity, EntityType.getForgivingly(classification), rawFreq));
+			});
+		});
+		
+		return entities;
 	}
 	
 	
