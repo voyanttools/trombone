@@ -29,7 +29,7 @@ import org.json.JSONObject;
 
 public class VoyantNssiClient {
 
-	public enum JobStatus {
+	public static enum JobStatus {
 		IN_PROGRESS, READY, FAILED, CANCELLED
 	}
 	
@@ -59,19 +59,19 @@ public class VoyantNssiClient {
 			clientSecret = nssiConfig[0];
 		}
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost("https://keycloak.stage.lincsproject.ca/auth/realms/lincs/protocol/openid-connect/token");
+			final HttpPost httpPost = new HttpPost("https://keycloak.stage.lincsproject.ca/auth/realms/lincs/protocol/openid-connect/token");
 
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("client_id", "voyant"));
-            params.add(new BasicNameValuePair("client_secret", clientSecret));
-            params.add(new BasicNameValuePair("grant_type", "client_credentials"));
-            httpPost.setEntity(new UrlEncodedFormEntity(params));
-            
-            CloseableHttpResponse response = httpClient.execute(httpPost);
-            JSONObject json = getJSONResponse(response);
-            
-            VoyantNssiClient.accessToken = json.getString("access_token");
-        }
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("client_id", "voyant"));
+			params.add(new BasicNameValuePair("client_secret", clientSecret));
+			params.add(new BasicNameValuePair("grant_type", "client_credentials"));
+			httpPost.setEntity(new UrlEncodedFormEntity(params));
+			
+			CloseableHttpResponse response = httpClient.execute(httpPost);
+			JSONObject json = getJSONResponse(response);
+			
+			VoyantNssiClient.accessToken = json.getString("access_token");
+		}
 	}
 	
 	public static int submitJob(String text) throws IOException {
@@ -81,39 +81,39 @@ public class VoyantNssiClient {
 		
 		if (debug) System.out.println("submitting job");
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost("https://api.nssi.stage.lincsproject.ca/api/jobs");
-            httpPost.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
-            
-            JSONObject jsonBody = new JSONObject();
-            jsonBody.put("projectName", PROJECT_NAME);
-            jsonBody.put("format", "text/plain");
-            jsonBody.put("workflow", WORKFLOW);
-            jsonBody.put("document", text);
-            String input = jsonBody.toString();
-            
-            StringEntity body = new StringEntity(input, "UTF-8");
-            httpPost.setEntity(body);
-            httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-type", "application/json; charset=UTF-8");
-            
-            CloseableHttpResponse response = httpClient.execute(httpPost);
-            try {
-            	JSONObject json = getJSONResponse(response);
-            
-	            int jobId = json.getInt("jobId");
-	            
-	            float estimated = json.getFloat("estimatedMinUntilRun");
-	            int millisecondsUntilRun = Math.round(estimated * 60 * 1000);
-	            
-	            return jobId;
-            } catch (HttpResponseException e) {
-            	if (e.getStatusCode() == 401) {
-            		setAccessToken();
-            		return submitJob(text);
-            	} else {
-            		throw new IOException("Error submitting job. Status code: "+e.getStatusCode());
-            	}
-            }
+			final HttpPost httpPost = new HttpPost("https://api.nssi.stage.lincsproject.ca/api/jobs");
+			httpPost.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
+			
+			JSONObject jsonBody = new JSONObject();
+			jsonBody.put("projectName", PROJECT_NAME);
+			jsonBody.put("format", "text/plain");
+			jsonBody.put("workflow", WORKFLOW);
+			jsonBody.put("document", text);
+			String input = jsonBody.toString();
+			
+			StringEntity body = new StringEntity(input, "UTF-8");
+			httpPost.setEntity(body);
+			httpPost.setHeader("Accept", "application/json");
+			httpPost.setHeader("Content-type", "application/json; charset=UTF-8");
+			
+			CloseableHttpResponse response = httpClient.execute(httpPost);
+			try {
+				JSONObject json = getJSONResponse(response);
+			
+				int jobId = json.getInt("jobId");
+				
+				float estimated = json.getFloat("estimatedMinUntilRun");
+				int millisecondsUntilRun = Math.round(estimated * 60 * 1000);
+				
+				return jobId;
+			} catch (HttpResponseException e) {
+				if (e.getStatusCode() == 401) {
+					setAccessToken();
+					return submitJob(text);
+				} else {
+					throw new IOException("Error submitting job. Status code: "+e.getStatusCode());
+				}
+			}
 		}
 	}
 	
@@ -144,149 +144,156 @@ public class VoyantNssiClient {
 	public static JobStatus getJobStatus(int jobId) throws IOException {
 		if (debug) System.out.println("checking job: "+jobId);
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet("https://api.nssi.stage.lincsproject.ca/api/jobs/"+jobId);
-            httpGet.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
-            
-            CloseableHttpResponse response = httpClient.execute(httpGet);
-            try {
-	            JSONObject json = getJSONResponse(response);
-	            
-	            String status = json.getString("status");
-	            if (debug) System.out.println(status);
-	            
-	            for (JobStatus js : JobStatus.values()) {
-	            	if (status.equals(js.name())) {
-	            		return js;
-	            	}
-	            }
-	            return JobStatus.FAILED;
-            } catch (HttpResponseException e) {
-            	if (e.getStatusCode() == 401) {
-            		setAccessToken();
-            		return getJobStatus(jobId);
-            	} else {
-            		throw new IOException("Error getting job status. Status code: "+e.getStatusCode());
-            	}
-            }
+			final HttpGet httpGet = new HttpGet("https://api.nssi.stage.lincsproject.ca/api/jobs/"+jobId);
+			httpGet.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
+			
+			CloseableHttpResponse response = httpClient.execute(httpGet);
+			try {
+				JSONObject json = getJSONResponse(response);
+				
+				String status = json.getString("status");
+				if (debug) System.out.println(status);
+				
+				for (JobStatus js : JobStatus.values()) {
+					if (status.equals(js.name())) {
+						return js;
+					}
+				}
+				return JobStatus.FAILED;
+			} catch (HttpResponseException e) {
+				if (e.getStatusCode() == 401) {
+					setAccessToken();
+					return getJobStatus(jobId);
+				} else {
+					throw new IOException("Error getting job status. Status code: "+e.getStatusCode());
+				}
+			}
 		}
 	}
 	
 	public static boolean cancelJob(int jobId) throws IOException {
 		if (debug) System.out.println("cancelling job: "+jobId);
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpPut httpPut = new HttpPut("https://api.nssi.stage.lincsproject.ca/api/jobs/"+jobId+"/actions/cancel");
-            httpPut.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
-            
-            CloseableHttpResponse response = httpClient.execute(httpPut);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode == 204) {
-            	if (debug) System.out.println("job cancelled: "+jobId);
-            	return true;
-            } else if (statusCode == 401) {
-            	setAccessToken();
-            	return cancelJob(jobId);
-            } else {
-            	if (debug) System.out.println("error cancelling job: "+jobId+", statusCode: "+statusCode);
-            	return false;
-            }
+			final HttpPut httpPut = new HttpPut("https://api.nssi.stage.lincsproject.ca/api/jobs/"+jobId+"/actions/cancel");
+			httpPut.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
+			
+			CloseableHttpResponse response = httpClient.execute(httpPut);
+			int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode == 204) {
+				if (debug) System.out.println("job cancelled: "+jobId);
+				return true;
+			} else if (statusCode == 401) {
+				setAccessToken();
+				return cancelJob(jobId);
+			} else {
+				if (debug) System.out.println("error cancelling job: "+jobId+", statusCode: "+statusCode);
+				return false;
+			}
 		}
 	}
 	
 	public static NssiResult getJobResults(int jobId) throws IOException {
 		if (debug) System.out.println("getting results: "+jobId);
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet("https://api.nssi.stage.lincsproject.ca/api/results/"+WORKFLOW+"/"+jobId);
-            httpGet.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
-            
-            CloseableHttpResponse response = httpClient.execute(httpGet);
-            try {
-	            JSONObject json = getJSONResponse(response);
-	            
-	            NssiResult nssiResult = new NssiResult();
-	            
-	            JSONArray data = json.getJSONArray("data");
-	            
-	            data.forEach(item -> {
-	            	JSONObject obj = (JSONObject) item;
-	            	
-	            	String entity = obj.getString("entity");
-	            	String classification = obj.getString("classification");
-	            	
-	            	JSONArray selections = obj.getJSONArray("selections");
-	            	selections.forEach(item2 -> {
-	            		JSONObject obj2 = (JSONObject) item2;
-	            		String lemma = obj2.getString("lemma");
-	            		
-	            		JSONObject selection = obj2.getJSONObject("selection");
-	            		int start = selection.getInt("start");
-	            		int end = selection.getInt("end");
-	            		
-	            		nssiResult.add(entity, classification, lemma, start, end);
-	            	});
-	            });
-	            
-	            return nssiResult;
-            } catch (HttpResponseException e) {
-            	if (e.getStatusCode() == 401) {
-            		setAccessToken();
-            		return getJobResults(jobId);
-            	} else {
-            		throw new IOException("Error getting job results. Status code: "+e.getStatusCode());
-            	}
-            }
+			final HttpGet httpGet = new HttpGet("https://api.nssi.stage.lincsproject.ca/api/results/"+WORKFLOW+"/"+jobId);
+			httpGet.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
+			
+			CloseableHttpResponse response = httpClient.execute(httpGet);
+			try {
+				JSONObject json = getJSONResponse(response);
+				
+				NssiResult nssiResult = jsonToNssiResult(json);
+				
+				return nssiResult;
+			} catch (HttpResponseException e) {
+				if (e.getStatusCode() == 401) {
+					setAccessToken();
+					return getJobResults(jobId);
+				} else {
+					throw new IOException("Error getting job results. Status code: "+e.getStatusCode());
+				}
+			}
 		}
 	}
+	
+	private static NssiResult jsonToNssiResult(JSONObject json) {
+		NssiResult nssiResult = new NssiResult();
+		
+		JSONArray data = json.getJSONArray("data");
+		
+		data.forEach(item -> {
+			JSONObject obj = (JSONObject) item;
+			
+			String entity = obj.getString("entity");
+			String classification = obj.getString("classification");
+			
+			JSONArray selections = obj.getJSONArray("selections");
+			selections.forEach(item2 -> {
+				JSONObject obj2 = (JSONObject) item2;
+				String lemma = obj2.getString("lemma");
+				
+				JSONObject selection = obj2.getJSONObject("selection");
+				int start = selection.getInt("start");
+				int end = selection.getInt("end");
+				
+				nssiResult.add(entity, classification, lemma, start, end);
+			});
+		});
+		
+		return nssiResult;
+	}
+	
 	
 	private static JSONObject getJSONResponse(CloseableHttpResponse response) throws HttpResponseException, IOException {
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (debug) System.out.println("status: "+statusCode);
 		if (statusCode >= 400) {
 			throw new HttpResponseException(statusCode, "Error getting response.");
-        } else if (statusCode == 204) {
-        	if (debug) System.out.println("no response");
-        	return null;
-        } else {
-	        HttpEntity entity = response.getEntity();
-	        Header encodingHeader = entity.getContentEncoding();
-	        
-	        Charset encoding = encodingHeader == null ? StandardCharsets.UTF_8 : Charsets.toCharset(encodingHeader.getValue());
-	        
-	        String jsonString = EntityUtils.toString(entity, encoding);
-//	        if (debug) System.out.println("response: "+jsonString);
-	        
-	        try {
-	        	JSONObject json = new JSONObject(jsonString);
-	        	return json;
-	        } catch (JSONException e) {
-	        	throw new IOException(e.getMessage());
-	        }
-        }
+		} else if (statusCode == 204) {
+			if (debug) System.out.println("no response");
+			return null;
+		} else {
+			HttpEntity entity = response.getEntity();
+			Header encodingHeader = entity.getContentEncoding();
+			
+			Charset encoding = encodingHeader == null ? StandardCharsets.UTF_8 : Charsets.toCharset(encodingHeader.getValue());
+			
+			String jsonString = EntityUtils.toString(entity, encoding);
+			if (debug) System.out.println("response: "+jsonString);
+			
+			try {
+				JSONObject json = new JSONObject(jsonString);
+				return json;
+			} catch (JSONException e) {
+				throw new IOException(e.getMessage());
+			}
+		}
 	}
 	
 	private static String[] readConfiguration() {
-        Properties prop = new Properties();
-        InputStream input = null;
-        String[] nssiConfig = new String[1];
+		Properties prop = new Properties();
+		InputStream input = null;
+		String[] nssiConfig = new String[1];
 
-        try {
-            input = VoyantNssiClient.class.getResourceAsStream("/ca/lincsproject/nssi/config.properties");
-            prop.load(input);
-            nssiConfig[0] = prop.getProperty("client_secret");
+		try {
+			input = VoyantNssiClient.class.getResourceAsStream("/ca/lincsproject/nssi/config.properties");
+			prop.load(input);
+			nssiConfig[0] = prop.getProperty("client_secret");
 
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        
-        return nssiConfig;
-    }
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return nssiConfig;
+	}
 	
 	public static void printResults(NssiResult nssiResult) {
 		for (NssiResult nr : nssiResult) {
