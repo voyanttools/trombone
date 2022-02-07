@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.CorpusEntity;
@@ -56,10 +59,19 @@ public class EntityCollocationsGraph extends AbstractTerms {
 		doRun(corpusMapper, stopwords);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void doRun(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
+		parameters.setParameter("includeEntities", "true");
 		DocumentEntities documentEntitiesTool = new DocumentEntities(storage, parameters);
 		documentEntitiesTool.run(corpusMapper);
-		List<DocumentEntity> documentEntities = documentEntitiesTool.getDocumentEntities();
+		List<DocumentEntity> documentEntities;
+		try {
+			documentEntities = (List<DocumentEntity>) documentEntitiesTool.getFuture().get(120, TimeUnit.SECONDS);
+			Map<String, String> status = documentEntitiesTool.getStatus();
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			e.printStackTrace();
+			throw new IOException("DocumentEntities failed!");
+		}
 		
 		
 		// organize by document and track counts

@@ -52,12 +52,8 @@ public class OpenNlpAnnotator implements NlpAnnotator {
 	}
 
 	@Override
-	public List<DocumentEntity> getEntities(CorpusMapper corpusMapper, IndexedDocument indexedDocument,
-			Collection<EntityType> types, FlexibleParameters parameters) throws IOException {
-		if (types!=null && types.size()==1 && types.contains(EntityType.location)) {
-			return getLocations(corpusMapper, indexedDocument, parameters);
-		}
-		return null;
+	public List<DocumentEntity> getEntities(CorpusMapper corpusMapper, IndexedDocument indexedDocument, FlexibleParameters parameters) throws IOException {
+		return getLocations(corpusMapper, indexedDocument, parameters);
 	}
 	
 	private List<DocumentEntity> getLocations(CorpusMapper corpusMapper, IndexedDocument indexedDocument, FlexibleParameters parameters) throws IOException {

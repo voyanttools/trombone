@@ -9,6 +9,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.CorpusEntity;
@@ -45,14 +48,21 @@ public class CorpusEntities extends AbstractTerms {
 	/* (non-Javadoc)
 	 * @see org.voyanttools.trombone.tool.corpus.AbstractCorpusTool#run(org.voyanttools.trombone.lucene.CorpusMapper)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run(CorpusMapper corpusMapper) throws IOException {
+		parameters.setParameter("includeEntities", "true");
 		DocumentEntities documentEntities = new DocumentEntities(storage, parameters);
 		documentEntities.run(corpusMapper);
-		corpusEntities = getCorpusEntities(documentEntities.getDocumentEntities());
+		try {
+			List<DocumentEntity> docEnts = (List<DocumentEntity>) documentEntities.getFuture().get(120, TimeUnit.SECONDS);
+			corpusEntities = getCorpusEntities(docEnts);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	List<CorpusEntity> getCorpusEntities(List<DocumentEntity> documentEntities) {
+	public List<CorpusEntity> getCorpusEntities(List<DocumentEntity> documentEntities) {
 		
 		// build map based on terms and types
 		Map<String, List<DocumentEntity>> map = new HashMap<String, List<DocumentEntity>>();

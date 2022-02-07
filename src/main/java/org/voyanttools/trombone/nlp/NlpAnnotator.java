@@ -19,8 +19,6 @@ import org.voyanttools.trombone.util.FlexibleParameters;
  */
 public interface NlpAnnotator {
 
-	List<DocumentEntity> getEntities(CorpusMapper corpusMapper,
-			IndexedDocument indexedDocument, Collection<EntityType> types, FlexibleParameters parameters)
-			throws IOException;
+	List<DocumentEntity> getEntities(CorpusMapper corpusMapper, IndexedDocument indexedDocument, FlexibleParameters parameters) throws IOException;
 	
 }

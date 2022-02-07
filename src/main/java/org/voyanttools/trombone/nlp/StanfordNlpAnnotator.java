@@ -57,16 +57,15 @@ public class StanfordNlpAnnotator implements NlpAnnotator {
 	}
 
 	@Override
-	public List<DocumentEntity> getEntities(CorpusMapper corpusMapper, IndexedDocument indexedDocument, Collection<EntityType> types, FlexibleParameters parameters) throws IOException {
+	public List<DocumentEntity> getEntities(CorpusMapper corpusMapper, IndexedDocument indexedDocument, FlexibleParameters parameters) throws IOException {
 		
-		List<CoreMap> entitiesMap = getEntities(indexedDocument.getDocumentString(), types);
+		List<CoreMap> entitiesMap = getEntities(indexedDocument.getDocumentString());
 		
 		// organize by term-name so that we can group together
 		Map<String, List<CoreMap>> stringEntitiesMap = new HashMap<String, List<CoreMap>>();
 		for (CoreMap entity : entitiesMap) {
 			String term = entity.get(TextAnnotation.class);
 			EntityType type = EntityType.getForgivingly(entity.get(NamedEntityTagAnnotation.class));
-			if (types.isEmpty()==false && types.contains(type)==false) {continue;}
 			String key = term+" -- " +type.name(); 
 			if (!stringEntitiesMap.containsKey(key)) {
 				stringEntitiesMap.put(key, new ArrayList<CoreMap>());
@@ -74,75 +73,34 @@ public class StanfordNlpAnnotator implements NlpAnnotator {
 			stringEntitiesMap.get(key).add(entity);
 		}
 		
-		Map<Integer, Integer> offsetToTokenPositionMap = parameters.getParameterBooleanValue("withDistributions") ? getOffsetsToPositionsMap(corpusMapper, indexedDocument, entitiesMap) : null;
-		
 		List<DocumentEntity> entities = new ArrayList<DocumentEntity>();
 		int corpusDocumentIndex = corpusMapper.getCorpus().getDocumentPosition(indexedDocument.getId());
 		for (Map.Entry<String, List<CoreMap>> stringEntitiesMapEntry : stringEntitiesMap.entrySet()) {
 			List<CoreMap> coreMaps = stringEntitiesMapEntry.getValue();
-			List<Integer> positions = new ArrayList<Integer>();
-			if (offsetToTokenPositionMap!=null) {
-				for (CoreMap entity : coreMaps) {
-					int startOffset = entity.get(CharacterOffsetBeginAnnotation.class);
-					Integer position = offsetToTokenPositionMap.get(startOffset);
-					if (position!=null) {positions.add(position);}
-				}
+			Set<Integer> offsets = new HashSet<Integer>();
+			for (CoreMap entity : coreMaps) {
+				int startOffset = entity.get(CharacterOffsetBeginAnnotation.class);
+				offsets.add(startOffset);
 			}
 			CoreMap entity = coreMaps.get(0);
 			String term = entity.get(TextAnnotation.class);
 			String normalized = entity.get(NormalizedNamedEntityTagAnnotation.class);
 			EntityType type = EntityType.getForgivingly(entity.get(NamedEntityTagAnnotation.class));
-			DocumentEntity e = new DocumentEntity(corpusDocumentIndex, term, normalized, type, positions.isEmpty() ? coreMaps.size() : positions.size(),  positions.isEmpty() ? null : ArrayUtils.toPrimitive(positions.toArray(new Integer[0])), null);
+			DocumentEntity e = new DocumentEntity(corpusDocumentIndex, term, normalized, type, coreMaps.size());
+			e.setOffsets(offsets.stream().mapToInt(Integer::intValue).toArray());
 			entities.add(e);
 		}
 		
 		return entities;
 	}
-	
-	private Map<Integer, Integer> getOffsetsToPositionsMap(CorpusMapper corpusMapper, IndexedDocument indexedDocument, List<CoreMap> entitiesMap) throws IOException {
-		// go through and collect offsets to keep
-		Set<Integer> offsets = new HashSet<Integer>();
-		for (CoreMap entity : entitiesMap) {
-			offsets.add(entity.get(CharacterOffsetBeginAnnotation.class));
-		}
-		
-		// go through vector to collect tokens of interest
-		Map<Integer, Integer> offsetToTokenPositionMap = new HashMap<Integer, Integer>();
-		int luceneDoc = corpusMapper.getLuceneIdFromDocumentId(indexedDocument.getId());
-		// TODO: check that we can assume that offsets align regardless of TokenType
-		Terms terms = corpusMapper.getLeafReader().getTermVector(luceneDoc, TokenType.lexical.name()); 
-		TermsEnum termsEnum = terms.iterator();
-		while(true) {
-			BytesRef term = termsEnum.next();
-			if (term!=null) {
-				PostingsEnum postingsEnum = termsEnum.postings(null, PostingsEnum.OFFSETS);
-				if (postingsEnum!=null) {
-					postingsEnum.nextDoc();
-					for (int i=0, len = postingsEnum.freq(); i<len; i++) {
-						int pos = postingsEnum.nextPosition();
-						int offset = postingsEnum.startOffset();
-						if (offsets.contains(offset)) {
-							offsetToTokenPositionMap.put(offset, pos);
-						}
-					}
-				}
-			}
-			else {break;}
-		}
-		return offsetToTokenPositionMap;
-		
-	}
 
-	private List<CoreMap> getEntities(String text, Collection<EntityType> types) {
+	private List<CoreMap> getEntities(String text) {
 		
 		List<CoreMap> sentences = getSentences(text);
 		List<CoreMap> entities = new ArrayList<CoreMap>();
 	    for(CoreMap sentence: sentences) {
 	    	for (CoreMap entity : sentence.get(MentionsAnnotation.class)) {
-	    		EntityType type = EntityType.getForgivingly(entity.get(NamedEntityTagAnnotation.class));
-	    		if (type!=EntityType.unknown && (types.isEmpty() || types.contains(type))) {
-	    			entities.add(entity);
-	    		}
+	    		entities.add(entity);
 	    	}
 	    }
 	    return entities;
