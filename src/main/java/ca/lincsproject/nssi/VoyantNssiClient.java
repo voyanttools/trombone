@@ -45,10 +45,14 @@ public class VoyantNssiClient {
 	
 	private static boolean debug = false;
 	
+	private final static String testResponse = "{\"processingDate\":\"2021-10-21T19:34:41.561559\",\"metadata\":{},\"data\":[{\"selections\":[{\"lemma\":\"Street\",\"selection\":{\"start\":106,\"end\":112}}],\"classification\":\"LOCATION\",\"entity\":\"Street\"},{\"selections\":[{\"lemma\":\"Holmes\",\"selection\":{\"start\":0,\"end\":6}}],\"classification\":\"PERSON\",\"entity\":\"Holmes\"}]}";
+	
 	
 	public static void main(String[] args) throws IOException {
 		String testText = "I had seen little of Holmes lately. My marriage had drifted us away from each other. My own complete happiness, and the home-centred interests which rise up around the man who first finds himself master of his own establishment, were sufficient to absorb all my attention, while Holmes, who loathed every form of society with his whole Bohemian soul, remained in our lodgings in Baker Street, buried among his old books, and alternating from week to week between cocaine and ambition, the drowsiness of the drug, and the fierce energy of his own keen nature. He was still, as ever, deeply attracted by the study of crime, and occupied his immense faculties and extraordinary powers of observation in following out those clues, and clearing up those mysteries which had been abandoned as hopeless by the official police. From time to time I heard some vague account of his doings: of his summons to Odessa in the case of the Trepoff murder, of his clearing up of the singular tragedy of the Atkinson brothers at Trincomalee, and finally of the mission which he had accomplished so delicately and successfully for the reigning family of Holland. Beyond these signs of his activity, however, which I merely shared with all the readers of the daily press, I knew little of my former friend and companion.";
+		String smallText = "Holmes, who loathed every form of society with his whole Bohemian soul, remained in our lodgings in Baker Street";
 		
+		debug = true;
 		int jobId = VoyantNssiClient.submitJob(testText);
 		NssiResult result = VoyantNssiClient.getResults(jobId);
 		VoyantNssiClient.printResults(result);
@@ -119,6 +123,10 @@ public class VoyantNssiClient {
 		}
 	}
 	
+	public static int submitJobTest(String text) throws IOException {
+		return 999;
+	}
+	
 	public static NssiResult getResults(int jobId) throws IOException {
 		return getResults(jobId, DEFAULT_POLLING_INTERVAL);
 	}
@@ -141,6 +149,13 @@ public class VoyantNssiClient {
 		} else {
 			throw new IOException("Error get NSSI results");
 		}
+	}
+	
+	public static NssiResult getResultsTest(int jobId) throws IOException, InterruptedException {
+		Thread.sleep(DEFAULT_POLLING_INTERVAL/10);
+		JSONObject json = new JSONObject(testResponse);
+		NssiResult nssiResult = jsonToNssiResult(json);
+		return nssiResult;
 	}
 	
 	public static JobStatus getJobStatus(int jobId) throws IOException {
