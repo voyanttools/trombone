@@ -21,6 +21,8 @@
  ******************************************************************************/
 package org.voyanttools.trombone.input.extract;
 
+import java.io.BufferedReader;
+
 //import it.svario.xpathapi.jaxp.XPathAPI;
 
 import java.io.ByteArrayInputStream;
@@ -28,16 +30,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -146,6 +151,7 @@ public class XmlExtractor implements Extractor, Serializable {
 						else if (name.equals("rss")) guessedFormat = DocumentFormat.RSS;
 						else if (name.equals("EEBO")) guessedFormat = DocumentFormat.EEBODREAM;
 						else if (name.equals("FictionBook")) guessedFormat = DocumentFormat.FICTIONBOOK;
+						else if (name.equals("html")) guessedFormat = DocumentFormat.HTML; // TODO throw error if actually HTML?
 						if (guessedFormat.isXml()) {
 							storedDocumentSource.getMetadata().setDocumentFormat(guessedFormat);
 						}
@@ -164,22 +170,8 @@ public class XmlExtractor implements Extractor, Serializable {
 			Properties properties = new Properties();
 			
 			String resourcePath = "/org/voyanttools/trombone/input-formats/"+guessedFormatString.toLowerCase()+".xml";
-			URL url = this.getClass().getResource(resourcePath);
-			if (url!=null) {
-				File file = new File(url.getPath());
-				if (file.exists()) {
-					FileInputStream in = null;
-					try {
-						in = new FileInputStream(file);
-						properties.loadFromXML(in);
-						
-					}
-					finally {
-						if (in!=null) {
-							in.close();
-						}
-					}
-				}
+			try (InputStream is = this.getClass().getResourceAsStream(resourcePath)) {
+				properties.loadFromXML(is);
 				if (localParameters.getParameterBooleanValue("splitDocuments")) {
 					for (String key : properties.stringPropertyNames()) {
 						if (key.contains(".splitDocuments")) {
@@ -192,8 +184,9 @@ public class XmlExtractor implements Extractor, Serializable {
 						localParameters.setParameter(key, properties.getProperty(key));
 					}
 				}
+			} catch (IOException e) {
+				throw new IOException("Unable to find local input format", e);
 			}
-			
 		}
 		
 		String[] relevantParameters = new String[]{"xmlContentXpath","xmlTitleXpath","xmlAuthorXpath","xmlPubPlaceXpath","xmlPublisherXpath","xmlPubDateXpath","xmlKeywordXpath","xmlCollectionXpath","xmlExtraMetadataXpath"};
