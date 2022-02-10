@@ -82,7 +82,12 @@ public class CatalogueFacets extends AbstractTool {
 	    Facets facets = new SortedSetDocValuesFacetCounts(state, fc);
 
 	    for (String facetFieldName : facetFields) {
-	    	FacetResult result = facets.getTopChildren(maxDocs, facetFieldName);
+	    	FacetResult result = null;
+	    	try {
+	    		result = facets.getTopChildren(maxDocs, facetFieldName);
+	    	} catch (IllegalArgumentException e) {
+	    		// try/catch handling for non-indexed dimensions
+	    	}
 	    	if (result != null) {
 	    		facetResults.put(facetFieldName, result.labelValues);
 		    } else {

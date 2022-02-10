@@ -74,6 +74,8 @@ public class NotebookLuceneManager extends AbstractLuceneManager {
 	public synchronized IndexWriter getIndexWriter(String corpus)
 			throws CorruptIndexException, LockObtainFailedException, IOException {
 		if (indexWriter==null) {
+			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+			iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
 			indexWriter = new IndexWriter(getDirectory(corpus), new IndexWriterConfig(analyzer));
 		}
 		access();
