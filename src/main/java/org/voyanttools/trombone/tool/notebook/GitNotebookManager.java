@@ -384,7 +384,12 @@ public class GitNotebookManager extends AbstractTool {
 					for (Entry<String, JsonValue> entry : jobject.entrySet()) {
 						String e_key = entry.getKey();
 						if (e_key.equals("keywords")) {
-							String value = entry.getValue().asJsonArray().toString();
+							String value = "[]";
+							try {
+								value = entry.getValue().asJsonArray().toString();
+							} catch (Exception e2) {
+								// need try statement for missing / non-array keywords
+							}
 							metadata.append(",\""+e_key+"\":"+value+"");
 						} else {
 							String value = ((JsonString) entry.getValue()).getString();
