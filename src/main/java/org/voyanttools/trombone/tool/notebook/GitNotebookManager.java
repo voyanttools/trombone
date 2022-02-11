@@ -352,7 +352,7 @@ public class GitNotebookManager extends AbstractTool {
 					git.add().addFilepattern(filename).call();
 					RevCommit commit = git.commit().setMessage("Added file: "+filename).call();
 					if (filename.endsWith(".json")) {
-						String notebookMetadata = getMetadataFromNotebook(rm, filename);
+						String notebookMetadata = getMetadataFromNotebook(rm, filename.replaceFirst(".json$", ""));
 						if (notebookMetadata != null) {
 							rm.addNoteToCommit(NOTEBOOK_REPO_NAME, commit, notebookMetadata);
 						}
@@ -395,6 +395,7 @@ public class GitNotebookManager extends AbstractTool {
 							String value = ((JsonString) entry.getValue()).getString();
 							if (e_key.equals("title") || e_key.equals("description")) {
 								value = value.replaceAll("<\\/?\\w+.*?>", ""); // remove possible tags
+								value = value.replaceAll("\\t|\\n|\\r", " "); // remove tabs, it causes the JsonTokenizer to fail
 							}
 							metadata.append(",\""+e_key+"\":\""+value+"\"");
 						}
