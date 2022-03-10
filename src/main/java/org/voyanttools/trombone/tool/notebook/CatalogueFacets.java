@@ -37,7 +37,7 @@ public class CatalogueFacets extends AbstractTool {
 
 	private Map<String, LabelAndValue[]> facetResults = new HashMap<String, LabelAndValue[]>();
 	
-	private final String[] defaultFacetFields = new String[] { "facet.author", "facet.keywords", "facet.language", "facet.license"};
+	private final String[] defaultFacetFields = new String[] { "facet.userId", "facet.author", "facet.keywords", "facet.language", "facet.license"};
 	
 	public CatalogueFacets(Storage storage, FlexibleParameters parameters) {
 		super(storage, parameters);
