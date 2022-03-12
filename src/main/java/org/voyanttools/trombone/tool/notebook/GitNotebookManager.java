@@ -31,7 +31,6 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
-import javax.mail.MessagingException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -56,7 +55,6 @@ import org.eclipse.jgit.notes.Note;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.voyanttools.trombone.mail.Mailer;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.storage.git.RepositoryManager;
@@ -73,9 +71,11 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 @XStreamAlias("notebook")
 public class GitNotebookManager extends AbstractTool {
 	
-	private final static String ID_AND_CODE_TEMPLATE = "^[\\w-]{4,16}$"; // regex for matching notebook id and access code
+	private final static String ID_AND_CODE_TEMPLATE = "^[A-Za-z0-9-]{4,32}$"; // regex for matching notebook id and access code
 	
 	private final static String NOTEBOOK_REPO_NAME = "notebook";
+	
+	private final static String NOTEBOOK_ID_SEPARATOR = "_";
 	
 	private final static String KEY_FILE_PATH = "/org/voyanttools/trombone/spyral/key.txt";
 	
@@ -281,10 +281,10 @@ public class GitNotebookManager extends AbstractTool {
 			if (name.matches(ID_AND_CODE_TEMPLATE) == false) {
 				throw new IOException("Notebook ID does not conform to template.");
 			}
-			id = userId + "$" + name;
+			id = userId + NOTEBOOK_ID_SEPARATOR + name;
 		} else {
 			while(true) {
-				id = userId + "$" + RandomStringUtils.randomAlphanumeric(6);
+				id = userId + NOTEBOOK_ID_SEPARATOR + RandomStringUtils.randomAlphanumeric(6);
 				try {
 					if (doesNotebookFileExist(rm, id+".json") == false) {
 						break;
@@ -351,17 +351,17 @@ public class GitNotebookManager extends AbstractTool {
 	
 	// from: https://stackoverflow.com/a/17625095
 	private static List<String> listFilesNewestFirst(File directory) throws IOException {
-	    try (final Stream<Path> fileStream = Files.list(directory.toPath())) {
-	        return fileStream
-	            .map(Path::toFile)
-	            .collect(Collectors.toMap(Function.identity(), File::lastModified))
-	            .entrySet()
-	            .stream()
-	            .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-	            .map(Map.Entry::getKey)
-	            .map(File::getName)
-	            .collect(Collectors.toList());
-	    }
+		try (final Stream<Path> fileStream = Files.list(directory.toPath())) {
+			return fileStream
+				.map(Path::toFile)
+				.collect(Collectors.toMap(Function.identity(), File::lastModified))
+				.entrySet()
+				.stream()
+				.sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+				.map(Map.Entry::getKey)
+				.map(File::getName)
+				.collect(Collectors.toList());
+		}
 	}
 	
 	private void handleUntrackedFiles(RepositoryManager rm) throws IOException, GitAPIException {
