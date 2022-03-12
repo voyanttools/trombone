@@ -90,6 +90,10 @@ public class GitNotebookManager extends AbstractTool {
 	
 	private String data = null; // notebook data as JSON
 	
+	private boolean success = true; // was the call successful?
+	
+	private String error = null; // used to store error message if not successful
+	
 	public GitNotebookManager(Storage storage, FlexibleParameters parameters) {
 		super(storage, parameters);
 	}
@@ -115,10 +119,12 @@ public class GitNotebookManager extends AbstractTool {
 				try {
 					data = doesNotebookFileExist(rm, id+".json") ? "true" : "false";
 				} catch (GitAPIException e) {
-					throw new IOException(e.toString());
+					setError(e.toString());
+					return;
 				}
 			} else {
-				throw new IOException("No notebook ID provided.");
+				setError("No notebook ID provided.");
+				return;
 			}
 		}
 		
@@ -137,7 +143,8 @@ public class GitNotebookManager extends AbstractTool {
 					data = "false";
 				}
 			} else {
-				throw new IOException("No notebook ID provided.");
+				setError("No notebook ID provided.");
+				return;
 			}
 		}
 		
@@ -152,11 +159,13 @@ public class GitNotebookManager extends AbstractTool {
 						data = RepositoryManager.getRepositoryFile(repo, id+".json");
 					}
 				} catch (IOException | GitAPIException e) {
-					throw new IOException("Unable to retrieve notebook: "+id);
+					setError("Unable to retrieve notebook: "+id);
+					return;
 				}
 			}
 			if (data==null) {
-				throw new IOException("Unable to retrieve notebook: "+id);
+				setError("Unable to retrieve notebook: "+id);
+				return;
 			}
 		}
 		
@@ -200,7 +209,8 @@ public class GitNotebookManager extends AbstractTool {
 					data = "["+String.join(",", notes)+"]";
 				}
 			} catch (GitAPIException e) {
-				throw new IOException(e.toString());
+				setError(e.toString());
+				return;
 			}
 		}
 		
@@ -242,7 +252,8 @@ public class GitNotebookManager extends AbstractTool {
 					indexNotebooks(notebookSources, false);
 				}
 			} catch (GitAPIException e) {
-				throw new IOException(e.toString());
+				setError(e.toString());
+				return;
 			}
 		}
 	}
@@ -250,36 +261,42 @@ public class GitNotebookManager extends AbstractTool {
 	private void doSave() throws IOException {
 		
 		if (isRequestAuthentic() == false) {
-			throw new IOException("Inauthentic call.");
+			setError("Inauthentic call.");
+			return;
 		}
 		
 		RepositoryManager rm = getRepositoryManager();
 		
 		String notebookData = parameters.getParameterValue("data","");
 		if (notebookData.trim().isEmpty()) {
-			throw new IOException("Notebook contains no data.");
+			setError("Notebook contains no data.");
+			return;
 		}
 		
 		String notebookMetadata = parameters.getParameterValue("metadata", "");
 		if (notebookMetadata.trim().isEmpty()) {
-			throw new IOException("Notebook contains no metadata.");
+			setError("Notebook contains no metadata.");
+			return;
 		}
 		
 		String userId = parameters.getParameterValue("spyral-id");
 		if (userId == null) {
-			throw new IOException("No Spyral account detected.");
+			setError("No Spyral account detected.");
+			return;
 		}
 		
 		JSONObject obj = (JSONObject) JSONValue.parse(notebookMetadata);
 		String metadataUserId = (String) obj.get("userId");
 		if (metadataUserId.equals(userId) == false) {
-			throw new IOException("Notebook author does not match Spyral account.");
+			setError("Notebook author does not match Spyral account.");
+			return;
 		}
 		
 		if (parameters.getParameterValue("name","").trim().isEmpty()==false) {
 			String name = parameters.getParameterValue("name");
 			if (name.matches(ID_AND_CODE_TEMPLATE) == false) {
-				throw new IOException("Notebook ID does not conform to template.");
+				setError("Notebook ID does not conform to template.");
+				return;
 			}
 			id = userId + NOTEBOOK_ID_SEPARATOR + name;
 		} else {
@@ -290,7 +307,8 @@ public class GitNotebookManager extends AbstractTool {
 						break;
 					}
 				} catch (GitAPIException e) {
-					throw new IOException(e.toString());
+					setError(e.toString());
+					return;
 				}
 			}
 		}
@@ -299,11 +317,10 @@ public class GitNotebookManager extends AbstractTool {
 			RevCommit commit = rm.addFile(NOTEBOOK_REPO_NAME, id+".json", notebookData);
 			rm.addNoteToCommit(NOTEBOOK_REPO_NAME, commit, notebookMetadata);
 		} catch (IOException | GitAPIException e) {
-			throw new IOException(e.toString());
+			setError(e.toString());
+			return;
 		}
 		indexNotebook(new StoredNotebookSource(id, notebookData, notebookMetadata), false);
-		
-		data = "true";
 	}
 
 	private RepositoryManager getRepositoryManager() throws IOException {
@@ -333,7 +350,7 @@ public class GitNotebookManager extends AbstractTool {
 			String key = IOUtils.readLines(inputStream, Charset.forName("UTF-8")).get(0).trim();
 			return key.equals(parameters.getParameterValue("key"));
 		} catch (Exception e) {
-			throw new IOException("No Spyral key found.");
+			return false;
 		}
 	}
 	
@@ -440,6 +457,11 @@ public class GitNotebookManager extends AbstractTool {
 			}
 		}
 		return null;
+	}
+	
+	private void setError(String errorString) {
+		success = false;
+		error = JSONValue.escape(errorString);
 	}
 	
 	private void indexNotebook(StoredNotebookSource notebook, boolean useExecutor) throws IOException {
