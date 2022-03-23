@@ -110,9 +110,9 @@ public class RepositoryManager {
 	
 	
 	private static RevTree getTree(Repository repository) throws IOException {
-        ObjectId lastCommitId = repository.resolve(Constants.HEAD);
-        return getTree(repository, lastCommitId);
-    }
+		ObjectId lastCommitId = repository.resolve(Constants.HEAD);
+		return getTree(repository, lastCommitId);
+	}
 	
 	/**
 	 * Get the tree for traversing the repo at a specific commit point.
@@ -122,11 +122,11 @@ public class RepositoryManager {
 	 * @throws IOException
 	 */
 	private static RevTree getTree(Repository repository, ObjectId commitId) throws IOException {
-        try (RevWalk revWalk = new RevWalk(repository)) {
-            RevCommit commit = revWalk.parseCommit(commitId);
-            RevTree tree = commit.getTree();
-            return tree;
-        }
+		try (RevWalk revWalk = new RevWalk(repository)) {
+			RevCommit commit = revWalk.parseCommit(commitId);
+			RevTree tree = commit.getTree();
+			return tree;
+		}
 	}
 	
 	/**
@@ -138,62 +138,62 @@ public class RepositoryManager {
 	public static List<String> getRepositoryContents(Repository repository) throws IOException {
 		RevTree tree = getTree(repository);
 		try (TreeWalk treeWalk = new TreeWalk(repository)) {
-            treeWalk.addTree(tree);
-            treeWalk.setRecursive(false);
-        
-            ArrayList<String> contents = new ArrayList<String>();
-            while(treeWalk.next()) {
-            	contents.add(treeWalk.getNameString());
-            }
-            
-            return contents;
+			treeWalk.addTree(tree);
+			treeWalk.setRecursive(false);
+		
+			ArrayList<String> contents = new ArrayList<String>();
+			while(treeWalk.next()) {
+				contents.add(treeWalk.getNameString());
+			}
+			
+			return contents;
 		}
 	}
 	
 	public static List<String> getRepositoryContents(Repository repository, String filter) throws IOException {
 		RevTree tree = getTree(repository);
 		try (TreeWalk treeWalk = new TreeWalk(repository)) {
-            treeWalk.addTree(tree);
-            treeWalk.setRecursive(false);
-            treeWalk.setFilter(PathFilter.create(filter));
-        
-            ArrayList<String> contents = new ArrayList<String>();
-            while(treeWalk.next()) {
-            	contents.add(treeWalk.getNameString());
-            }
-            
-            return contents;
+			treeWalk.addTree(tree);
+			treeWalk.setRecursive(false);
+			treeWalk.setFilter(PathFilter.create(filter));
+		
+			ArrayList<String> contents = new ArrayList<String>();
+			while(treeWalk.next()) {
+				contents.add(treeWalk.getNameString());
+			}
+			
+			return contents;
 		}
 	}
 	
 	public static boolean doesRepositoryFileExist(Repository repository, String filename) throws IOException {
 		RevTree tree = getTree(repository);
 		try (TreeWalk treeWalk = new TreeWalk(repository)) {
-            treeWalk.addTree(tree);
-            treeWalk.setRecursive(false);
-            treeWalk.setFilter(PathFilter.create(filename));
-            if (!treeWalk.next()) {
-                return false;
-            } else {
-            	return true;
-            }
+			treeWalk.addTree(tree);
+			treeWalk.setRecursive(false);
+			treeWalk.setFilter(PathFilter.create(filename));
+			if (!treeWalk.next()) {
+				return false;
+			} else {
+				return true;
+			}
 		}
 	}
 	
 	public static String getRepositoryFile(Repository repository, String filename) throws IOException {
 		RevTree tree = getTree(repository);
 		try (TreeWalk treeWalk = new TreeWalk(repository)) {
-            treeWalk.addTree(tree);
-            treeWalk.setRecursive(false);
-            treeWalk.setFilter(PathFilter.create(filename));
-            if (!treeWalk.next()) {
-                throw new IOException("Could not find file: "+filename);
-            }
-            
-            ObjectLoader loader = repository.open(treeWalk.getObjectId(0));
-            String contents = RepositoryManager.getStringFromObjectLoader(loader);
-            
-            return contents;
+			treeWalk.addTree(tree);
+			treeWalk.setRecursive(false);
+			treeWalk.setFilter(PathFilter.create(filename));
+			if (!treeWalk.next()) {
+				throw new IOException("Could not find file: "+filename);
+			}
+			
+			ObjectLoader loader = repository.open(treeWalk.getObjectId(0));
+			String contents = RepositoryManager.getStringFromObjectLoader(loader);
+			
+			return contents;
 		}
 	}
 	
@@ -202,9 +202,9 @@ public class RepositoryManager {
 		try (Git git = new Git(repository)) {
 			Iterable<RevCommit> logs = git.log()
 					.add(head)
-		            .addPath(filename)
-		            .setMaxCount(1)
-		            .call();
+					.addPath(filename)
+					.setMaxCount(1)
+					.call();
 			
 			RevCommit rc = logs.iterator().next();
 			return rc;
@@ -213,8 +213,8 @@ public class RepositoryManager {
 	
 	public static String getStringFromObjectLoader(ObjectLoader loader) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        loader.copyTo(baos);
-        return baos.toString(Charset.forName("UTF-8"));
+		loader.copyTo(baos);
+		return baos.toString(Charset.forName("UTF-8"));
 	}
 	
 	public static Set<String> getUntrackedFiles(Repository repository) throws GitAPIException {

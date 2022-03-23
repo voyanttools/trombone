@@ -37,7 +37,7 @@ public class CatalogueFacets extends AbstractTool {
 
 	private Map<String, LabelAndValue[]> facetResults = new HashMap<String, LabelAndValue[]>();
 	
-	private final String[] defaultFacetFields = new String[] { "facet.author", "facet.keywords", "facet.language", "facet.license"};
+	private final String[] defaultFacetFields = new String[] { "facet.userId", "facet.author", "facet.keywords", "facet.language", "facet.license"};
 	
 	public CatalogueFacets(Storage storage, FlexibleParameters parameters) {
 		super(storage, parameters);
@@ -82,7 +82,12 @@ public class CatalogueFacets extends AbstractTool {
 	    Facets facets = new SortedSetDocValuesFacetCounts(state, fc);
 
 	    for (String facetFieldName : facetFields) {
-	    	FacetResult result = facets.getTopChildren(maxDocs, facetFieldName);
+	    	FacetResult result = null;
+	    	try {
+	    		result = facets.getTopChildren(maxDocs, facetFieldName);
+	    	} catch (IllegalArgumentException e) {
+	    		// try/catch handling for non-indexed dimensions
+	    	}
 	    	if (result != null) {
 	    		facetResults.put(facetFieldName, result.labelValues);
 		    } else {
