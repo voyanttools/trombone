@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -87,17 +86,10 @@ public class XlsExpander implements Expander {
 	}
 	
 	private Workbook getWorkBook(StoredDocumentSource storedDocumentSource) throws IOException {
-		InputStream inputStream = null;
-		Workbook wb;
-		try {
-			inputStream = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
+		Workbook wb = null;
+		try (InputStream inputStream = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId())) {
 			wb = WorkbookFactory.create(inputStream);
-		} catch (InvalidFormatException e) {
-			throw new IOException(e);
-		}
-		finally {
-			inputStream.close();
-		}
+		};
 		return wb;
 		
 	}

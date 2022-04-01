@@ -108,8 +108,6 @@
 			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- loaded by tika <dependency> <groupId>org.apache.commons</groupId> 
-			<artifactId>commons-compress</artifactId> <version>1.12</version> </dependency> -->
 		<dependency>
 			<groupId>it.svario.xpathapi</groupId>
 			<artifactId>xpathapi-jaxp</artifactId>
@@ -124,7 +122,7 @@
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parsers</artifactId>
-			<version>1.18</version>
+			<version>1.28.1</version>
 		</dependency>
 		<!-- <dependency> <groupId>org.apache.lucene</groupId> <artifactId>lucene-core</artifactId> 
 			<version>6.1.0</version> </dependency> -->
@@ -310,8 +308,13 @@
 		<!-- used by pacte client, we specify version because tika uses an older 
 			version that doesn't work properly -->
 		<!-- <dependency> <groupId>org.apache.httpcomponents</groupId> <artifactId>httpclient</artifactId> 
-			<version>4.5.4</version> </dependency> <dependency> <groupId>org.jsoup</groupId> 
-			<artifactId>jsoup</artifactId> <version>1.11.3</version> </dependency> -->
+			<version>4.5.4</version> </dependency> -->
+			
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.14.3</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.sun.mail</groupId>
