@@ -26,6 +26,8 @@ import org.voyanttools.trombone.model.EntityType;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
 import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.MentionsAnnotation;
 //import edu.stanford.nlp.ling.CoreAnnotations.MentionsAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
@@ -77,17 +79,21 @@ public class StanfordNlpAnnotator implements NlpAnnotator {
 		int corpusDocumentIndex = corpusMapper.getCorpus().getDocumentPosition(indexedDocument.getId());
 		for (Map.Entry<String, List<CoreMap>> stringEntitiesMapEntry : stringEntitiesMap.entrySet()) {
 			List<CoreMap> coreMaps = stringEntitiesMapEntry.getValue();
-			Set<Integer> offsets = new HashSet<Integer>();
+			int[][] offsets = new int[coreMaps.size()][2];
+			int count = 0;
 			for (CoreMap entity : coreMaps) {
 				int startOffset = entity.get(CharacterOffsetBeginAnnotation.class);
-				offsets.add(startOffset);
+				int endOffset = entity.get(CharacterOffsetEndAnnotation.class);
+				offsets[count] = new int[] {startOffset, endOffset};
+				count++;
 			}
 			CoreMap entity = coreMaps.get(0);
 			String term = entity.get(TextAnnotation.class);
 			String normalized = entity.get(NormalizedNamedEntityTagAnnotation.class);
+			String lemma = entity.get(LemmaAnnotation.class); // TODO always null?
 			EntityType type = EntityType.getForgivingly(entity.get(NamedEntityTagAnnotation.class));
 			DocumentEntity e = new DocumentEntity(corpusDocumentIndex, term, normalized, type, coreMaps.size());
-			e.setOffsets(offsets.stream().mapToInt(Integer::intValue).toArray());
+			e.setOffsets(offsets);
 			entities.add(e);
 		}
 		

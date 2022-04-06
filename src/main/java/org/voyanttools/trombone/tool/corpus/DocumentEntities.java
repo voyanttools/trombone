@@ -50,7 +50,7 @@ import ca.lincsproject.nssi.VoyantNssiClient;
 public class DocumentEntities extends AbstractAsyncCorpusTool {
 
 	private static enum NLP {
-		Stanford, NSSI
+		Stanford, OpenNLP, NSSI
 	}
 	
 	private boolean verbose = false;
@@ -81,7 +81,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 	
 	@Override
 	public void run(CorpusMapper corpusMapper) throws IOException {
-		return;
+		realrun(corpusMapper);
 	}
 	
 	public void realrun(CorpusMapper corpusMapper) throws IOException {
@@ -143,6 +143,8 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		String anno = parameters.getParameterValue("annotator", "");
 		if (anno.toLowerCase().equals("nssi")) {
 			annotator = NLP.NSSI;
+		} else if (anno.toLowerCase().equals("opennlp")){
+			annotator = NLP.OpenNLP;
 		} else {
 			annotator = NLP.Stanford;
 		}
@@ -275,14 +277,32 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 			IndexedDocument indexedDocument = corpusMapper.getCorpus().getDocument(docId);
 			if (annotator.equals(NLP.NSSI)) {
 				int jobId = VoyantNssiClient.submitJob(indexedDocument.getDocumentString());
-				NssiResult nssiResult = VoyantNssiClient.getResults(jobId);
+				List<DocumentEntity> ents = VoyantNssiClient.getResults(jobId);
 				int docIndex = corpusMapper.getCorpus().getDocumentPosition(docId);
-				List<DocumentEntity> ents = new ArrayList<DocumentEntity>();
-				for (NssiResult nr : nssiResult) {
-//					System.out.println(nr.getCurrentClassification()+": "+nr.getCurrentEntity()+" / "+nr.getCurrentLemma()+", pos: ["+nr.getCurrentStart()+", "+nr.getCurrentEnd()+"]");
-					ents.add(new DocumentEntity(docIndex, nr.getCurrentLemma(), nr.getCurrentEntity(), EntityType.getForgivingly(nr.getCurrentClassification()), 0, new int[] {0}, new float[] {0f}));
+				for (DocumentEntity ent : ents) {
+					ent.setDocIndex(docIndex);
 				}
+				addPositionsToEntities(corpusMapper, indexedDocument, ents);
 				return new DocResult(docId, "done", ents);
+			} else if (annotator.equals(NLP.OpenNLP)) {
+				String lang = indexedDocument.getMetadata().getLanguageCode();
+				if (lang.equals("en")) {
+					NlpAnnotator nlpAnnotator = storage.getNlpAnnotatorFactory().getOpenNlpAnnotator(lang);
+					if (verbose) {
+						System.out.println(docId+": getting entities");
+					}
+					List<DocumentEntity> ents = nlpAnnotator.getEntities(corpusMapper, indexedDocument, parameters);
+					if (verbose) {
+						System.out.println(docId+": got entities");
+					}
+					
+					// FIXME OpenNLP offsets and positions don't match up with Lucene because of how tokens are provided to OpenNLP
+//					addPositionsToEntities(corpusMapper, indexedDocument, ents);
+					
+					return new DocResult(docId, "done", ents);
+				} else {
+					return new DocResult(docId, "done", new ArrayList<DocumentEntity>());
+				}
 			} else {
 //				if (Math.random() > .5f) {
 //					throw new Exception("random failure");
@@ -311,40 +331,45 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 	
 	
 	private void addPositionsToEntities(CorpusMapper corpusMapper, IndexedDocument indexedDocument, List<DocumentEntity> entities) throws IOException {
-		// go through and collect offsets to keep
-		Set<Integer> offsets = new HashSet<Integer>();
-		for (DocumentEntity entity : entities) {
-			int[] entOffsets = entity.getOffsets();
-			for (int offset : entOffsets) {
-				offsets.add(offset);
-			}
-		}
-		
-		Map<String, List<Integer>> entityPositionsMap = new HashMap<String, List<Integer>>();
+		// term/type key -> offsetIndex key -> [startPosition, endPosition]
+		Map<String, Map<Integer, List<Integer>>> entityPositionsMap = new HashMap<String, Map<Integer, List<Integer>>>();
 		
 		int luceneDoc = corpusMapper.getLuceneIdFromDocumentId(indexedDocument.getId());
 		// TODO: check that we can assume that offsets align regardless of TokenType
 		Terms terms = corpusMapper.getLeafReader().getTermVector(luceneDoc, TokenType.lexical.name()); 
 		TermsEnum termsEnum = terms.iterator();
 		while(true) {
+			// go through all terms
 			BytesRef term = termsEnum.next();
 			if (term!=null) {
 				PostingsEnum postingsEnum = termsEnum.postings(null, PostingsEnum.OFFSETS);
 				if (postingsEnum!=null) {
 					postingsEnum.nextDoc();
+					// go through each instance of the term
 					for (int i=0, len = postingsEnum.freq(); i<len; i++) {
 						int pos = postingsEnum.nextPosition();
-						int offset = postingsEnum.startOffset();
+						int startOffset = postingsEnum.startOffset();
+						int endOffset = postingsEnum.endOffset();
+						// go through the entities and match entity offset to term instance offset
 						for (DocumentEntity entity : entities) {
-							int[] entOffsets = entity.getOffsets();
-							for (int entOffset : entOffsets) {
-								if (entOffset == offset) {
+							int[][] entOffsets = entity.getOffsets();
+							int offsetsCount = 0;
+							for (int[] entOffset : entOffsets) {
+								if (entOffset[0] == startOffset || entOffset[1] == endOffset) {
 									String key = entity.getTerm()+" -- "+entity.getType().name();
 									if (!entityPositionsMap.containsKey(key)) {
-										entityPositionsMap.put(key, new ArrayList<Integer>());
+										entityPositionsMap.put(key, new HashMap<>());
 									}
-									entityPositionsMap.get(key).add(pos);
+									if (entityPositionsMap.get(key).get(offsetsCount) == null) {
+										entityPositionsMap.get(key).put(offsetsCount, new ArrayList<>());
+									}
+									if (entOffset[0] == startOffset) {
+										entityPositionsMap.get(key).get(offsetsCount).add(0, pos);
+									} else {
+										entityPositionsMap.get(key).get(offsetsCount).add(pos);
+									}
 								}
+								offsetsCount++;
 							}
 						}
 					}
@@ -355,9 +380,18 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		
 		for (DocumentEntity entity : entities) {
 			String key = entity.getTerm()+" -- "+entity.getType().name();
-			List<Integer> positions = entityPositionsMap.get(key);
-			if (positions != null) {
-				entity.setPositions(positions.stream().mapToInt(Integer::intValue).toArray());
+			Map<Integer, List<Integer>> offsetPositions = entityPositionsMap.get(key);
+			if (offsetPositions != null) {
+				int[][] posArray = new int[offsetPositions.size()][2];
+				for (Integer offsetIndex : offsetPositions.keySet()) {
+					List<Integer> positions = offsetPositions.get(offsetIndex);
+					if (positions.size() == 2) {
+						posArray[offsetIndex] = new int[] {positions.get(0), positions.get(1)};
+					} else {
+						posArray[offsetIndex] = new int[] {positions.get(0)};
+					}
+				}
+				entity.setPositions(posArray);
 			}
 		}
 		

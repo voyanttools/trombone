@@ -11,16 +11,17 @@ import java.io.Serializable;
  */
 public class DocumentEntity implements Serializable, Comparable<DocumentEntity> {
 
+	// TODO add lemma?
 	private int docIndex;
 	private String term;
-	private String normalized;
+	private String normalized; // normalized form of numerical named entities, e.g. dates
 	private EntityType type;
 	private int rawFreq;
-	private int[] positions;
+	private int[][] positions; // term position
 	private float[] confidences;
-	private int[] offsets;
+	private int[][] offsets; // start and end character offsets
 
-	public DocumentEntity(int docIndex, String term, String normalized, EntityType type, int rawFreq, int[] positions, float[] confidences) {
+	public DocumentEntity(int docIndex, String term, String normalized, EntityType type, int rawFreq, int[][] positions, float[] confidences) {
 		this.docIndex = docIndex;
 		this.term = term;
 		this.normalized = normalized;
@@ -31,7 +32,7 @@ public class DocumentEntity implements Serializable, Comparable<DocumentEntity> 
 		this.offsets = null;
 	}
 	
-	public DocumentEntity(int docIndex, String term, String normalized, EntityType type, int rawFreq, int[] positions) {
+	public DocumentEntity(int docIndex, String term, String normalized, EntityType type, int rawFreq, int[][] positions) {
 		this(docIndex, term, normalized, type, rawFreq, positions, null);
 	}
 	
@@ -41,6 +42,10 @@ public class DocumentEntity implements Serializable, Comparable<DocumentEntity> 
 	
 	public int getDocIndex() {
 		return docIndex;
+	}
+	
+	public void setDocIndex(int docIndex) {
+		this.docIndex = docIndex;
 	}
 	
 	public String getTerm() {
@@ -64,11 +69,11 @@ public class DocumentEntity implements Serializable, Comparable<DocumentEntity> 
 		return type;
 	}
 	
-	public int[] getPositions() {
+	public int[][] getPositions() {
 		return positions;
 	}
 	
-	public void setPositions(int[] positions) {
+	public void setPositions(int[][] positions) {
 		this.positions = positions;
 	}
 	
@@ -76,11 +81,11 @@ public class DocumentEntity implements Serializable, Comparable<DocumentEntity> 
 		return confidences;
 	}
 
-	public int[] getOffsets() {
+	public int[][] getOffsets() {
 		return offsets;
 	}
 
-	public void setOffsets(int[] offsets) {
+	public void setOffsets(int[][] offsets) {
 		this.offsets = offsets;
 	}
 

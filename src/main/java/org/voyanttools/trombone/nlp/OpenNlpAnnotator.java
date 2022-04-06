@@ -58,9 +58,11 @@ public class OpenNlpAnnotator implements NlpAnnotator {
 	
 	private List<DocumentEntity> getLocations(CorpusMapper corpusMapper, IndexedDocument indexedDocument, FlexibleParameters parameters) throws IOException {
 		FlexibleParameters params = new FlexibleParameters();
-		params.setParameter("noOthers", "true");		
-		DocumentTokens documentTokens = new DocumentTokens(corpusMapper.getStorage(), new FlexibleParameters());
+		params.setParameter("noOthers", "true");
+		params.setParameter("docId", indexedDocument.getId());
+		DocumentTokens documentTokens = new DocumentTokens(corpusMapper.getStorage(), params);
 		documentTokens.run(corpusMapper);
+		
 		List<DocumentToken> tokens = documentTokens.getDocumentTokens();
 		String[] strings = tokens.stream()
 			.map(DocumentToken::getTerm)
@@ -80,14 +82,35 @@ public class OpenNlpAnnotator implements NlpAnnotator {
 		List<DocumentEntity> documentEntities = new ArrayList<DocumentEntity>();
 		for (Map.Entry<String, List<Span>> stringSpansEntry : stringSpans.entrySet()) {
 			String term = stringSpansEntry.getKey();
+			
 			List<Span> spansList = stringSpansEntry.getValue();
-			int[] positions = spansList.stream().
+			
+			int[] startOffsets = spansList.stream().
+					mapToInt(span -> tokens.get(span.getStart()).getStartOffset()).toArray();
+			int[] endOffsets = spansList.stream().
+					mapToInt(span -> tokens.get(span.getEnd()).getEndOffset()).toArray();
+			
+			int[][] offsets = new int[startOffsets.length][2];
+			for (int i = 0; i < startOffsets.length; i++) {
+				offsets[i] = new int[] {startOffsets[i], endOffsets[i]};
+			}
+			
+			int[] startPositions = spansList.stream().
 					mapToInt(span -> tokens.get(span.getStart()).getPosition()).toArray();
+			int[] endPositions = spansList.stream().
+					mapToInt(span -> tokens.get(span.getEnd()).getPosition()).toArray();
+			
+			int[][] positions = new int[startPositions.length][2];
+			for (int i = 0; i < startPositions.length; i++) {
+				positions[i] = new int[] {startPositions[i], endPositions[i]};
+			}
+			
 			float[] probabilities = NumberUtils.getFloats(spansList.stream()
 					.mapToDouble(span -> span.getProb())
 					.toArray());
-			Span span = spansList.get(0);
+			
 			DocumentEntity documentEntity = new DocumentEntity(corpusDocumentIndex, term, term, EntityType.location, spansList.size(), positions, probabilities);
+			documentEntity.setOffsets(offsets);
 			documentEntities.add(documentEntity);
 		}
 		return documentEntities;

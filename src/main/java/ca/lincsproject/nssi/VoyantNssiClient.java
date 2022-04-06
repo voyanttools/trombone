@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.Charsets;
@@ -54,7 +56,7 @@ public class VoyantNssiClient {
 		
 		debug = true;
 		int jobId = VoyantNssiClient.submitJob(testText);
-		NssiResult result = VoyantNssiClient.getResults(jobId);
+		List<DocumentEntity> result = VoyantNssiClient.getResults(jobId);
 		VoyantNssiClient.printResults(result);
 	}
 	
@@ -73,10 +75,11 @@ public class VoyantNssiClient {
 			params.add(new BasicNameValuePair("grant_type", "client_credentials"));
 			httpPost.setEntity(new UrlEncodedFormEntity(params));
 			
-			CloseableHttpResponse response = httpClient.execute(httpPost);
-			JSONObject json = getJSONResponse(response);
-			
-			VoyantNssiClient.accessToken = json.getString("access_token");
+			try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+				JSONObject json = getJSONResponse(response);
+				
+				VoyantNssiClient.accessToken = json.getString("access_token");
+			}
 		}
 	}
 	
@@ -92,7 +95,7 @@ public class VoyantNssiClient {
 			
 			JSONObject jsonBody = new JSONObject();
 			jsonBody.put("projectName", PROJECT_NAME);
-			jsonBody.put("format", "text/plain");
+			jsonBody.put("format", "text/plain"); // TODO determine format?
 			jsonBody.put("workflow", WORKFLOW);
 			jsonBody.put("document", text);
 			String input = jsonBody.toString();
@@ -102,8 +105,7 @@ public class VoyantNssiClient {
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json; charset=UTF-8");
 			
-			CloseableHttpResponse response = httpClient.execute(httpPost);
-			try {
+			try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
 				JSONObject json = getJSONResponse(response);
 			
 				int jobId = json.getInt("jobId");
@@ -127,11 +129,11 @@ public class VoyantNssiClient {
 		return 999;
 	}
 	
-	public static NssiResult getResults(int jobId) throws IOException {
+	public static List<DocumentEntity> getResults(int jobId) throws IOException {
 		return getResults(jobId, DEFAULT_POLLING_INTERVAL);
 	}
 	
-	public static NssiResult getResults(int jobId, long pollingInterval) throws IOException {
+	public static List<DocumentEntity> getResults(int jobId, long pollingInterval) throws IOException {
 		JobStatus status = getJobStatus(jobId);
 		while (status.equals(JobStatus.IN_PROGRESS) && !Thread.interrupted()) {
 			try {
@@ -144,17 +146,16 @@ public class VoyantNssiClient {
 		}
 		
 		if (status.equals(JobStatus.READY)) {
-			NssiResult nssiResult = getJobResults(jobId);
-			return nssiResult;
+			return getJobResults(jobId);
 		} else {
 			throw new IOException("Error get NSSI results");
 		}
 	}
 	
-	public static NssiResult getResultsTest(int jobId) throws IOException, InterruptedException {
+	public static List<DocumentEntity> getResultsTest(int jobId) throws IOException, InterruptedException {
 		Thread.sleep(DEFAULT_POLLING_INTERVAL/10);
 		JSONObject json = new JSONObject(testResponse);
-		NssiResult nssiResult = jsonToNssiResult(json);
+		List<DocumentEntity> nssiResult = jsonToDocumentEntities(json);
 		return nssiResult;
 	}
 	
@@ -164,8 +165,7 @@ public class VoyantNssiClient {
 			final HttpGet httpGet = new HttpGet("https://api.nssi.stage.lincsproject.ca/api/jobs/"+jobId);
 			httpGet.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
 			
-			CloseableHttpResponse response = httpClient.execute(httpGet);
-			try {
+			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				JSONObject json = getJSONResponse(response);
 				
 				String status = json.getString("status");
@@ -194,34 +194,32 @@ public class VoyantNssiClient {
 			final HttpPut httpPut = new HttpPut("https://api.nssi.stage.lincsproject.ca/api/jobs/"+jobId+"/actions/cancel");
 			httpPut.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
 			
-			CloseableHttpResponse response = httpClient.execute(httpPut);
-			int statusCode = response.getStatusLine().getStatusCode();
-			if (statusCode == 204) {
-				if (debug) System.out.println("job cancelled: "+jobId);
-				return true;
-			} else if (statusCode == 401) {
-				setAccessToken();
-				return cancelJob(jobId);
-			} else {
-				if (debug) System.out.println("error cancelling job: "+jobId+", statusCode: "+statusCode);
-				return false;
+			try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == 204) {
+					if (debug) System.out.println("job cancelled: "+jobId);
+					return true;
+				} else if (statusCode == 401) {
+					setAccessToken();
+					return cancelJob(jobId);
+				} else {
+					if (debug) System.out.println("error cancelling job: "+jobId+", statusCode: "+statusCode);
+					return false;
+				}
 			}
 		}
 	}
 	
-	public static NssiResult getJobResults(int jobId) throws IOException {
+	public static List<DocumentEntity> getJobResults(int jobId) throws IOException {
 		if (debug) System.out.println("getting results: "+jobId);
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
 			final HttpGet httpGet = new HttpGet("https://api.nssi.stage.lincsproject.ca/api/results/"+WORKFLOW+"/"+jobId);
 			httpGet.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
 			
-			CloseableHttpResponse response = httpClient.execute(httpGet);
-			try {
+			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				JSONObject json = getJSONResponse(response);
 				
-				NssiResult nssiResult = jsonToNssiResult(json);
-				
-				return nssiResult;
+				return jsonToDocumentEntities(json);
 			} catch (HttpResponseException e) {
 				if (e.getStatusCode() == 401) {
 					setAccessToken();
@@ -264,6 +262,8 @@ public class VoyantNssiClient {
 	private static List<DocumentEntity> jsonToDocumentEntities(JSONObject json) {
 		List<DocumentEntity> entities = new ArrayList<DocumentEntity>();
 		
+		Map<String, DocumentEntity> entitiesMap = new HashMap<>();
+		
 		JSONArray data = json.getJSONArray("data");
 		
 		data.forEach(item -> {
@@ -281,9 +281,31 @@ public class VoyantNssiClient {
 				JSONObject selection = obj2.getJSONObject("selection");
 				int start = selection.getInt("start");
 				int end = selection.getInt("end");
-				entities.add(new DocumentEntity(-1, lemma, entity, EntityType.getForgivingly(classification), rawFreq));
+				
+				DocumentEntity currEntity;
+				if (entitiesMap.containsKey(entity)) {
+					currEntity = entitiesMap.get(entity);
+				} else {
+					currEntity = new DocumentEntity(-1, entity, lemma, EntityType.getForgivingly(classification), rawFreq);
+					entitiesMap.put(entity, currEntity);
+				}
+				int[][] offsets = currEntity.getOffsets();
+				if (offsets == null) {
+					currEntity.setOffsets(new int[][] {{start, end}});
+				} else {
+					int[][] newOffsets = new int[offsets.length+1][2];
+					for (int i = 0; i < offsets.length; i++) {
+						newOffsets[i] = offsets[i];
+					}
+					newOffsets[newOffsets.length-1] = new int[] {start, end};
+					currEntity.setOffsets(newOffsets);
+				}
 			});
 		});
+		
+		for (DocumentEntity ent : entitiesMap.values()) {
+			entities.add(ent);
+		}
 		
 		return entities;
 	}
@@ -340,9 +362,9 @@ public class VoyantNssiClient {
 		return nssiConfig;
 	}
 	
-	public static void printResults(NssiResult nssiResult) {
-		for (NssiResult nr : nssiResult) {
-			System.out.println(nr.getCurrentClassification()+": "+nr.getCurrentEntity()+" / "+nr.getCurrentLemma()+", pos: ["+nr.getCurrentStart()+", "+nr.getCurrentEnd()+"]");
+	public static void printResults(List<DocumentEntity> nssiResult) {
+		for (DocumentEntity ent : nssiResult) {
+			System.out.println(ent.getType()+": "+ent.getTerm()+" / "+ent.getNormalized()+", pos: ["+ent.getOffsets()+"]");
 		}
 	}
 }
