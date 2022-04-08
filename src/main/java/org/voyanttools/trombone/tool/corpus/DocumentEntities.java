@@ -39,7 +39,6 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-import ca.lincsproject.nssi.NssiResult;
 import ca.lincsproject.nssi.VoyantNssiClient;
 
 /**
