@@ -281,7 +281,7 @@ public class GitNotebookManager extends AbstractTool {
 		
 		String userId = parameters.getParameterValue("spyral-id");
 		if (userId == null) {
-			setError("No Spyral account detected.");
+			setError("No Spyral account detected. Please sign in.");
 			return;
 		}
 		
