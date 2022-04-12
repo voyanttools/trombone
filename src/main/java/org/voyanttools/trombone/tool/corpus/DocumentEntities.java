@@ -38,6 +38,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import ca.lincsproject.nssi.VoyantNssiClient;
 
@@ -52,10 +53,13 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		Stanford, OpenNLP, NSSI
 	}
 	
+	@XStreamOmitField
 	private boolean verbose = false;
 	
+	@XStreamOmitField
 	private boolean includeEntities = false; // flag for actually including the entities in the results
 	
+	@XStreamOmitField
 	private boolean retryFailures = false;
 
 	private final static int TIMEOUT_FAIL = 60; // how many minutes need to pass before failing
@@ -153,11 +157,29 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		}
 		
 		List<String> ids = getCorpusStoredDocumentIdsFromParameters(corpusMapper.getCorpus());
+		
+		if (retryFailures) {
+			for (String docId : ids) {
+				resetFailedDocument(docId, annotator);
+			}
+		}
+		
 		for (String docId : ids) {
 			futures.add(doNlp(corpusMapper, docId, annotator));
 		}
 		
 		return Futures.allAsList(futures);
+	}
+	
+	private void resetFailedDocument(String docId, NLP annotator) {
+		String id = getDocumentCacheId(docId, annotator);
+		try {
+			String statusString = storage.retrieveString(id+"-status", Storage.Location.object);
+			if (statusString.startsWith("failed")) {
+				storage.storeString("retrying", id+"-status", Storage.Location.object, true);
+			}
+		} catch (IOException e) {
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -167,11 +189,6 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		boolean startNlp = false;
 		try {
 			String statusString = storage.retrieveString(id+"-status", Storage.Location.object);
-			
-			if (retryFailures && statusString.startsWith("failed")) {
-				statusString = "retrying";
-				startNlp = true;
-			}
 			
 			status.put(docId, statusString);
 			if (verbose) {
@@ -200,6 +217,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 			} else if (statusString.equals("queued")) {
 				return Futures.immediateFuture(new DocResult(docId, statusString));
 			} else if (statusString.equals("retrying")) {
+				startNlp = true;
 			} else {
 				Instant runStart = Instant.ofEpochSecond(Integer.parseInt(statusString));
 				Duration diff = Duration.between(runStart, Instant.now());
