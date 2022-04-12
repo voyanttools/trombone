@@ -55,6 +55,8 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 	private boolean verbose = false;
 	
 	private boolean includeEntities = false; // flag for actually including the entities in the results
+	
+	private boolean retryFailures = false;
 
 	private final static int TIMEOUT_FAIL = 60; // how many minutes need to pass before failing
 	
@@ -87,6 +89,8 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		
 		includeEntities = parameters.getParameterBooleanValue("includeEntities");
 		
+		retryFailures = parameters.getParameterBooleanValue("retryFailures");
+		
 		Set<EntityType> types = new HashSet<EntityType>();
 		for (String type : parameters.getParameterValues("type")) {
 			for (String t : type.split(",\\s*")) {
@@ -111,7 +115,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 								tempEntities.add(entity);
 							}
 						}
-					} else if (result.status.equals("failed")) {
+					} else if (result.status.startsWith("failed")) {
 					} else {
 						allDone = false;
 					}
@@ -163,6 +167,12 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		boolean startNlp = false;
 		try {
 			String statusString = storage.retrieveString(id+"-status", Storage.Location.object);
+			
+			if (retryFailures && statusString.startsWith("failed")) {
+				statusString = "retrying";
+				startNlp = true;
+			}
+			
 			status.put(docId, statusString);
 			if (verbose) {
 				System.out.println(docId+": "+statusString);
@@ -185,10 +195,11 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 					}
 					startNlp = true;
 				}
-			} else if (statusString.equals("failed")) {
+			} else if (statusString.startsWith("failed")) {
 				return Futures.immediateFuture(new DocResult(docId, statusString));
 			} else if (statusString.equals("queued")) {
 				return Futures.immediateFuture(new DocResult(docId, statusString));
+			} else if (statusString.equals("retrying")) {
 			} else {
 				Instant runStart = Instant.ofEpochSecond(Integer.parseInt(statusString));
 				Duration diff = Duration.between(runStart, Instant.now());
@@ -197,7 +208,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 						System.out.println(docId+": timed out");
 					}
 					status.put(docId, "failed");
-					storage.storeString("failed", id+"-status", Storage.Location.object, true);
+					storage.storeString("failed > timeout", id+"-status", Storage.Location.object, true);
 				} else {
 					return Futures.immediateFuture(new DocResult(docId, statusString));
 				}
@@ -225,7 +236,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 					} catch (IOException e) {
 						e.printStackTrace();
 						try {
-							storage.storeString("failed", id+"-status", Storage.Location.object, true);
+							storage.storeString("failed > "+e.getMessage(), id+"-status", Storage.Location.object, true);
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}
@@ -235,7 +246,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 				public void onFailure(Throwable t) {
 					System.out.println(docId+" failed: "+t.getMessage());
 					try {
-						storage.storeString("failed", id+"-status", Storage.Location.object, true);
+						storage.storeString("failed > "+t.getMessage(), id+"-status", Storage.Location.object, true);
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
