@@ -95,7 +95,7 @@ public class VoyantNssiClient {
 			
 			JSONObject jsonBody = new JSONObject();
 			jsonBody.put("projectName", PROJECT_NAME);
-			jsonBody.put("format", "text/plain"); // TODO determine format?
+			jsonBody.put("format", "text/html");
 			jsonBody.put("workflow", WORKFLOW);
 			jsonBody.put("document", text);
 			String input = jsonBody.toString();
