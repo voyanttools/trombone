@@ -332,7 +332,12 @@ public class VoyantNssiClient {
 				JSONObject json = new JSONObject(jsonString);
 				return json;
 			} catch (JSONException e) {
-				throw new IOException(e.getMessage());
+				if (statusCode == 200 && jsonString.equals("")) {
+					// temporary handling of https://gitlab.com/calincs/conversion/NSSI/-/issues/259
+					throw new HttpResponseException(401, "Access token expired");
+				} else {
+					throw new IOException("Error parsing JSON: "+jsonString);
+				}
 			}
 		}
 	}
