@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -410,13 +411,19 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 			String key = entity.getTerm()+" -- "+entity.getType().name();
 			Map<Integer, List<Integer>> offsetPositions = entityPositionsMap.get(key);
 			if (offsetPositions != null) {
-				int[][] posArray = new int[offsetPositions.size()][2];
-				for (Integer offsetIndex : offsetPositions.keySet()) {
-					List<Integer> positions = offsetPositions.get(offsetIndex);
-					if (positions.size() == 2) {
-						posArray[offsetIndex] = new int[] {positions.get(0), positions.get(1)};
+				// find max index instead of using offsetPositions size, since some entries might be missing
+				int maxIndex = Collections.max(offsetPositions.keySet()) + 1;
+				int[][] posArray = new int[maxIndex][2];
+				for (int offsetIndex = 0; offsetIndex < maxIndex; offsetIndex++) {
+					if (offsetPositions.containsKey(offsetIndex)) {
+						List<Integer> positions = offsetPositions.get(offsetIndex);
+						if (positions.size() == 2) {
+							posArray[offsetIndex] = new int[] {positions.get(0), positions.get(1)};
+						} else {
+							posArray[offsetIndex] = new int[] {positions.get(0)};
+						}
 					} else {
-						posArray[offsetIndex] = new int[] {positions.get(0)};
+						posArray[offsetIndex] = new int[] {-1};
 					}
 				}
 				entity.setPositions(posArray);
