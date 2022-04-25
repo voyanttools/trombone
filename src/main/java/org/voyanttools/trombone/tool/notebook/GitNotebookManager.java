@@ -118,7 +118,7 @@ public class GitNotebookManager extends AbstractTool {
 			if (id.trim().isEmpty() == false) {
 				try {
 					data = doesNotebookFileExist(rm, id+".json") ? "true" : "false";
-				} catch (GitAPIException e) {
+				} catch (Exception e) {
 					setError(e.toString());
 					return;
 				}
@@ -158,7 +158,7 @@ public class GitNotebookManager extends AbstractTool {
 					try (Repository repo = rm.getRepository(NOTEBOOK_REPO_NAME)) {
 						data = RepositoryManager.getRepositoryFile(repo, id+".json");
 					}
-				} catch (IOException | GitAPIException e) {
+				} catch (Exception e) {
 					setError("Unable to retrieve notebook: "+id);
 					return;
 				}
@@ -208,7 +208,7 @@ public class GitNotebookManager extends AbstractTool {
 				
 					data = "["+String.join(",", notes)+"]";
 				}
-			} catch (GitAPIException e) {
+			} catch (Exception e) {
 				setError(e.toString());
 				return;
 			}
@@ -251,7 +251,7 @@ public class GitNotebookManager extends AbstractTool {
 					}
 					indexNotebooks(notebookSources, false);
 				}
-			} catch (GitAPIException e) {
+			} catch (Exception e) {
 				setError(e.toString());
 				return;
 			}
@@ -316,7 +316,7 @@ public class GitNotebookManager extends AbstractTool {
 		try {
 			RevCommit commit = rm.addFile(NOTEBOOK_REPO_NAME, id+".json", notebookData);
 			rm.addNoteToCommit(NOTEBOOK_REPO_NAME, commit, notebookMetadata);
-		} catch (IOException | GitAPIException e) {
+		} catch (Exception e) {
 			setError(e.toString());
 			return;
 		}
