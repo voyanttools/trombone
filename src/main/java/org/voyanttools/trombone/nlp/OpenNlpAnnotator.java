@@ -61,7 +61,12 @@ public class OpenNlpAnnotator implements NlpAnnotator {
 		params.setParameter("noOthers", "true");
 		params.setParameter("docId", indexedDocument.getId());
 		DocumentTokens documentTokens = new DocumentTokens(corpusMapper.getStorage(), params);
-		documentTokens.run(corpusMapper);
+		try {
+			documentTokens.run(corpusMapper);
+		} catch (Exception e) {
+			// TODO sometimes corpusMapper.getLuceneIdFromDocumentId with this ID fails??
+			System.out.println("OpenNlpAnnotator error with: "+indexedDocument.getId());
+		}
 		
 		List<DocumentToken> tokens = documentTokens.getDocumentTokens();
 		String[] strings = tokens.stream()
