@@ -16,6 +16,7 @@ import org.voyanttools.trombone.model.CorpusNgram;
 import org.voyanttools.trombone.model.DocumentNgram;
 import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.tool.util.Message;
 import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.FlexibleQueue;
@@ -61,14 +62,18 @@ public class CorpusNgrams extends AbstractTerms implements ConsumptiveTool {
 	@Override
 	protected void runQueries(CorpusMapper corpusMapper, Keywords stopwords, String[] queries) throws IOException {
 		DocumentNgrams documentNgrams = getDocumentNgrams(corpusMapper.getCorpus());
+		documentNgrams.setStartTime();
 		List<DocumentNgram> docNgrams = documentNgrams.getNgrams(corpusMapper, stopwords, queries);
+		transferDocumentNgramsMessages(documentNgrams);
 		addFromDocumentNgrams(docNgrams, corpusMapper.getCorpus().size());
 	}
 	
 	@Override
 	protected void runAllTerms(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
 		DocumentNgrams documentNgrams = getDocumentNgrams(corpusMapper.getCorpus());
+		documentNgrams.setStartTime();
 		List<DocumentNgram> docNgrams = documentNgrams.getNgrams(corpusMapper, stopwords);
+		transferDocumentNgramsMessages(documentNgrams);
 		addFromDocumentNgrams(docNgrams, corpusMapper.getCorpus().size());
 	}
 	
@@ -122,6 +127,14 @@ public class CorpusNgrams extends AbstractTerms implements ConsumptiveTool {
 		return this.ngrams;
 	}
 	
+	private void transferDocumentNgramsMessages(DocumentNgrams documentNgrams) {
+		if (documentNgrams.hasMessages()) {
+			for (Message msg : documentNgrams.getMessages()) {
+				message(msg.clone());
+			}
+		}
+	}
+	
 	public static class CorpusNgramsConverter implements Converter {
 
 		@Override
@@ -132,6 +145,8 @@ public class CorpusNgrams extends AbstractTerms implements ConsumptiveTool {
 		@Override
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			CorpusNgrams corpusNgrams = (CorpusNgrams) source;
+
+			corpusNgrams.writeMessages(writer, context);
 			
 			ToolSerializer.startNode(writer, "total", Integer.class);
 			writer.setValue(String.valueOf(corpusNgrams.total));

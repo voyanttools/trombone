@@ -43,4 +43,7 @@ public class Message {
 		this.lineNumber = lineNumber;
 	}
 
+	public Message clone() {
+		return new Message(this.type, this.code, this.message, this.className, this.methodName, this.lineNumber);
+	}
 }

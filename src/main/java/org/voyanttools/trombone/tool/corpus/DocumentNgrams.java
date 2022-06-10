@@ -43,6 +43,7 @@ import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.model.DocumentNgram;
 import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.tool.util.Message;
 import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.FlexibleQueue;
@@ -73,6 +74,14 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 	@XStreamOmitField
 	private int maxLength;
 	
+	@XStreamOmitField
+	private long startTime;
+	
+	// this tool can get very memory intensive so limit it by time elapsed
+	// TODO limit by term count or memory usage?
+	@XStreamOmitField
+	private long MAX_RUN_TIME_MILLI = 60000;
+		
 	private List<DocumentNgram> ngrams = new ArrayList<DocumentNgram>();
 	
 	@XStreamOmitField
@@ -97,21 +106,25 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 		minRawFreq = parameters.getParameterIntValue("minRawFreq", 2);
 		DocumentNgram.Sort sort = DocumentNgram.Sort.getForgivingly(parameters);
 		comparator = DocumentNgram.getComparator(sort);
+//		if (limit==Integer.MAX_VALUE) { // don't allow no limit
+//			message(Message.Type.WARN, "mandatoryLimit", "This tool can't be called with no limit to the number of correlations, so the limit has been set to 5,000");
+//			limit = 5000;
+//		}
 	}
 	
 	@Override
 	public float getVersion() {
 		return super.getVersion()+3;
 	}
-	
 
 	@Override
 	protected void runQueries(CorpusMapper corpusMapper, Keywords stopwords, String[] queries) throws IOException {
+		this.setStartTime();
 		this.ngrams = getNgrams(corpusMapper, stopwords, queries);
 	}
 	
 
-	List<DocumentNgram> getNgrams(CorpusMapper corpusMapper, Keywords stopwords, String[] queries) throws IOException {
+	protected List<DocumentNgram> getNgrams(CorpusMapper corpusMapper, Keywords stopwords, String[] queries) throws IOException {
 
 		Map<String, SpanQuery> queriesMap = getCategoriesAwareSpanQueryMap(corpusMapper, queries);
 
@@ -178,6 +191,7 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 			}
 			
 			// we need to go through our first list to see if any of them are long enough
+//			System.out.println("ngrams: "+ngrams.size()+", termInfo: "+sparseSimplifiedTermInfoArray.length);
 			List<DocumentNgram> nextNgrams = getNextNgrams(ngrams, sparseSimplifiedTermInfoArray, docIndexInCorpus, 2);
 			for (DocumentNgram ngram : ngrams) {
 				if (ngram.getLength()>=minLength && ngram.getLength()<=maxLength) {
@@ -200,6 +214,7 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 
 	@Override
 	protected void runAllTerms(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
+		this.setStartTime();
 		this.ngrams.addAll(getNgrams(corpusMapper, stopwords));
 	}
 
@@ -237,6 +252,7 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 			}
 			
 			List<DocumentNgram> ngrams = getNgramsFromStringPositions(stringPositionsMap, corpusDocumentIndex, 1);
+//			System.out.println("ngrams: "+ngrams.size()+", termInfo: "+sparseSimplifiedTermInfoArray.length);
 			ngrams = getNextNgrams(ngrams, sparseSimplifiedTermInfoArray, corpusDocumentIndex, 2);
 			
 			ngrams = filter.getFilteredNgrams(ngrams, lastToken);
@@ -276,10 +292,17 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 			}
 		}
 		List<DocumentNgram> newngrams = getNgramsFromStringPositions(stringPositionsMap, corpusDocumentIndex, length);
-		if (newngrams.isEmpty()==false) {
-			newngrams.addAll(getNextNgrams(newngrams, sparseSimplifiedTermInfoArray, corpusDocumentIndex, length+1));
+		long currTime = System.currentTimeMillis();
+		long diffTime = currTime - startTime;
+		if (diffTime >= MAX_RUN_TIME_MILLI) {
+			message(Message.Type.WARN, "maxTime", "This tool has exceeded the maximum run time.");
+			return newngrams;
+		} else {
+			if (newngrams.isEmpty()==false) {
+				newngrams.addAll(getNextNgrams(newngrams, sparseSimplifiedTermInfoArray, corpusDocumentIndex, length+1));
+			}
+			return newngrams;
 		}
-		return newngrams;
 	}
 	
 
@@ -359,14 +382,17 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 			BytesRef term = termsEnum.next();
 			if (term!=null) {
 				String termString = term.utf8ToString();
-				//if (stopwords.isKeyword(termString)) {continue;} // treat as whitespace or punctuation
+				//if (stopwords.isKeyword(termString)) {continue;} // treat as whitespace or punctuation // TODO why are stopwords not used??
 				PostingsEnum postingsEnum = termsEnum.postings(null, PostingsEnum.OFFSETS);
 				while(postingsEnum.nextDoc() != PostingsEnum.NO_MORE_DOCS) {
 					int freq = postingsEnum.freq();
 					for (int i=0, len = freq; i<len; i++) {
 						int pos = postingsEnum.nextPosition();
-						new SimplifiedTermInfo(termString, pos, 1, freq, postingsEnum.startOffset(), postingsEnum.endOffset());
-						simplifiedTermInfoArray[pos] = freq>1 ? new SimplifiedTermInfo(termString, pos, 1, freq, postingsEnum.startOffset(), postingsEnum.endOffset())  : new SimplifiedTermInfo(""); // empty string if not repeating
+						if (freq > 1) {
+							simplifiedTermInfoArray[pos] = new SimplifiedTermInfo(termString, pos, 1, freq, postingsEnum.startOffset(), postingsEnum.endOffset());
+						} else {
+							simplifiedTermInfoArray[pos] = new SimplifiedTermInfo(""); // empty string if not repeating	
+						}
 					}
 				}
 			}
@@ -384,6 +410,10 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 		}
 	}
 
+	protected void setStartTime() {
+		startTime = System.currentTimeMillis();
+	}
+	
 
 	private interface OverlapFilter {
 		List<DocumentNgram> getFilteredNgrams(List<DocumentNgram> ngrams, int lastToken);
@@ -469,6 +499,8 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 		@Override
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			DocumentNgrams documentNgrams = (DocumentNgrams) source;
+			
+			documentNgrams.writeMessages(writer, context);
 			
 			// TODO total is never updated
 			ToolSerializer.startNode(writer, "total", Integer.class);

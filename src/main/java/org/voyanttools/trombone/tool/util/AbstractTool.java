@@ -98,6 +98,17 @@ public abstract class AbstractTool implements RunnableTool {
 	}
 	
 	/**
+	 * Add an already created message to the list
+	 * @param msg The message
+	 */
+	protected void message(Message msg) {
+		if (messages==null) {
+			messages = new ArrayList<Message>();
+		}
+		messages.add(msg);
+	}
+	
+	/**
 	 * Determine if this tool has any messages.
 	 * @return whether or not this tool has any messages
 	 */
