@@ -12,6 +12,7 @@ import org.voyanttools.trombone.model.DocumentTerm;
 import org.voyanttools.trombone.model.DocumentTermsCorrelation;
 import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.tool.util.Message;
 import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.FlexibleQueue;
@@ -34,14 +35,30 @@ public class DocumentTermCorrelations extends AbstractTerms {
 	
 	private List<DocumentTermsCorrelation> correlations;
 	
+	@XStreamOmitField
+	private long startTime;
+	
+	@XStreamOmitField
+	private long MAX_RUN_TIME_MILLI = 60000;
+	
 	public DocumentTermCorrelations(Storage storage, FlexibleParameters parameters) {
 		super(storage, parameters);
 		distributionBins = parameters.getParameterIntValue("bins", 10);
 		correlations = new ArrayList<DocumentTermsCorrelation>();
+		if (limit==Integer.MAX_VALUE) { // don't allow no limit
+			message(Message.Type.WARN, "mandatoryLimit", "This tool can't be called with no limit to the number of correlations, so the limit has been set to 10,000");
+			limit = 10000;
+		}
 	}
 	
 	public float getVersion() {
 		return super.getVersion()+2;
+	}
+	
+	@Override
+	public void run(CorpusMapper corpusMapper) throws IOException {
+		this.startTime = System.currentTimeMillis();
+		super.run(corpusMapper);
 	}
 
 	@Override
@@ -84,6 +101,7 @@ public class DocumentTermCorrelations extends AbstractTerms {
 		FlexibleParameters params = new FlexibleParameters();
 		params.setParameter("withDistributions", "relative");
 		params.setParameter("minRawFreq", 2);
+//		params.setParameter("perDocLimit", limit); // TODO consider setting perDocLimit instead of using max time limit
 		if (id!=null) {params.setParameter("docId", id);}
 		return new DocumentTerms(storage, params);
 	}
@@ -93,8 +111,11 @@ public class DocumentTermCorrelations extends AbstractTerms {
 		Comparator<DocumentTermsCorrelation> comparator = DocumentTermsCorrelation.getComparator(DocumentTermsCorrelation.Sort.getForgivingly(parameters));
 		FlexibleQueue<DocumentTermsCorrelation> queue = new FlexibleQueue<DocumentTermsCorrelation>(comparator, start+limit);
 		SimpleRegression regression = new SimpleRegression();
+		boolean maxTimeHit = false;
 		for (DocumentTerm outer : outerList) {
+			if (maxTimeHit) break;
 			for (DocumentTerm inner : innerList) {
+				if (maxTimeHit) break;
 				if (outer.getDocId().equals(inner.getDocId())==false) {continue;} // different docs, maybe from querying
 				if (outer.equals(inner)) {continue;} // same word
 				if (!half || (half && outer.getTerm().compareTo(inner.getTerm())>0)) {
@@ -105,6 +126,14 @@ public class DocumentTermCorrelations extends AbstractTerms {
 						regression.addData(outerCounts[i], innerCounts[i]);
 					}
 					queue.offer(new DocumentTermsCorrelation(inner, outer, (float) regression.getR(), (float) regression.getSignificance()));
+					if (total % 10 == 0) {
+						long currTime = System.currentTimeMillis();
+						long diffTime = currTime - startTime;
+						if (diffTime >= MAX_RUN_TIME_MILLI) {
+							message(Message.Type.WARN, "maxTime", "This tool has exceeded the maximum run time.");
+							maxTimeHit = true;
+						}
+					}
 					total++;
 				}
 			}
@@ -128,6 +157,8 @@ public class DocumentTermCorrelations extends AbstractTerms {
 		@Override
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			DocumentTermCorrelations documentTermCorrelations = (DocumentTermCorrelations) source;
+			
+			documentTermCorrelations.writeMessages(writer, context);
 			
 			ToolSerializer.startNode(writer, "total", Integer.class);
 			writer.setValue(String.valueOf(documentTermCorrelations.getTotal()));

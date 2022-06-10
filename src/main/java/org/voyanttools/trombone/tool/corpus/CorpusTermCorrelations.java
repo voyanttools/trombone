@@ -26,6 +26,7 @@ import org.voyanttools.trombone.util.NumberUtils;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -43,6 +44,12 @@ public class CorpusTermCorrelations extends AbstractTerms {
 	private List<CorpusTermsCorrelation> correlations = new ArrayList<CorpusTermsCorrelation>();
 	
 	private float minInDocumentsCountRatio;
+	
+	@XStreamOmitField
+	private long startTime;
+	
+	@XStreamOmitField
+	private long MAX_RUN_TIME_MILLI = 60000;
 
 	/**
 	 * @param storage
@@ -60,6 +67,13 @@ public class CorpusTermCorrelations extends AbstractTerms {
 	public float getVersion() {
 		return super.getVersion()+3;
 	}
+	
+	@Override
+	public void run(CorpusMapper corpusMapper) throws IOException {
+		this.startTime = System.currentTimeMillis();
+		super.run(corpusMapper);
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.voyanttools.trombone.tool.corpus.AbstractTerms#runQueries(org.voyanttools.trombone.lucene.CorpusMapper, org.voyanttools.trombone.model.Keywords, java.lang.String[])
 	 */
@@ -82,9 +96,12 @@ public class CorpusTermCorrelations extends AbstractTerms {
 		SimpleRegression regression = new SimpleRegression();
 		Comparator<CorpusTermsCorrelation> comparator = CorpusTermsCorrelation.getComparator(CorpusTermsCorrelation.Sort.getForgivingly(parameters));
 		FlexibleQueue<CorpusTermsCorrelation> queue = new FlexibleQueue<CorpusTermsCorrelation>(comparator, start+limit);
+		boolean maxTimeHit = false;
 		for (CorpusTerm outer : outerList) {
+			if (maxTimeHit) break;
 			if ((outer.getInDocumentsCount()*100)/docsCount<minInDocumentsCountRatio) {continue;}
 			for (CorpusTerm inner : innerList) {
+				if (maxTimeHit) break;
 				if ((inner.getInDocumentsCount()*100)/docsCount<minInDocumentsCountRatio) {continue;}
 				if (outer.getTerm().equals(inner.getTerm())==true) {continue;}
 				if (!half || (half && outer.getTerm().compareTo(inner.getTerm())>0)) {
@@ -94,6 +111,14 @@ public class CorpusTermCorrelations extends AbstractTerms {
 						regression.addData(outerCounts[i], innerCounts[i]);
 					}
 					queue.offer(new CorpusTermsCorrelation(inner, outer, (float) regression.getR(), (float) regression.getSignificance()));
+					if (total % 10 == 0) {
+						long currTime = System.currentTimeMillis();
+						long diffTime = currTime - startTime;
+						if (diffTime >= MAX_RUN_TIME_MILLI) {
+							message(Message.Type.WARN, "maxTime", "This tool has exceeded the maximum run time.");
+							maxTimeHit = true;
+						}
+					}
 					total++;
 				}
 			}
@@ -151,7 +176,7 @@ public class CorpusTermCorrelations extends AbstractTerms {
 			
 			corpusTermCorrelations.writeMessages(writer, context);
 
-	        ToolSerializer.startNode(writer, "total", Integer.class);
+			ToolSerializer.startNode(writer, "total", Integer.class);
 			writer.setValue(String.valueOf(corpusTermCorrelations.getTotal()));
 			ToolSerializer.endNode(writer);
 			
@@ -165,7 +190,7 @@ public class CorpusTermCorrelations extends AbstractTerms {
 			
 			ToolSerializer.startNode(writer, "correlations", Map.class);
 			for (CorpusTermsCorrelation corpusTermCorrelation : corpusTermCorrelations.correlations) {
-		        context.convertAnother(corpusTermCorrelation);
+				context.convertAnother(corpusTermCorrelation);
 			}
 			ToolSerializer.endNode(writer);
 		}
