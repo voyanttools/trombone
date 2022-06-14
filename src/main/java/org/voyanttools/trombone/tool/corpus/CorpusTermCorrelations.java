@@ -49,7 +49,13 @@ public class CorpusTermCorrelations extends AbstractTerms {
 	private long startTime;
 	
 	@XStreamOmitField
-	private long MAX_RUN_TIME_MILLI = 60000;
+	private static long maxRunTimeMilliseconds = -1;
+	
+	@XStreamOmitField
+	private final static String LIMIT_ENTRY = "termCorrelationsMaxTime";
+	
+	@XStreamOmitField
+	private final static long DEFAULT_MAX_RUN_TIME = 20000;
 
 	/**
 	 * @param storage
@@ -61,6 +67,14 @@ public class CorpusTermCorrelations extends AbstractTerms {
 		if (limit==Integer.MAX_VALUE) { // don't allow no limit
 			message(Message.Type.WARN, "mandatoryLimit", "This tool can't be called with no limit to the number of correlations, so the limit has been set to 10,000");
 			limit = 10000;
+		}
+		if (CorpusTermCorrelations.maxRunTimeMilliseconds == -1) {
+			try {
+				String limit = this.getToolLimits(LIMIT_ENTRY);
+				CorpusTermCorrelations.maxRunTimeMilliseconds = Long.parseLong(limit);
+			} catch (Exception e) {
+				CorpusTermCorrelations.maxRunTimeMilliseconds = DEFAULT_MAX_RUN_TIME;
+			}
 		}
 	}
 
@@ -114,7 +128,7 @@ public class CorpusTermCorrelations extends AbstractTerms {
 					if (total % 10 == 0) {
 						long currTime = System.currentTimeMillis();
 						long diffTime = currTime - startTime;
-						if (diffTime >= MAX_RUN_TIME_MILLI) {
+						if (diffTime >= maxRunTimeMilliseconds) {
 							message(Message.Type.WARN, "maxTime", "This tool has exceeded the maximum run time.");
 							maxTimeHit = true;
 						}

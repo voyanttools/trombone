@@ -23,6 +23,7 @@ package org.voyanttools.trombone.tool.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -66,6 +68,9 @@ public abstract class AbstractTool implements RunnableTool {
 	
 	@XStreamOmitField
 	private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
+	
+	@XStreamOmitField
+	public static String LIMITS_FILE_PATH = "/org/voyanttools/trombone/limits/config.properties";
 	
 	/**
 	 * @param storage 
@@ -226,6 +231,21 @@ public abstract class AbstractTool implements RunnableTool {
 			ToolSerializer.startNode(writer, "messages", List.class);
 			context.convertAnother(this.getMessages());
 			ToolSerializer.endNode(writer);
+		}
+	}
+	
+	/**
+	 * Get the specified entry from the tool limits config
+	 * @param limitsEntry
+	 * @return
+	 * @throws IOException
+	 */
+	protected String getToolLimits(String limitsEntry) throws IOException {
+		Properties prop = new Properties();
+		try(InputStream inputStream = AbstractTool.class.getResourceAsStream(LIMITS_FILE_PATH)) {
+			// TODO cache file?
+			prop.load(inputStream);
+			return prop.getProperty(limitsEntry);
 		}
 	}
 }

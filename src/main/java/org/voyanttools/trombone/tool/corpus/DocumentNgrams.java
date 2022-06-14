@@ -77,10 +77,14 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 	@XStreamOmitField
 	private long startTime;
 	
-	// this tool can get very memory intensive so limit it by time elapsed
-	// TODO limit by term count or memory usage?
 	@XStreamOmitField
-	private long MAX_RUN_TIME_MILLI = 60000;
+	private static long maxRunTimeMilliseconds = -1;
+	
+	@XStreamOmitField
+	private final static String LIMIT_ENTRY = "documentNgramsMaxTime";
+	
+	@XStreamOmitField
+	private final static long DEFAULT_MAX_RUN_TIME = 10000;
 		
 	private List<DocumentNgram> ngrams = new ArrayList<DocumentNgram>();
 	
@@ -106,10 +110,14 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 		minRawFreq = parameters.getParameterIntValue("minRawFreq", 2);
 		DocumentNgram.Sort sort = DocumentNgram.Sort.getForgivingly(parameters);
 		comparator = DocumentNgram.getComparator(sort);
-//		if (limit==Integer.MAX_VALUE) { // don't allow no limit
-//			message(Message.Type.WARN, "mandatoryLimit", "This tool can't be called with no limit to the number of correlations, so the limit has been set to 5,000");
-//			limit = 5000;
-//		}
+		if (DocumentNgrams.maxRunTimeMilliseconds == -1) {
+			try {
+				String limit = this.getToolLimits(LIMIT_ENTRY);
+				DocumentNgrams.maxRunTimeMilliseconds = Long.parseLong(limit);
+			} catch (Exception e) {
+				DocumentNgrams.maxRunTimeMilliseconds = DEFAULT_MAX_RUN_TIME;
+			}
+		}
 	}
 	
 	@Override
@@ -218,7 +226,7 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 		this.ngrams.addAll(getNgrams(corpusMapper, stopwords));
 	}
 
-	List<DocumentNgram> getNgrams(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
+	protected List<DocumentNgram> getNgrams(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
 		Corpus corpus = corpusMapper.getCorpus();
 		int[] totalTokens = corpus.getLastTokenPositions(tokenType);
 		FlexibleQueue<DocumentNgram> queue = new FlexibleQueue<DocumentNgram>(comparator, start+limit);
@@ -294,7 +302,7 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 		List<DocumentNgram> newngrams = getNgramsFromStringPositions(stringPositionsMap, corpusDocumentIndex, length);
 		long currTime = System.currentTimeMillis();
 		long diffTime = currTime - startTime;
-		if (diffTime >= MAX_RUN_TIME_MILLI) {
+		if (diffTime >= maxRunTimeMilliseconds) {
 			message(Message.Type.WARN, "maxTime", "This tool has exceeded the maximum run time.");
 			return newngrams;
 		} else {
@@ -486,7 +494,7 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 	}
 
 
-	List<DocumentNgram> getNgrams() {
+	protected List<DocumentNgram> getNgrams() {
 		return ngrams;
 	}
 	
