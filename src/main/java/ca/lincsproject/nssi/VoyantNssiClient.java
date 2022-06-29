@@ -67,7 +67,7 @@ public class VoyantNssiClient {
 			clientSecret = nssiConfig[0];
 		}
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-			final HttpPost httpPost = new HttpPost("https://keycloak.stage.lincsproject.ca/auth/realms/lincs/protocol/openid-connect/token");
+			final HttpPost httpPost = new HttpPost("https://keycloak.lincsproject.ca/auth/realms/lincs/protocol/openid-connect/token");
 
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("client_id", "voyant"));
@@ -90,7 +90,7 @@ public class VoyantNssiClient {
 		
 		if (debug) System.out.println("submitting job");
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-			final HttpPost httpPost = new HttpPost("https://api.nssi.stage.lincsproject.ca/api/jobs");
+			final HttpPost httpPost = new HttpPost("https://api.nssi.lincsproject.ca/api/jobs");
 			httpPost.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
 			
 			JSONObject jsonBody = new JSONObject();
@@ -162,7 +162,7 @@ public class VoyantNssiClient {
 	public static JobStatus getJobStatus(int jobId) throws IOException {
 		if (debug) System.out.println("checking job: "+jobId);
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-			final HttpGet httpGet = new HttpGet("https://api.nssi.stage.lincsproject.ca/api/jobs/"+jobId);
+			final HttpGet httpGet = new HttpGet("https://api.nssi.lincsproject.ca/api/jobs/"+jobId);
 			httpGet.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
 			
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -191,7 +191,7 @@ public class VoyantNssiClient {
 	public static boolean cancelJob(int jobId) throws IOException {
 		if (debug) System.out.println("cancelling job: "+jobId);
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-			final HttpPut httpPut = new HttpPut("https://api.nssi.stage.lincsproject.ca/api/jobs/"+jobId+"/actions/cancel");
+			final HttpPut httpPut = new HttpPut("https://api.nssi.lincsproject.ca/api/jobs/"+jobId+"/actions/cancel");
 			httpPut.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
 			
 			try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
@@ -213,7 +213,7 @@ public class VoyantNssiClient {
 	public static List<DocumentEntity> getJobResults(int jobId) throws IOException {
 		if (debug) System.out.println("getting results: "+jobId);
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-			final HttpGet httpGet = new HttpGet("https://api.nssi.stage.lincsproject.ca/api/results/"+WORKFLOW+"/"+jobId);
+			final HttpGet httpGet = new HttpGet("https://api.nssi.lincsproject.ca/api/results/"+WORKFLOW+"/"+jobId);
 			httpGet.setHeader("Authorization", "Bearer "+VoyantNssiClient.accessToken);
 			
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
