@@ -171,21 +171,21 @@ public class XmlExtractor implements Extractor, Serializable {
 			
 			String resourcePath = "/org/voyanttools/trombone/input-formats/"+guessedFormatString.toLowerCase()+".xml";
 			try (InputStream is = this.getClass().getResourceAsStream(resourcePath)) {
-				properties.loadFromXML(is);
-				if (localParameters.getParameterBooleanValue("splitDocuments")) {
+				if (is != null) {
+					properties.loadFromXML(is);
+					if (localParameters.getParameterBooleanValue("splitDocuments")) {
+						for (String key : properties.stringPropertyNames()) {
+							if (key.contains(".splitDocuments")) {
+								localParameters.setParameter(key.split("\\.")[0], properties.getProperty(key)); // overwrite prefix key
+							}
+						}
+					}
 					for (String key : properties.stringPropertyNames()) {
-						if (key.contains(".splitDocuments")) {
-							localParameters.setParameter(key.split("\\.")[0], properties.getProperty(key)); // overwrite prefix key
+						if (localParameters.getParameterValue(key,"").isEmpty()==true) {
+							localParameters.setParameter(key, properties.getProperty(key));
 						}
 					}
 				}
-				for (String key : properties.stringPropertyNames()) {
-					if (localParameters.getParameterValue(key,"").isEmpty()==true) {
-						localParameters.setParameter(key, properties.getProperty(key));
-					}
-				}
-			} catch (IOException e) {
-				throw new IOException("Unable to find local input format", e);
 			}
 		}
 		

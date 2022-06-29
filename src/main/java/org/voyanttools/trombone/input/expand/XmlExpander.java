@@ -167,12 +167,12 @@ class XmlExpander implements Expander {
 			String resourcePath = "/org/voyanttools/trombone/input-formats/"+guessedFormatString.toLowerCase()+".xml";
 			Properties properties = new Properties();
 			try (InputStream is = this.getClass().getResourceAsStream(resourcePath)) {
-				properties.loadFromXML(is);
-				if (properties.containsKey("xmlDocumentsXpath")) {
-					xmlDocumentsXpath = properties.getProperty("xmlDocumentsXpath");
+				if (is != null) {
+					properties.loadFromXML(is);
+					if (properties.containsKey("xmlDocumentsXpath")) {
+						xmlDocumentsXpath = properties.getProperty("xmlDocumentsXpath");
+					}
 				}
-			} catch (IOException e) {
-				throw new IOException("Unable to find local input format", e);
 			}
 		}
 
