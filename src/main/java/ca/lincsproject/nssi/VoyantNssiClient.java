@@ -67,7 +67,7 @@ public class VoyantNssiClient {
 			clientSecret = nssiConfig[0];
 		}
 		try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-			final HttpPost httpPost = new HttpPost("https://keycloak.lincsproject.ca/auth/realms/lincs/protocol/openid-connect/token");
+			final HttpPost httpPost = new HttpPost("https://keycloak.lincsproject.ca/realms/lincs/protocol/openid-connect/token");
 
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("client_id", "voyant"));
