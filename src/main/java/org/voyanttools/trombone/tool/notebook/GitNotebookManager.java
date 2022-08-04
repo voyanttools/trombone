@@ -112,6 +112,10 @@ public class GitNotebookManager extends AbstractTool {
 			doSave();
 		}
 		
+		else if (action.equals("delete")) {
+			doDelete();
+		}
+		
 		// CHECK IF NOTEBOOK EXISTS
 		else if (action.equals("exists")) {
 			id = parameters.getParameterValue("id","");
@@ -311,16 +315,41 @@ public class GitNotebookManager extends AbstractTool {
 					return;
 				}
 			}
+	
+	private void doDelete() throws IOException {
+		if (isRequestAuthentic() == false) {
+			setError("Inauthentic call.");
+			return;
+		}
+		
+		String userId = parameters.getParameterValue("spyral-id");
+		if (userId == null) {
+			setError("No Spyral account detected. Please sign in.");
+			return;
+		}
+		
+		String notebookId = parameters.getParameterValue("id","");
+		if (notebookId.trim().isEmpty()) {
+			setError("No notebook ID specified!");
+			return;
+		}
+		
+		RepositoryManager rm = getRepositoryManager();
+		if (doesNotebookFileExist(rm, notebookId+".json")) {
+			try {
+				rm.removeFile(NOTEBOOK_REPO_NAME, notebookId+".json");
+			} catch (Exception e) {
+				setError(e.toString());
+				return;
+			}
 		}
 		
 		try {
-			RevCommit commit = rm.addFile(NOTEBOOK_REPO_NAME, id+".json", notebookData);
-			rm.addNoteToCommit(NOTEBOOK_REPO_NAME, commit, notebookMetadata);
-		} catch (Exception e) {
+			removeNotebookFromIndex(notebookId);
+		} catch (IOException e) {
 			setError(e.toString());
 			return;
 		}
-		indexNotebook(new StoredNotebookSource(id, notebookData, notebookMetadata), false);
 	}
 
 	private RepositoryManager getRepositoryManager() throws IOException {
@@ -354,10 +383,8 @@ public class GitNotebookManager extends AbstractTool {
 		}
 	}
 	
-	private boolean doesNotebookFileExist(RepositoryManager rm, String filename) throws IOException, GitAPIException {
-		try (Repository notebookRepo = rm.getRepository(NOTEBOOK_REPO_NAME)) {
-			return RepositoryManager.doesRepositoryFileExist(notebookRepo, filename);
-		}
+	private boolean doesNotebookFileExist(RepositoryManager rm, String filename) {
+		return rm.doesFileExist(NOTEBOOK_REPO_NAME, filename);
 	}
 	
 	private String getAccessCodeFile(RepositoryManager rm, String filename) throws IOException, GitAPIException {
@@ -504,6 +531,22 @@ public class GitNotebookManager extends AbstractTool {
 			}
 		}
 	}
+	
+	private void removeNotebookFromIndex(String notebookId) throws IOException {
+		IndexWriter indexWriter = storage.getNotebookLuceneManager().getIndexWriter(""); // note: do not close the indexWriter
+		try (DirectoryReader indexReader = DirectoryReader.open(indexWriter)) {
+			
+			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+			Term notebookIdTerm = new Term("id", notebookId);
+			TopDocs topDocs = indexSearcher.search(new TermQuery(notebookIdTerm), 1);
+			if (topDocs.totalHits>0) {
+				indexWriter.deleteDocuments(notebookIdTerm);
+			} else {
+				throw new IOException("Unable to remove notebook from index. Notebook not found: "+notebookId);
+			}
+		}
+	}
+	
 	
 	private class StoredNotebookSource {
 		private String notebookId;
