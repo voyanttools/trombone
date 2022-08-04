@@ -80,7 +80,7 @@ public class GitNotebookManager extends AbstractTool {
 	private final static String KEY_FILE_PATH = "/org/voyanttools/trombone/spyral/key.txt";
 	
 	public static final List<String> multivalueFields = Arrays.asList(new String[]{"keywords"}); // used for facets when indexing notebook
-	public static final List<String> metadataFieldsToIndex = Arrays.asList(new String[]{"userId", "author", "title", "created", "modified", "keywords", "license", "language", "description"});
+	public static final List<String> metadataFieldsToIndex = Arrays.asList(new String[]{"userId", "author", "title", "created", "modified", "keywords", "license", "language", "description", "catalogue"});
 	public static final List<String> metadataFieldsToTokenize = Arrays.asList(new String[]{"title", "keywords", "description"});
 	
 	@XStreamOmitField
@@ -120,12 +120,7 @@ public class GitNotebookManager extends AbstractTool {
 		else if (action.equals("exists")) {
 			id = parameters.getParameterValue("id","");
 			if (id.trim().isEmpty() == false) {
-				try {
-					data = doesNotebookFileExist(rm, id+".json") ? "true" : "false";
-				} catch (Exception e) {
-					setError(e.toString());
-					return;
-				}
+				data = doesNotebookFileExist(rm, id+".json") ? "true" : "false";
 			} else {
 				setError("No notebook ID provided.");
 				return;
@@ -306,15 +301,22 @@ public class GitNotebookManager extends AbstractTool {
 		} else {
 			while(true) {
 				id = userId + NOTEBOOK_ID_SEPARATOR + RandomStringUtils.randomAlphanumeric(6);
-				try {
-					if (doesNotebookFileExist(rm, id+".json") == false) {
-						break;
-					}
-				} catch (GitAPIException e) {
-					setError(e.toString());
-					return;
+				if (doesNotebookFileExist(rm, id+".json") == false) {
+					break;
 				}
 			}
+		}
+		
+		try {
+			RevCommit commit = rm.addFile(NOTEBOOK_REPO_NAME, id+".json", notebookData);
+			rm.addNoteToCommit(NOTEBOOK_REPO_NAME, commit, notebookMetadata);
+		} catch (Exception e) {
+			setError(e.toString());
+			return;
+		}
+		
+		indexNotebook(new StoredNotebookSource(id, notebookData, notebookMetadata), false);
+	}
 	
 	private void doDelete() throws IOException {
 		if (isRequestAuthentic() == false) {
@@ -501,7 +503,7 @@ public class GitNotebookManager extends AbstractTool {
 		IndexWriter indexWriter = storage.getNotebookLuceneManager().getIndexWriter(""); // note: do not close the indexWriter
 		try (DirectoryReader indexReader = DirectoryReader.open(indexWriter)) {
 			
-			IndexSearcher indexSearcher = new IndexSearcher(indexReader);	
+			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 			
 			int processors = Runtime.getRuntime().availableProcessors();
 			ExecutorService executor;
@@ -647,6 +649,20 @@ public class GitNotebookManager extends AbstractTool {
 							JsonValue jsonValue = jsonParser.getValue();
 							
 							switch (jsonValue.getValueType()) {
+								case TRUE:
+									document.add(new SortedSetDocValuesFacetField(facet, "true"));
+									if (doIndex) {
+										System.out.println("adding: "+key+", true");
+										document.add(new StringField(key, "true", Field.Store.YES));
+									}
+									break;
+								case FALSE:
+									document.add(new SortedSetDocValuesFacetField(facet, "false"));
+									if (doIndex) {
+										System.out.println("adding: "+key+", false");
+										document.add(new StringField(key, "false", Field.Store.YES));
+									}
+									break;
 								case ARRAY:
 									JsonArray jsonArray = jsonValue.asJsonArray();
 									for (JsonValue val : jsonArray) {

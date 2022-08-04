@@ -229,6 +229,14 @@ public class NotebookFinder extends AbstractTool {
 				writer.setValue(doc.get("modified"));
 				writer.endNode();
 				
+				String catVal = doc.get("catalogue");
+				if (catVal == null) {
+					catVal = "false";
+				}
+				ToolSerializer.startNode(writer, "catalogue", Boolean.class);
+				writer.setValue(catVal);
+				ToolSerializer.endNode(writer);
+				
 				writer.endNode();
 				total++;
 			}
