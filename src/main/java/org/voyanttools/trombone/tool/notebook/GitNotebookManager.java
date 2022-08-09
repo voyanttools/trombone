@@ -71,7 +71,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 @XStreamAlias("notebook")
 public class GitNotebookManager extends AbstractTool {
 	
-	private final static String ID_AND_CODE_TEMPLATE = "^[A-Za-z0-9-]{4,32}$"; // regex for matching notebook id and access code
+	private final static String NOTEBOOK_NAME_TEMPLATE = "^[A-Za-z0-9-]{4,32}$"; // regex for matching notebook name
 	
 	private final static String GITHUB_USERNAME_TEMPLATE = "^[a-z\\d](?:[a-z\\d]|-(?=[a-z\\d])){0,38}$"; // regex for matching github username
 	
@@ -116,6 +116,7 @@ public class GitNotebookManager extends AbstractTool {
 			doSave();
 		}
 		
+		// DELETE NOTEBOOK
 		else if (action.equals("delete")) {
 			doDelete();
 		}
@@ -125,26 +126,6 @@ public class GitNotebookManager extends AbstractTool {
 			id = parameters.getParameterValue("id","");
 			if (id.trim().isEmpty() == false) {
 				data = doesNotebookFileExist(rm, id+".json") ? "true" : "false";
-			} else {
-				setError("No notebook ID provided.");
-				return;
-			}
-		}
-		
-		// CHECK IF ACCESS CODE EXISTS
-		else if (action.equals("protected")) {
-			id = parameters.getParameterValue("id","");
-			if (id.trim().isEmpty() == false) {
-				try {
-					String accessCode = getAccessCodeFile(rm, id);
-					if (accessCode.isEmpty()) {
-						data = "false";
-					} else {
-						data = "true";
-					}
-				} catch (IOException | GitAPIException e) {
-					data = "false";
-				}
 			} else {
 				setError("No notebook ID provided.");
 				return;
@@ -297,7 +278,7 @@ public class GitNotebookManager extends AbstractTool {
 		
 		if (parameters.getParameterValue("name","").trim().isEmpty()==false) {
 			String name = parameters.getParameterValue("name");
-			if (name.matches(ID_AND_CODE_TEMPLATE) == false) {
+			if (name.matches(NOTEBOOK_NAME_TEMPLATE) == false) {
 				setError("Notebook ID does not conform to template.");
 				return;
 			}
@@ -401,7 +382,7 @@ public class GitNotebookManager extends AbstractTool {
 		}
 		
 		String notebook = parts[1];
-		if (notebook.matches(ID_AND_CODE_TEMPLATE) == false) return false;
+		if (notebook.matches(NOTEBOOK_NAME_TEMPLATE) == false) return false;
 		
 		return true;
 	}
@@ -418,12 +399,6 @@ public class GitNotebookManager extends AbstractTool {
 	
 	private boolean doesNotebookFileExist(RepositoryManager rm, String filename) {
 		return rm.doesFileExist(NOTEBOOK_REPO_NAME, filename);
-	}
-	
-	private String getAccessCodeFile(RepositoryManager rm, String filename) throws IOException, GitAPIException {
-		try (Repository notebookRepo = rm.getRepository(NOTEBOOK_REPO_NAME)) {
-			return RepositoryManager.getRepositoryFile(notebookRepo, filename);
-		}
 	}
 	
 	// from: https://stackoverflow.com/a/17625095
