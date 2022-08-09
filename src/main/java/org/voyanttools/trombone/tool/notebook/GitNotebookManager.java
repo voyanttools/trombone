@@ -73,7 +73,11 @@ public class GitNotebookManager extends AbstractTool {
 	
 	private final static String ID_AND_CODE_TEMPLATE = "^[A-Za-z0-9-]{4,32}$"; // regex for matching notebook id and access code
 	
+	private final static String GITHUB_USERNAME_TEMPLATE = "^[a-z\\d](?:[a-z\\d]|-(?=[a-z\\d])){0,38}$"; // regex for matching github username
+	
 	private final static String NOTEBOOK_REPO_NAME = "notebook";
+	
+	private final static String USERNAME_SEPARATOR = "@";
 	
 	private final static String NOTEBOOK_ID_SEPARATOR = "_";
 	
@@ -336,6 +340,11 @@ public class GitNotebookManager extends AbstractTool {
 			return;
 		}
 		
+		if (isNotebookIdAuthentic(notebookId) == false) {
+			setError("Bad notebook ID!");
+			return;
+		}
+		
 		RepositoryManager rm = getRepositoryManager();
 		if (doesNotebookFileExist(rm, notebookId+".json")) {
 			try {
@@ -373,6 +382,28 @@ public class GitNotebookManager extends AbstractTool {
 			}
 		}
 		return repoManager;
+	}
+	
+	private boolean isNotebookIdAuthentic(String notebookId) {
+		String[] parts = notebookId.split(NOTEBOOK_ID_SEPARATOR);
+		if (parts.length == 1) return false;
+		
+		String[] usernameAndProvider = parts[0].split(USERNAME_SEPARATOR);
+		if (usernameAndProvider.length == 1) return false;
+		else {
+			String username = usernameAndProvider[0];
+			String provider = usernameAndProvider[1];
+			if (provider.equals("gh")) {
+				if (username.matches(GITHUB_USERNAME_TEMPLATE) == false) return false;
+			} else {
+				return false;
+			}
+		}
+		
+		String notebook = parts[1];
+		if (notebook.matches(ID_AND_CODE_TEMPLATE) == false) return false;
+		
+		return true;
 	}
 	
 	// checks the key in the parameters to see if it matches the key in the local key file
