@@ -326,6 +326,11 @@ public class GitNotebookManager extends AbstractTool {
 			return;
 		}
 		
+		if (notebookId.startsWith(userId) == false) {
+			setError("Not authorized!");
+			return;
+		}
+		
 		RepositoryManager rm = getRepositoryManager();
 		if (doesNotebookFileExist(rm, notebookId+".json")) {
 			try {
