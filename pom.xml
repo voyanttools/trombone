@@ -88,9 +88,6 @@
 	</distributionManagement>
 
 	<dependencies>
-		<!-- <dependency> <groupId>org.apache.directory.studio</groupId> <artifactId>org.apache.commons.codec</artifactId> 
-			<version>1.6</version> </dependency> <dependency> <groupId>org.apache.directory.studio</groupId> 
-			<artifactId>org.apache.commons.io</artifactId> <version>2.1</version> </dependency> -->
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
@@ -99,7 +96,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
-			<version>9.4.44.v20210927</version>
+			<version>9.4.48.v20220622</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -124,8 +121,6 @@
 			<artifactId>tika-parsers</artifactId>
 			<version>1.28.1</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.apache.lucene</groupId> <artifactId>lucene-core</artifactId> 
-			<version>6.1.0</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-facet</artifactId>
@@ -141,8 +136,6 @@
 			<artifactId>lucene-queryparser</artifactId>
 			<version>6.2.1</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.apache.lucene</groupId> <artifactId>lucene-analyzers-common</artifactId> 
-			<version>6.1.0</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers-smartcn</artifactId>
