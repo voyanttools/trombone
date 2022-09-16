@@ -184,8 +184,8 @@ public class XmlExtractor implements Extractor, Serializable {
 						localParameters.setParameter(key, properties.getProperty(key));
 					}
 				}
-			} catch (IOException e) {
-				throw new IOException("Unable to find local input format", e);
+			} catch (IOException|NullPointerException e) {
+				// silently catch exceptions for unknown input formats
 			}
 		}
 		
