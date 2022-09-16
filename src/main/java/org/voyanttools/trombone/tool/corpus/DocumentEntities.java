@@ -365,7 +365,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		
 		int luceneDoc = corpusMapper.getLuceneIdFromDocumentId(indexedDocument.getId());
 		// TODO: check that we can assume that offsets align regardless of TokenType
-		Terms terms = corpusMapper.getLeafReader().getTermVector(luceneDoc, TokenType.lexical.name()); 
+		Terms terms = corpusMapper.getIndexReader().getTermVector(luceneDoc, TokenType.lexical.name()); 
 		TermsEnum termsEnum = terms.iterator();
 		while(true) {
 			// go through all terms
