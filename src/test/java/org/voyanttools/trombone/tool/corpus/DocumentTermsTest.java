@@ -112,7 +112,7 @@ public class DocumentTermsTest {
 		
 		parameters.setParameter("query", "dar*");
 		documentTermFrequencies = new DocumentTerms(storage, parameters);
-		documentTermFrequencies.run();		
+		documentTermFrequencies.run();
 		documentTerms = documentTermFrequencies.getDocumentTerms();
 		assertEquals(1, documentTerms.size());
 		documentTerm = documentTerms.get(0);
@@ -122,7 +122,7 @@ public class DocumentTermsTest {
 		
 		parameters.setParameter("query", "it was");
 		documentTermFrequencies = new DocumentTerms(storage, parameters);
-		documentTermFrequencies.run();		
+		documentTermFrequencies.run();
 		// we sort by reverse frequency by default
 		documentTerms = documentTermFrequencies.getDocumentTerms();
 		assertEquals(2, documentTerms.size());
@@ -137,34 +137,34 @@ public class DocumentTermsTest {
 		
 		parameters.removeParameter("query");
 		documentTermFrequencies = new DocumentTerms(storage, parameters);
-		documentTermFrequencies.run();		
+		documentTermFrequencies.run();
 		documentTerms = documentTermFrequencies.getDocumentTerms();
 		assertEquals(14, documentTerms.size());
 		documentTerm = documentTerms.get(0);
-		assertEquals("it", documentTerm.getTerm());
+		assertEquals("was", documentTerm.getTerm());
 		assertEquals(2, documentTerm.getRawFrequency());
 		
 		parameters.setParameter("limit", 1);
 		documentTermFrequencies = new DocumentTerms(storage, parameters);
-		documentTermFrequencies.run();		
+		documentTermFrequencies.run();
 		documentTerms = documentTermFrequencies.getDocumentTerms();
 		assertEquals(1, documentTerms.size());
 		documentTerm = documentTerms.get(0);
-		assertEquals("it", documentTerm.getTerm());
+		assertEquals("was", documentTerm.getTerm());
 		assertEquals(2, documentTerm.getRawFrequency());
 		
 		parameters.setParameter("start", 1);
 		documentTermFrequencies = new DocumentTerms(storage, parameters);
-		documentTermFrequencies.run();		
+		documentTermFrequencies.run();
 		documentTerms = documentTermFrequencies.getDocumentTerms();
 		assertEquals(1, documentTerms.size());
 		documentTerm = documentTerms.get(0);
-		assertEquals("of", documentTerm.getTerm());
+		assertEquals("times", documentTerm.getTerm());
 		assertEquals(2, documentTerm.getRawFrequency());
 		
 		parameters.setParameter("start", 50);
 		documentTermFrequencies = new DocumentTerms(storage, parameters);
-		documentTermFrequencies.run();		
+		documentTermFrequencies.run();
 		documentTerms = documentTermFrequencies.getDocumentTerms();
 		assertEquals(0, documentTerms.size());
 		
@@ -173,13 +173,13 @@ public class DocumentTermsTest {
 		parameters.removeParameter("start");
 		parameters.removeParameter("limit");
 		documentTermFrequencies = new DocumentTerms(storage, parameters);
-		documentTermFrequencies.run();		
+		documentTermFrequencies.run();
 		documentTerms = documentTermFrequencies.getDocumentTerms();
 		assertEquals(6, documentTerms.size());
 		documentTerm = documentTerms.get(0);
 		assertEquals("times", documentTerm.getTerm());
 		documentTerm = documentTerms.get(documentTerms.size()-1);
-		assertEquals("worst", documentTerm.getTerm());
+		assertEquals("best", documentTerm.getTerm());
 		
 		storage.destroy();
 		
