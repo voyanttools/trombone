@@ -559,7 +559,7 @@ public class GitNotebookManager extends AbstractTool {
 			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 			Term notebookIdTerm = new Term("id", notebookId);
 			TopDocs topDocs = indexSearcher.search(new TermQuery(notebookIdTerm), 1);
-			if (topDocs.totalHits>0) {
+			if (topDocs.totalHits.value>0) {
 				indexWriter.deleteDocuments(notebookIdTerm);
 			} else {
 				throw new IOException("Unable to remove notebook from index. Notebook not found: "+notebookId);
@@ -615,7 +615,7 @@ public class GitNotebookManager extends AbstractTool {
 				boolean alreadyIndexed = false;
 				Term notebookIdTerm = new Term("id", notebookId);
 				TopDocs topDocs = indexSearcher.search(new TermQuery(notebookIdTerm), 1);
-				if (topDocs.totalHits>0) {
+				if (topDocs.totalHits.value>0) {
 					alreadyIndexed = true;
 					System.out.println("Re-Indexing: "+notebookId);
 				} else {
