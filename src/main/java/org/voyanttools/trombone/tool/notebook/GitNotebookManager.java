@@ -507,6 +507,10 @@ public class GitNotebookManager extends AbstractTool {
 		error = JSONValue.escape(errorString);
 	}
 	
+	public String getData() {
+		return data;
+	}
+	
 	private void indexNotebook(StoredNotebookSource notebook, boolean useExecutor) throws IOException {
 		List<StoredNotebookSource> notebooks = new ArrayList<StoredNotebookSource>();
 		notebooks.add(notebook);

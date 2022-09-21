@@ -2,12 +2,10 @@ package org.voyanttools.trombone.tool.notebook;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.lucene.facet.LabelAndValue;
 import org.junit.Test;
 import org.voyanttools.trombone.storage.Storage;
@@ -22,21 +20,10 @@ public class CatalogueFacetsTest {
 	public void test() throws IOException {
 		FileStorage storage = new FileStorage(TestHelper.getTemporaryTestStorageDirectory());
 		
-		index(storage);
+		GitNotebookManagerTest.reindex(storage);
 		test(storage);
 		
 		storage.destroy();
-	}
-
-	private void index(FileStorage storage) throws IOException {
-		File notebookFile = TestHelper.getResource("json/notebook.json");
-		File notebookStorage = new File(storage.storageLocation, Storage.Location.notebook.toString());
-		FileUtils.copyFileToDirectory(notebookFile, notebookStorage);
-		
-		FlexibleParameters parameters = new FlexibleParameters();
-		parameters.setParameter("action", "reindex");
-		GitNotebookManager gnm = new GitNotebookManager(storage, parameters);
-		gnm.run();
 	}
 	
 	private void test(Storage storage) throws IOException {
@@ -48,7 +35,8 @@ public class CatalogueFacetsTest {
 		
 		for (Entry<String, LabelAndValue[]> facetResult : facetResults.entrySet()) {
 			if (facetResult.getKey().equals("facet.author")) {
-				assertEquals("Andrew", facetResult.getValue()[0].label);
+				LabelAndValue[] lav = facetResult.getValue();
+				assertEquals("Andrew", lav[0].label);
 			}
 		}
 	}
