@@ -453,7 +453,7 @@ public class GitNotebookManager extends AbstractTool {
 			return null;
 		}
 		
-		StringBuilder metadata = new StringBuilder("{\"id\":\""+notebookId+"\"");
+		StringBuilder metadata = new StringBuilder("{");
 		
 		JsonObject jobject = getJsonObjectForKey(notebookJson, "metadata");
 		if (jobject != null) {
@@ -466,18 +466,21 @@ public class GitNotebookManager extends AbstractTool {
 					} catch (Exception e2) {
 						// need try statement for missing / non-array keywords
 					}
-					metadata.append(",\""+e_key+"\":"+value+"");
+					metadata.append("\""+e_key+"\":"+value+",");
+				} else if (e_key.equals("catalogue")) {
+					Boolean value = Boolean.parseBoolean(entry.getValue().toString());
+					metadata.append("\""+e_key+"\":"+value+",");
 				} else {
 					String value = ((JsonString) entry.getValue()).getString();
 					if (e_key.equals("title") || e_key.equals("description")) {
 						value = value.replaceAll("<\\/?\\w+.*?>", ""); // remove possible tags
 						value = value.replaceAll("\\t|\\n|\\r", " "); // remove tabs, it causes the JsonTokenizer to fail
 					}
-					metadata.append(",\""+e_key+"\":\""+value+"\"");
+					metadata.append("\""+e_key+"\":\""+value+"\",");
 				}
 			}
 		}
-		
+		metadata.deleteCharAt(metadata.length()-1);
 		metadata.append("}");
 		return metadata.toString();
 	}
