@@ -162,17 +162,17 @@ class XmlExpander implements Expander {
 		// check to see if we need to set xmlDocumentsXpath using defaults for format
 		if (xmlDocumentsXpath.isEmpty() && (parameters.getParameterValue("inputFormat","").isEmpty()==false || guessedFormat!=DocumentFormat.UNKNOWN)) {
 			
-			String guessedFormatString = guessedFormat==DocumentFormat.UNKNOWN ? parameters.getParameterValue("inputFormat","") : guessedFormat.name();			
+			String guessedFormatString = guessedFormat==DocumentFormat.UNKNOWN ? parameters.getParameterValue("inputFormat","") : guessedFormat.name();	
 			
 			String resourcePath = "/org/voyanttools/trombone/input-formats/"+guessedFormatString.toLowerCase()+".xml";
 			Properties properties = new Properties();
 			try (InputStream is = this.getClass().getResourceAsStream(resourcePath)) {
-				if (is != null) {
-					properties.loadFromXML(is);
-					if (properties.containsKey("xmlDocumentsXpath")) {
-						xmlDocumentsXpath = properties.getProperty("xmlDocumentsXpath");
-					}
+				properties.loadFromXML(is);
+				if (properties.containsKey("xmlDocumentsXpath")) {
+					xmlDocumentsXpath = properties.getProperty("xmlDocumentsXpath");
 				}
+			} catch (IOException|NullPointerException e) {
+				// silently catch exceptions for unknown input formats
 			}
 		}
 

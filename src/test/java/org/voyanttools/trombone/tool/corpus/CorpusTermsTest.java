@@ -79,36 +79,36 @@ public class CorpusTermsTest {
 		assertEquals(2, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
 		assertEquals("was", corpusTerm.getTerm());
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals(3, corpusTerm.getRawFrequency());
 		corpusTerm = corpusTerms.get(1);
 		assertEquals("worst", corpusTerm.getTerm());
-		assertEquals(1, corpusTerm.getRawFreq());
+		assertEquals(1, corpusTerm.getRawFrequency());
 		
 		// we're expanding the term here
 		parameters.setParameter("query", "dar*");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
 		assertEquals("dar*", corpusTerm.getTerm());
-		assertEquals(1, corpusTerm.getRawFreq());
+		assertEquals(1, corpusTerm.getRawFrequency());
 		
 		// we're expanding the term here, but term is empty
 		parameters.setParameter("query", "darrrrr*");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
 		assertEquals("darrrrr*", corpusTerm.getTerm());
-		assertEquals(0, corpusTerm.getRawFreq());
+		assertEquals(0, corpusTerm.getRawFrequency());
 		
 		parameters.setParameter("query", "\"it was\"");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		// we sort by reverse frequency by default
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
@@ -116,12 +116,12 @@ public class CorpusTermsTest {
 		corpusTerm = corpusTerms.get(0);
 //		assertEquals(1, corpusTerm.getDocumentIndex());
 		assertEquals("\"it was\"", corpusTerm.getTerm());
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals(3, corpusTerm.getRawFrequency());
 
 		// phrase with no quotes (treated as a phrase)
 		parameters.setParameter("query", "it was");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		// we sort by reverse frequency by default
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
@@ -129,7 +129,7 @@ public class CorpusTermsTest {
 		corpusTerm = corpusTerms.get(0);
 //		assertEquals(1, corpusTerm.getDocumentIndex());
 		assertEquals("\"it was\"", corpusTerm.getTerm());
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals(3, corpusTerm.getRawFrequency());
 
 
 		// we don't want "document" from the first document
@@ -140,7 +140,7 @@ public class CorpusTermsTest {
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
-		assertEquals(0, corpusTerm.getRawFreq());
+		assertEquals(0, corpusTerm.getRawFrequency());
 		
 		parameters.setParameter("withDistributions", "true");
 		parameters.setParameter("query", "document");
@@ -150,31 +150,31 @@ public class CorpusTermsTest {
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
-		assertEquals(0, corpusTerm.getRawFreq());
+		assertEquals(0, corpusTerm.getRawFrequency());
 		
 		parameters.setParameter("query", "it");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals(3, corpusTerm.getRawFrequency());
 		parameters.removeParameter("withDistributions");
 		
 		parameters.setParameter("query", "dar*");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
 		assertEquals("dar*", corpusTerm.getTerm());
-		assertEquals(1, corpusTerm.getRawFreq());
+		assertEquals(1, corpusTerm.getRawFrequency());
 
 		parameters.setParameter("query", "\"it was\"");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		// we sort by reverse frequency by default
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
@@ -182,12 +182,12 @@ public class CorpusTermsTest {
 		corpusTerm = corpusTerms.get(0);
 //		assertEquals(1, corpusTerm.getDocumentIndex());
 		assertEquals("\"it was\"", corpusTerm.getTerm());
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals(3, corpusTerm.getRawFrequency());
 
 // TODO: this should work but doesn't!!
 //		parameters.setParameter("query", "\"it wa*\"");
 //		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-//		corpusTermFrequencies.run();		
+//		corpusTermFrequencies.run();
 //		assertEquals(1, corpusTermFrequencies.getTotal());
 //		// we sort by reverse frequency by default
 //		corpusTerms = corpusTermFrequencies.getCorpusTerms();
@@ -195,12 +195,12 @@ public class CorpusTermsTest {
 //		corpusTerm = corpusTerms.get(0);
 ////		assertEquals(1, corpusTerm.getDocumentIndex());
 //		assertEquals("\"it wa*\"", corpusTerm.getTerm());
-//		assertEquals(3, corpusTerm.getRawFreq());
+//		assertEquals(3, corpusTerm.getRawFrequency());
 		
 		// phrase with no quotes (treated as a phrase)
 		parameters.setParameter("query", "it was");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		// we sort by reverse frequency by default
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
@@ -208,49 +208,49 @@ public class CorpusTermsTest {
 		corpusTerm = corpusTerms.get(0);
 //		assertEquals(1, corpusTerm.getDocumentIndex());
 		assertEquals("\"it was\"", corpusTerm.getTerm());
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals(3, corpusTerm.getRawFrequency());
 		
 		parameters.setParameter("query", "d[a-z]rk");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
 		assertEquals("d[a-z]rk", corpusTerm.getTerm());
-		assertEquals(1, corpusTerm.getRawFreq());
+		assertEquals(1, corpusTerm.getRawFrequency());
 
 		// regex with wildcard
 		parameters.setParameter("query", "d[a-z]rk*");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
 		assertEquals("d[a-z]rk*", corpusTerm.getTerm());
-		assertEquals(1, corpusTerm.getRawFreq());
+		assertEquals(1, corpusTerm.getRawFrequency());
 
 		// two terms must occur
 		parameters.setParameter("query", "+best +times");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
 		assertEquals("+best +times", corpusTerm.getTerm());
-		assertEquals(1, corpusTerm.getRawFreq());
+		assertEquals(1, corpusTerm.getRawFrequency());
 		
 		parameters.setParameter("minRawFreq", 2); // should have no effect for query
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
 		assertEquals("+best +times", corpusTerm.getTerm());
-		assertEquals(1, corpusTerm.getRawFreq());
+		assertEquals(1, corpusTerm.getRawFrequency());
 		
 		// all terms 
 		parameters.removeParameter("minRawFreq"); // now set to minimum of 2, so two terms left
@@ -268,8 +268,8 @@ public class CorpusTermsTest {
 		}
 		
 		corpusTerm = corpusTerms.get(0);
-		assertEquals("it", corpusTerm.getTerm());
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals("was", corpusTerm.getTerm());
+		assertEquals(3, corpusTerm.getRawFrequency());
 
 		
 		parameters.setParameter("minRawFreq", 0); // set to default of 0, same result
@@ -307,8 +307,8 @@ public class CorpusTermsTest {
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
-		assertEquals("it", corpusTerm.getTerm());
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals("was", corpusTerm.getTerm());
+		assertEquals(3, corpusTerm.getRawFrequency());
 
 		// start 1, limit 1
 		parameters.setParameter("start", "1");
@@ -318,8 +318,8 @@ public class CorpusTermsTest {
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
-		assertEquals("was", corpusTerm.getTerm());
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals("it", corpusTerm.getTerm());
+		assertEquals(3, corpusTerm.getRawFrequency());
 
 		// start 50, limit 1 (empty)
 		parameters.setParameter("start", "50");
@@ -371,9 +371,9 @@ public class CorpusTermsTest {
 		corpusTermFrequencies.run();
 		assertEquals(3, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
-		assertEquals(2, corpusTerms.get(0).getRawFreq()); // neither document has light
-		assertEquals(1, corpusTerms.get(1).getRawFreq()); // dark occurs in 1
-		assertEquals(0, corpusTerms.get(2).getRawFreq()); // was occurs in both
+		assertEquals(2, corpusTerms.get(0).getRawFrequency()); // neither document has light
+		assertEquals(1, corpusTerms.get(1).getRawFrequency()); // dark occurs in 1
+		assertEquals(0, corpusTerms.get(2).getRawFrequency()); // was occurs in both
 		assertEquals(3, corpusTerms.size());
 		
 		// testing with not – for now only concerned with inDocumentsCountOnly
@@ -385,9 +385,9 @@ public class CorpusTermsTest {
 		corpusTermFrequencies.run();
 		assertEquals(3, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
-		assertEquals(2, corpusTerms.get(0).getRawFreq()); // neither document has light
-		assertEquals(1, corpusTerms.get(1).getRawFreq()); // dark occurs in 1
-		assertEquals(0, corpusTerms.get(2).getRawFreq()); // was occurs in both
+		assertEquals(2, corpusTerms.get(0).getRawFrequency()); // neither document has light
+		assertEquals(1, corpusTerms.get(1).getRawFrequency()); // dark occurs in 1
+		assertEquals(0, corpusTerms.get(2).getRawFrequency()); // was occurs in both
 		assertEquals(3, corpusTerms.size());
 		
 		// testing with not – for now only concerned with inDocumentsCountOnly
@@ -399,9 +399,9 @@ public class CorpusTermsTest {
 		corpusTermFrequencies.run();
 		assertEquals(3, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
-		assertEquals(2, corpusTerms.get(0).getRawFreq()); // neither document has light
-		assertEquals(1, corpusTerms.get(1).getRawFreq()); // dark occurs in 1
-		assertEquals(0, corpusTerms.get(2).getRawFreq()); // was occurs in both
+		assertEquals(2, corpusTerms.get(0).getRawFrequency()); // neither document has light
+		assertEquals(1, corpusTerms.get(1).getRawFrequency()); // dark occurs in 1
+		assertEquals(0, corpusTerms.get(2).getRawFrequency()); // was occurs in both
 		assertEquals(3, corpusTerms.size());
 		
 		
@@ -415,7 +415,7 @@ public class CorpusTermsTest {
 		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
-		assertEquals(2, corpusTerms.get(0).getRawFreq()); // neither document has light
+		assertEquals(2, corpusTerms.get(0).getRawFrequency()); // neither document has light
 		assertEquals(1, corpusTerms.size());
 		
 		
@@ -428,7 +428,7 @@ public class CorpusTermsTest {
 		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
-		assertEquals(1, corpusTerms.get(0).getRawFreq()); // neither document has light
+		assertEquals(1, corpusTerms.get(0).getRawFrequency()); // neither document has light
 		assertEquals(1, corpusTerms.size());
 		
 		// test comparison corpus
@@ -526,25 +526,25 @@ public class CorpusTermsTest {
 		// try was with no explicit tokentype
 		parameters.setParameter("query", "was");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
 		assertEquals("was", corpusTerm.getTerm());
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals(3, corpusTerm.getRawFrequency());
 		
 		// try was with explicit token type
 		parameters.setParameter("query", "was");
 		parameters.setParameter("tokenType", "lexical");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
-		corpusTermFrequencies.run();		
+		corpusTermFrequencies.run();
 		assertEquals(1, corpusTermFrequencies.getTotal());
 		corpusTerms = corpusTermFrequencies.getCorpusTerms();
 		assertEquals(1, corpusTerms.size());
 		corpusTerm = corpusTerms.get(0);
 		assertEquals("was", corpusTerm.getTerm());
-		assertEquals(3, corpusTerm.getRawFreq());
+		assertEquals(3, corpusTerm.getRawFrequency());
 
 	}
 

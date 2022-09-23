@@ -101,6 +101,23 @@ public class RepositoryManager {
 		}
 	}
 	
+	public RevCommit removeFile(String repoName, String filename) throws IOException, GitAPIException {
+		if (doesFileExist(repoName, filename)) {
+			try (Git git = new Git(getRepository(repoName))) {
+				git.rm().addFilepattern(filename).call();
+				RevCommit commit = git.commit().setMessage("Removed file: "+filename).call();
+				return commit;
+			}
+		} else {
+			throw new IOException("File does not exist: "+filename);
+		}
+	}
+	
+	public boolean doesFileExist(String repoName, String filename) {
+		File file = new File(storageLocation, repoName+File.separator+filename);
+		return file.exists();
+	}
+	
 	public Note addNoteToCommit(String repoName, RevCommit commit, String noteContent) throws IOException, GitAPIException {
 		try (Git git = new Git(getRepository(repoName))) {
 			Note note = git.notesAdd().setMessage(noteContent).setObjectId(commit).call();

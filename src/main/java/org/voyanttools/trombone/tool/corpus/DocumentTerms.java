@@ -196,7 +196,8 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 
 	
 	private void runAllTermsFromDocumentTermVectors(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
-		FlexibleQueue<DocumentTerm> queue = new FlexibleQueue<DocumentTerm>(comparator, start+limit);
+		int size = start+limit;
+		FlexibleQueue<DocumentTerm> queue = new FlexibleQueue<DocumentTerm>(comparator, size);
 		LeafReader reader = corpusMapper.getLeafReader();
 		Corpus corpus = corpusMapper.getCorpus();
 		CorpusTermMinimalsDB corpusTermMinimalsDB = CorpusTermMinimalsDB.getInstance(corpusMapper, tokenType);
@@ -208,7 +209,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 		float[] typesCountStdDev = corpus.getTypesCountStdDevs(tokenType);
 		for (int doc : corpusMapper.getLuceneIds()) {
 			if (!docIdBitSet.get(doc)) {continue;}
-			FlexibleQueue<DocumentTerm> docQueue = new FlexibleQueue<DocumentTerm>(comparator, limit*docIdBitSet.length());
+			FlexibleQueue<DocumentTerm> docQueue = new FlexibleQueue<DocumentTerm>(comparator, size);
 			int documentPosition = corpusMapper.getDocumentPositionFromLuceneId(doc);
 			String docId = corpusMapper.getDocumentIdFromLuceneId(doc);
 			float mean = typesCountMeans[documentPosition];

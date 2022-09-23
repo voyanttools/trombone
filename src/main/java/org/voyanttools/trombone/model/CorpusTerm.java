@@ -178,6 +178,8 @@ public class CorpusTerm implements Serializable {
 			return RawFrequencyAscendingComparator;
 		case TERMASC:
 			return TermAscendingComparator;
+		case TERMDESC:
+			return TermDescendingComparator;
 		case RELATIVEPEAKEDNESSASC:
 			return RelativePeakednessAscendingComparator;
 		case RELATIVEPEAKEDNESSDESC:
@@ -186,8 +188,6 @@ public class CorpusTerm implements Serializable {
 			return RelativeSkewnessAscendingComparator;
 		case RELATIVESKEWNESSDESC:
 			return RelativeSkewnessDescendingComparator;
-		case TERMDESC:
-			return TermDescendingComparator;
 		case INDOCUMENTSCOUNTASC:
 			return InDocumentsCountAscendingComparator;
 		case INDOCUMENTSCOUNTDESC:
@@ -204,7 +204,7 @@ public class CorpusTerm implements Serializable {
 	private static Comparator<CorpusTerm> TermAscendingComparator = new Comparator<CorpusTerm>() {
 		@Override
 		public int compare(CorpusTerm term1, CorpusTerm term2) {
-			int i = term2.getNormalizedTerm().compareTo(term1.getNormalizedTerm());
+			int i = term1.getNormalizedTerm().compareTo(term2.getNormalizedTerm());
 			if (i==0) {
 				return term1.rawFreq - term2.rawFreq;
 			}
@@ -215,9 +215,9 @@ public class CorpusTerm implements Serializable {
 	private static Comparator<CorpusTerm> TermDescendingComparator = new Comparator<CorpusTerm>() {
 		@Override
 		public int compare(CorpusTerm term1, CorpusTerm term2) {
-			int i = term1.getNormalizedTerm().compareTo(term2.getNormalizedTerm());
+			int i = term2.getNormalizedTerm().compareTo(term1.getNormalizedTerm());
 			if (i==0) {
-				return term1.rawFreq - term2.rawFreq;
+				return term2.rawFreq - term1.rawFreq;
 			}
 			return i;
 		}
@@ -228,7 +228,7 @@ public class CorpusTerm implements Serializable {
 		@Override
 		public int compare(CorpusTerm term1, CorpusTerm term2) {
 			if (term1.rawFreq==term2.rawFreq) {
-				return term1.getNormalizedTerm().compareTo(term2.getNormalizedTerm());
+				return term2.getNormalizedTerm().compareTo(term1.getNormalizedTerm());
 			}
 			else {
 				return term2.rawFreq - term1.rawFreq;
@@ -242,7 +242,7 @@ public class CorpusTerm implements Serializable {
 		@Override
 		public int compare(CorpusTerm term1, CorpusTerm term2) {
 			if (term1.rawFreq==term2.rawFreq) {
-				return term2.getNormalizedTerm().compareTo(term1.getNormalizedTerm());
+				return term1.getNormalizedTerm().compareTo(term2.getNormalizedTerm());
 			}
 			else {
 				return term1.rawFreq - term2.rawFreq;
@@ -267,7 +267,7 @@ public class CorpusTerm implements Serializable {
 		@Override
 		public int compare(CorpusTerm term1, CorpusTerm term2) {
 			if (term1.inDocumentsCount==term2.inDocumentsCount) {
-				return term1.getNormalizedTerm().compareTo(term2.getNormalizedTerm());
+				return term2.getNormalizedTerm().compareTo(term1.getNormalizedTerm());
 			}
 			else {
 				return term2.inDocumentsCount - term1.inDocumentsCount;
@@ -284,7 +284,7 @@ public class CorpusTerm implements Serializable {
 			float f1 = term1.getPeakedness();
 			float f2 = term2.getPeakedness();
 			if (f1==f2) {
-				return RawFrequencyDescendingComparator.compare(term1, term2);
+				return RawFrequencyAscendingComparator.compare(term1, term2);
 			}
 			else {
 				return Float.compare(f1, f2);
@@ -329,7 +329,7 @@ public class CorpusTerm implements Serializable {
 			float f1 = term1.getSkewness();
 			float f2 = term2.getSkewness();
 			if (f1==f2) {
-				return RawFrequencyDescendingComparator.compare(term1, term2);
+				return RawFrequencyAscendingComparator.compare(term1, term2);
 			}
 			else {
 				return Float.compare(f1, f2);
@@ -359,7 +359,7 @@ public class CorpusTerm implements Serializable {
 			float f1 = term1.getComparisonCorpusRelativeFrequencyDifference();
 			float f2 = term2.getComparisonCorpusRelativeFrequencyDifference();
 			if (f1==f2) {
-				return RawFrequencyDescendingComparator.compare(term1, term2);
+				return RawFrequencyAscendingComparator.compare(term1, term2);
 			}
 			else {
 				return Float.compare(f1, f2);

@@ -59,19 +59,15 @@ public class CatalogueFacets extends AbstractTool {
 		
 		String[] facetQuery = parameters.getParameterValues("query");
 		
-		Query q;
-		if (facetQuery.length == 0) {
-			q = new MatchAllDocsQuery();
-		} else {
-			FacetsConfig config = new FacetsConfig();
-			q = new DrillDownQuery(config);
-			for (String facet : facetQuery) {
-				String[] keyval = facet.split("=");
-				if (keyval.length == 2) {
-					((DrillDownQuery) q).add(keyval[0], keyval[1]);
-				}
+		FacetsConfig config = new FacetsConfig();
+		Query q = new DrillDownQuery(config);
+		for (String facet : facetQuery) {
+			String[] keyval = facet.split("=");
+			if (keyval.length == 2) {
+				((DrillDownQuery) q).add(keyval[0], keyval[1]);
 			}
 		}
+		((DrillDownQuery) q).add("facet.catalogue", "true");
 		
 		String[] facetFields = parameters.getParameterValues("facets", defaultFacetFields);
 		

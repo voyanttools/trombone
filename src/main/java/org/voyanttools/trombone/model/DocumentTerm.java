@@ -158,12 +158,12 @@ public class DocumentTerm {
 		switch (sort) {
 		case RAWFREQASC:
 			return RawFrequencyAscendingComparator;
+		case RAWFREQDESC:
+			return RawFrequencyDescendingComparator;
 		case TERMASC:
 			return TermAscendingComparator;
 		case TERMDESC:
 			return TermDescendingComparator;
-		case RAWFREQDESC:
-			return RawFrequencyDescendingComparator;
 		case RELATIVEFREQASC:
 			return RelativeFrequencyAscendingComparator;
 		case TFIDFASC:
@@ -183,30 +183,8 @@ public class DocumentTerm {
 		public int compare(DocumentTerm term1, DocumentTerm term2) {
 			if (term2.getTerm().equals(term1.getTerm())) {
 				if (term1.relativeFreq==term2.relativeFreq) {
-					if (term1.rawFreq==term2.rawFreq) { // 
-						return Integer.compare(term2.docIndex, term1.docIndex);
-					}
-					else {
-						return Integer.compare(term1.rawFreq, term2.rawFreq);
-					}
-				}
-				else {
-					return Float.compare(term1.relativeFreq, term2.relativeFreq);
-				}
-			}
-			else {
-				return term2.getNormalizedTerm().compareTo(term1.getNormalizedTerm());
-			}
-		}
-	};
-
-	private static Comparator<DocumentTerm> TermDescendingComparator = new Comparator<DocumentTerm>() {
-		@Override
-		public int compare(DocumentTerm term1, DocumentTerm term2) {
-			if (term2.getTerm().equals(term1.getTerm())) {
-				if (term1.relativeFreq==term2.relativeFreq) {
-					if (term1.rawFreq==term2.rawFreq) { // 
-						return Integer.compare(term2.docIndex, term1.docIndex);
+					if (term1.rawFreq==term2.rawFreq) {
+						return Integer.compare(term1.docIndex, term2.docIndex);
 					}
 					else {
 						return Integer.compare(term1.rawFreq, term2.rawFreq);
@@ -222,6 +200,28 @@ public class DocumentTerm {
 		}
 	};
 
+	private static Comparator<DocumentTerm> TermDescendingComparator = new Comparator<DocumentTerm>() {
+		@Override
+		public int compare(DocumentTerm term1, DocumentTerm term2) {
+			if (term2.getTerm().equals(term1.getTerm())) {
+				if (term1.relativeFreq==term2.relativeFreq) {
+					if (term1.rawFreq==term2.rawFreq) {
+						return Integer.compare(term2.docIndex, term1.docIndex);
+					}
+					else {
+						return Integer.compare(term2.rawFreq, term1.rawFreq);
+					}
+				}
+				else {
+					return Float.compare(term2.relativeFreq, term1.relativeFreq);
+				}
+			}
+			else {
+				return term2.getNormalizedTerm().compareTo(term1.getNormalizedTerm());
+			}
+		}
+	};
+
 	private static Comparator<DocumentTerm> RawFrequencyDescendingComparator = new Comparator<DocumentTerm>() {
 
 		@Override
@@ -232,7 +232,7 @@ public class DocumentTerm {
 						return Integer.compare(term2.docIndex, term1.docIndex);
 					}
 					else {
-						return term2.getNormalizedTerm().compareTo(term1.getNormalizedTerm());
+						return TermDescendingComparator.compare(term1, term2);
 					}
 				}
 				else {
@@ -240,7 +240,7 @@ public class DocumentTerm {
 				}
 			}
 			else {
-				return term1.rawFreq - term2.rawFreq;
+				return term2.rawFreq - term1.rawFreq;
 			}
 		}
 		
@@ -253,10 +253,10 @@ public class DocumentTerm {
 			if (term1.rawFreq==term2.rawFreq) {
 				if (term1.relativeFreq==term2.relativeFreq) {
 					if (term2.getTerm().equals(term1.getTerm())) {
-						return Integer.compare(term2.docIndex, term1.docIndex);
+						return Integer.compare(term1.docIndex, term2.docIndex);
 					}
 					else {
-						return term2.getNormalizedTerm().compareTo(term1.getNormalizedTerm());
+						return TermAscendingComparator.compare(term1, term2);
 					}
 				}
 				else {
@@ -264,7 +264,7 @@ public class DocumentTerm {
 				}
 			}
 			else {
-				return term2.rawFreq - term1.rawFreq;
+				return term1.rawFreq - term2.rawFreq;
 			}
 		}
 		
@@ -277,10 +277,10 @@ public class DocumentTerm {
 			if (term1.relativeFreq==term2.relativeFreq) {
 				if (term1.rawFreq==term2.rawFreq) {
 					if (term2.getTerm().equals(term1.getTerm())) {
-						return Integer.compare(term2.docIndex, term1.docIndex);
+						return Integer.compare(term1.docIndex, term2.docIndex);
 					}
 					else {
-						return term2.getNormalizedTerm().compareTo(term1.getNormalizedTerm());
+						return TermAscendingComparator.compare(term1, term2);
 					}
 				}
 				else {
@@ -304,11 +304,11 @@ public class DocumentTerm {
 						return Integer.compare(term2.docIndex, term1.docIndex);
 					}
 					else {
-						return term1.getNormalizedTerm().compareTo(term2.getNormalizedTerm());
+						return TermDescendingComparator.compare(term1, term2);
 					}
 				}
 				else {
-					return Integer.compare(term1.rawFreq, term2.rawFreq);
+					return Integer.compare(term2.rawFreq, term1.rawFreq);
 				}
 			}
 			else {
@@ -325,7 +325,7 @@ public class DocumentTerm {
 			float f1 = term1.getTfIdf();
 			float f2 = term2.getTfIdf();
 			if (f1==f2) {
-				return TermAscendingComparator.compare(term1, term2);
+				return TermDescendingComparator.compare(term1, term2);
 			}
 			else {
 				return Float.compare(f2, f1);
@@ -357,7 +357,7 @@ public class DocumentTerm {
 			float f1 = term1.getZscore();
 			float f2 = term2.getZscore();
 			if (f1==f2) {
-				return TermAscendingComparator.compare(term1, term2);
+				return TermDescendingComparator.compare(term1, term2);
 			}
 			else {
 				return Float.compare(f2, f1);

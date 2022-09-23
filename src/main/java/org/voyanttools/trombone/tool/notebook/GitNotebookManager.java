@@ -71,16 +71,20 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 @XStreamAlias("notebook")
 public class GitNotebookManager extends AbstractTool {
 	
-	private final static String ID_AND_CODE_TEMPLATE = "^[A-Za-z0-9-]{4,32}$"; // regex for matching notebook id and access code
+	private final static String NOTEBOOK_NAME_TEMPLATE = "^[A-Za-z0-9-]{4,32}$"; // regex for matching notebook name
+	
+	private final static String GITHUB_USERNAME_TEMPLATE = "^[a-z\\d](?:[a-z\\d]|-(?=[a-z\\d])){0,38}$"; // regex for matching github username
 	
 	private final static String NOTEBOOK_REPO_NAME = "notebook";
+	
+	private final static String USERNAME_SEPARATOR = "@";
 	
 	private final static String NOTEBOOK_ID_SEPARATOR = "_";
 	
 	private final static String KEY_FILE_PATH = "/org/voyanttools/trombone/spyral/key.txt";
 	
 	public static final List<String> multivalueFields = Arrays.asList(new String[]{"keywords"}); // used for facets when indexing notebook
-	public static final List<String> metadataFieldsToIndex = Arrays.asList(new String[]{"userId", "author", "title", "created", "modified", "keywords", "license", "language", "description"});
+	public static final List<String> metadataFieldsToIndex = Arrays.asList(new String[]{"userId", "author", "title", "created", "modified", "keywords", "license", "language", "description", "catalogue"});
 	public static final List<String> metadataFieldsToTokenize = Arrays.asList(new String[]{"title", "keywords", "description"});
 	
 	@XStreamOmitField
@@ -112,36 +116,16 @@ public class GitNotebookManager extends AbstractTool {
 			doSave();
 		}
 		
+		// DELETE NOTEBOOK
+		else if (action.equals("delete")) {
+			doDelete();
+		}
+		
 		// CHECK IF NOTEBOOK EXISTS
 		else if (action.equals("exists")) {
 			id = parameters.getParameterValue("id","");
 			if (id.trim().isEmpty() == false) {
-				try {
-					data = doesNotebookFileExist(rm, id+".json") ? "true" : "false";
-				} catch (Exception e) {
-					setError(e.toString());
-					return;
-				}
-			} else {
-				setError("No notebook ID provided.");
-				return;
-			}
-		}
-		
-		// CHECK IF ACCESS CODE EXISTS
-		else if (action.equals("protected")) {
-			id = parameters.getParameterValue("id","");
-			if (id.trim().isEmpty() == false) {
-				try {
-					String accessCode = getAccessCodeFile(rm, id);
-					if (accessCode.isEmpty()) {
-						data = "false";
-					} else {
-						data = "true";
-					}
-				} catch (IOException | GitAPIException e) {
-					data = "false";
-				}
+				data = doesNotebookFileExist(rm, id+".json") ? "true" : "false";
 			} else {
 				setError("No notebook ID provided.");
 				return;
@@ -294,7 +278,7 @@ public class GitNotebookManager extends AbstractTool {
 		
 		if (parameters.getParameterValue("name","").trim().isEmpty()==false) {
 			String name = parameters.getParameterValue("name");
-			if (name.matches(ID_AND_CODE_TEMPLATE) == false) {
+			if (name.matches(NOTEBOOK_NAME_TEMPLATE) == false) {
 				setError("Notebook ID does not conform to template.");
 				return;
 			}
@@ -302,13 +286,8 @@ public class GitNotebookManager extends AbstractTool {
 		} else {
 			while(true) {
 				id = userId + NOTEBOOK_ID_SEPARATOR + RandomStringUtils.randomAlphanumeric(6);
-				try {
-					if (doesNotebookFileExist(rm, id+".json") == false) {
-						break;
-					}
-				} catch (GitAPIException e) {
-					setError(e.toString());
-					return;
+				if (doesNotebookFileExist(rm, id+".json") == false) {
+					break;
 				}
 			}
 		}
@@ -320,7 +299,54 @@ public class GitNotebookManager extends AbstractTool {
 			setError(e.toString());
 			return;
 		}
+		
 		indexNotebook(new StoredNotebookSource(id, notebookData, notebookMetadata), false);
+	}
+	
+	private void doDelete() throws IOException {
+		if (isRequestAuthentic() == false) {
+			setError("Inauthentic call.");
+			return;
+		}
+		
+		String userId = parameters.getParameterValue("spyral-id");
+		if (userId == null) {
+			setError("No Spyral account detected. Please sign in.");
+			return;
+		}
+		
+		String notebookId = parameters.getParameterValue("id","");
+		if (notebookId.trim().isEmpty()) {
+			setError("No notebook ID specified!");
+			return;
+		}
+		
+		if (isNotebookIdAuthentic(notebookId) == false) {
+			setError("Bad notebook ID!");
+			return;
+		}
+		
+		if (notebookId.startsWith(userId) == false) {
+			setError("Not authorized!");
+			return;
+		}
+		
+		RepositoryManager rm = getRepositoryManager();
+		if (doesNotebookFileExist(rm, notebookId+".json")) {
+			try {
+				rm.removeFile(NOTEBOOK_REPO_NAME, notebookId+".json");
+			} catch (Exception e) {
+				setError(e.toString());
+				return;
+			}
+		}
+		
+		try {
+			removeNotebookFromIndex(notebookId);
+		} catch (IOException e) {
+			setError(e.toString());
+			return;
+		}
 	}
 
 	private RepositoryManager getRepositoryManager() throws IOException {
@@ -344,6 +370,28 @@ public class GitNotebookManager extends AbstractTool {
 		return repoManager;
 	}
 	
+	private boolean isNotebookIdAuthentic(String notebookId) {
+		String[] parts = notebookId.split(NOTEBOOK_ID_SEPARATOR);
+		if (parts.length == 1) return false;
+		
+		String[] usernameAndProvider = parts[0].split(USERNAME_SEPARATOR);
+		if (usernameAndProvider.length == 1) return false;
+		else {
+			String username = usernameAndProvider[0];
+			String provider = usernameAndProvider[1];
+			if (provider.equals("gh")) {
+				if (username.matches(GITHUB_USERNAME_TEMPLATE) == false) return false;
+			} else {
+				return false;
+			}
+		}
+		
+		String notebook = parts[1];
+		if (notebook.matches(NOTEBOOK_NAME_TEMPLATE) == false) return false;
+		
+		return true;
+	}
+	
 	// checks the key in the parameters to see if it matches the key in the local key file
 	private boolean isRequestAuthentic() throws IOException {
 		try(InputStream inputStream = this.getClass().getResourceAsStream(KEY_FILE_PATH)) {
@@ -354,16 +402,8 @@ public class GitNotebookManager extends AbstractTool {
 		}
 	}
 	
-	private boolean doesNotebookFileExist(RepositoryManager rm, String filename) throws IOException, GitAPIException {
-		try (Repository notebookRepo = rm.getRepository(NOTEBOOK_REPO_NAME)) {
-			return RepositoryManager.doesRepositoryFileExist(notebookRepo, filename);
-		}
-	}
-	
-	private String getAccessCodeFile(RepositoryManager rm, String filename) throws IOException, GitAPIException {
-		try (Repository notebookRepo = rm.getRepository(NOTEBOOK_REPO_NAME)) {
-			return RepositoryManager.getRepositoryFile(notebookRepo, filename);
-		}
+	private boolean doesNotebookFileExist(RepositoryManager rm, String filename) {
+		return rm.doesFileExist(NOTEBOOK_REPO_NAME, filename);
 	}
 	
 	// from: https://stackoverflow.com/a/17625095
@@ -413,7 +453,7 @@ public class GitNotebookManager extends AbstractTool {
 			return null;
 		}
 		
-		StringBuilder metadata = new StringBuilder("{\"id\":\""+notebookId+"\"");
+		StringBuilder metadata = new StringBuilder("{");
 		
 		JsonObject jobject = getJsonObjectForKey(notebookJson, "metadata");
 		if (jobject != null) {
@@ -426,18 +466,21 @@ public class GitNotebookManager extends AbstractTool {
 					} catch (Exception e2) {
 						// need try statement for missing / non-array keywords
 					}
-					metadata.append(",\""+e_key+"\":"+value+"");
+					metadata.append("\""+e_key+"\":"+value+",");
+				} else if (e_key.equals("catalogue")) {
+					Boolean value = Boolean.parseBoolean(entry.getValue().toString());
+					metadata.append("\""+e_key+"\":"+value+",");
 				} else {
 					String value = ((JsonString) entry.getValue()).getString();
 					if (e_key.equals("title") || e_key.equals("description")) {
 						value = value.replaceAll("<\\/?\\w+.*?>", ""); // remove possible tags
 						value = value.replaceAll("\\t|\\n|\\r", " "); // remove tabs, it causes the JsonTokenizer to fail
 					}
-					metadata.append(",\""+e_key+"\":\""+value+"\"");
+					metadata.append("\""+e_key+"\":\""+value+"\",");
 				}
 			}
 		}
-		
+		metadata.deleteCharAt(metadata.length()-1);
 		metadata.append("}");
 		return metadata.toString();
 	}
@@ -464,6 +507,10 @@ public class GitNotebookManager extends AbstractTool {
 		error = JSONValue.escape(errorString);
 	}
 	
+	public String getData() {
+		return data;
+	}
+	
 	private void indexNotebook(StoredNotebookSource notebook, boolean useExecutor) throws IOException {
 		List<StoredNotebookSource> notebooks = new ArrayList<StoredNotebookSource>();
 		notebooks.add(notebook);
@@ -474,7 +521,7 @@ public class GitNotebookManager extends AbstractTool {
 		IndexWriter indexWriter = storage.getNotebookLuceneManager().getIndexWriter(""); // note: do not close the indexWriter
 		try (DirectoryReader indexReader = DirectoryReader.open(indexWriter)) {
 			
-			IndexSearcher indexSearcher = new IndexSearcher(indexReader);	
+			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 			
 			int processors = Runtime.getRuntime().availableProcessors();
 			ExecutorService executor;
@@ -504,6 +551,22 @@ public class GitNotebookManager extends AbstractTool {
 			}
 		}
 	}
+	
+	private void removeNotebookFromIndex(String notebookId) throws IOException {
+		IndexWriter indexWriter = storage.getNotebookLuceneManager().getIndexWriter(""); // note: do not close the indexWriter
+		try (DirectoryReader indexReader = DirectoryReader.open(indexWriter)) {
+			
+			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+			Term notebookIdTerm = new Term("id", notebookId);
+			TopDocs topDocs = indexSearcher.search(new TermQuery(notebookIdTerm), 1);
+			if (topDocs.totalHits>0) {
+				indexWriter.deleteDocuments(notebookIdTerm);
+			} else {
+				throw new IOException("Unable to remove notebook from index. Notebook not found: "+notebookId);
+			}
+		}
+	}
+	
 	
 	private class StoredNotebookSource {
 		private String notebookId;
@@ -604,6 +667,20 @@ public class GitNotebookManager extends AbstractTool {
 							JsonValue jsonValue = jsonParser.getValue();
 							
 							switch (jsonValue.getValueType()) {
+								case TRUE:
+									document.add(new SortedSetDocValuesFacetField(facet, "true"));
+									if (doIndex) {
+										System.out.println("adding: "+key+", true");
+										document.add(new StringField(key, "true", Field.Store.YES));
+									}
+									break;
+								case FALSE:
+									document.add(new SortedSetDocValuesFacetField(facet, "false"));
+									if (doIndex) {
+										System.out.println("adding: "+key+", false");
+										document.add(new StringField(key, "false", Field.Store.YES));
+									}
+									break;
 								case ARRAY:
 									JsonArray jsonArray = jsonValue.asJsonArray();
 									for (JsonValue val : jsonArray) {
