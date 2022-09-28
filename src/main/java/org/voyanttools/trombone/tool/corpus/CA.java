@@ -131,18 +131,16 @@ public class CA extends CorpusAnalysisTool {
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			
 			CA ca = (CA) source;
-	        
+			
 			final List<RawCATerm> caTerms = ca.getAnalysisTerms();
 			
 			ToolSerializer.startNode(writer, "totalTerms", Integer.class);
 			writer.setValue(String.valueOf(caTerms.size()));
 			ToolSerializer.endNode(writer);
 			
-			ToolSerializer.startNode(writer, "dimensions", List.class);
-	        context.convertAnother(ca.ca.getDimensionPercentages());
-	        ToolSerializer.endNode(writer);
+			ToolSerializer.setNumericList(writer, "dimensions", ca.ca.getDimensionPercentages());
 			
-	        AnalysisUtils.outputTerms(caTerms, true, writer, context);
+			AnalysisUtils.outputTerms(caTerms, true, writer, context);
 
 		}
 
