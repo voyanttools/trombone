@@ -176,7 +176,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 	
 					if (freq>=minRawFreq) {
 						total++;
-						float zscore = stdDev != 0 ? ((float) freq - mean / stdDev) : Float.NaN;
+						float zscore = stdDev != 0 ? ((freq - mean) / stdDev) : Float.NaN;
 						DocumentTerm documentTerm = new DocumentTerm(documentPosition, docId, queryString, freq, totalTokenCounts[documentPosition], zscore, positions, null, corpusTermMinimal);
 						docQueue.offer(documentTerm);
 						
@@ -248,7 +248,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 							}
 							if (freq>=minRawFreq) {
 								total++;
-								float zscore = stdDev != 0 ? ((freq-mean) / stdDev) : Float.NaN;
+								float zscore = stdDev != 0 ? ((freq - mean) / stdDev) : Float.NaN;
 								DocumentTerm documentTerm = new DocumentTerm(documentPosition, docId, termString, freq, totalTokensCount, zscore, positions, offsets, corpusTermMinimal);
 								docQueue.offer(documentTerm);
 							}

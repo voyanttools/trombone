@@ -130,6 +130,7 @@ public class DocumentTermsTest {
 		assertEquals(1, documentTerm.getDocumentIndex());
 		assertEquals("\"it was\"", documentTerm.getTerm());
 		assertEquals(2, documentTerm.getRawFrequency());
+		assertEquals(0.585539, documentTerm.getZscore(), 0.0001);
 		documentTerm = documentTerms.get(1);
 		assertEquals(0, documentTerm.getDocumentIndex());
 		assertEquals("\"it was\"", documentTerm.getTerm());
@@ -143,6 +144,7 @@ public class DocumentTermsTest {
 		documentTerm = documentTerms.get(0);
 		assertEquals("was", documentTerm.getTerm());
 		assertEquals(2, documentTerm.getRawFrequency());
+		assertEquals(0.585539, documentTerm.getZscore(), 0.0001);
 		
 		parameters.setParameter("limit", 1);
 		documentTermFrequencies = new DocumentTerms(storage, parameters);
