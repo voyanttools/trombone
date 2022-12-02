@@ -224,10 +224,15 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 					List<DocumentToken> documentOtherTokens = getDocumentOtherTokens(stripper.strip(string), id, corpusDocumentIndexPosition, lastEndOffset);
 					documentTokens.addAll(documentOtherTokens);
 				}
+				
+				if (currentDocTokensCount>=this.perDocLimit) {
+					break;
+				}
 			}
 			
-			if (tokensCounter>=limit || currentDocTokensCount>=this.perDocLimit) {break;}
+			if (tokensCounter>=limit) {break;}
 			termInfos.clear();
+			// TODO should it reset to "start" or to 0?
 			documentStart = 0; // reset to the start of next document
 		}
 	}
