@@ -7,11 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -32,7 +30,6 @@ import org.voyanttools.trombone.util.FlexibleParameters;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -46,20 +43,15 @@ import cc.mallet.pipe.SerialPipes;
 import cc.mallet.pipe.TokenSequence2FeatureSequence;
 import cc.mallet.pipe.TokenSequenceRemoveStopwords;
 import cc.mallet.topics.ParallelTopicModel;
-import cc.mallet.topics.TopicAssignment;
-import cc.mallet.types.Alphabet;
-import cc.mallet.types.FeatureSequence;
 import cc.mallet.types.IDSorter;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
-import cc.mallet.types.LabelSequence;
 import cc.mallet.types.TokenSequence;
 
 @XStreamAlias("topicModeling")
 @XStreamConverter(TopicModeling.TopicModelingConverter.class)
 public class TopicModeling extends AbstractCorpusTool {
 
-	@XStreamOmitField
 	private int numThreads = 1;
 
 	private int numIterations;
@@ -70,17 +62,15 @@ public class TopicModeling extends AbstractCorpusTool {
 	
 	private int seed = 0;
 
-	@XStreamOmitField
 	private double alphaSum = 1.0;
 
-	@XStreamOmitField
 	private double beta = 0.01;
 	
-	@XStreamOmitField
 	private double docSortSmoothing = 10.0;
 
-	@XStreamOmitField
 	private boolean malletTokenization = false;
+	
+	private boolean debug = false;
 	
 	private String[][] topWords;
 	
@@ -99,27 +89,31 @@ public class TopicModeling extends AbstractCorpusTool {
 		numIterations = Math.min(1000, parameters.getParameterIntValue("iterations", 100));
 		numTopics = Math.min(100, parameters.getParameterIntValue("topics", 10));
 		numTermsPerTopic = Math.min(100, parameters.getParameterIntValue("termsPerTopic", 10));
-		malletTokenization = parameters.getParameterBooleanValue("malletTokenization");
+//		malletTokenization = parameters.getParameterBooleanValue("malletTokenization");
 	}
 
 	@Override
 	public void run(CorpusMapper corpusMapper) throws IOException {
 		ParallelTopicModel model = null;
-		try {
-			model = deserializeTopicModel();
-		} catch (Exception e) {
-		}
+		
+//		try {
+//			model = deserializeTopicModel();
+//		} catch (Exception e) {
+//		}
+		
 		if (model == null) {
 			long start = System.currentTimeMillis();
+			
 			InstanceList instances;
 			if (malletTokenization) {
 				instances = getInstanceListFromTexts(corpusMapper);
 			} else {
 				instances = getInstanceListFromTokens(corpusMapper);
 			} 
+			
 			long end = System.currentTimeMillis();
 			long ellapsed = (end-start);
-			System.out.println("TopicModeling tokenization: "+ellapsed+"ms");
+			if (debug) System.out.println("TopicModeling tokenization: "+ellapsed+"ms");
 			
 			model = getModelFromInstances(instances);
 		}
@@ -127,19 +121,18 @@ public class TopicModeling extends AbstractCorpusTool {
 		model.setRandomSeed(seed);
 		
 		long start = System.currentTimeMillis();
+		
 		model.estimate();
+		
 		long end = System.currentTimeMillis();
 		long ellapsed = (end-start);
-		System.out.println("TopicModeling runtime: "+ellapsed+"ms");
+		if (debug) System.out.println("TopicModeling runtime: "+ellapsed+"ms");
 
+		// https://mimno.github.io/Mallet/topics-devel
 		topWords = getTopWords(model, numTermsPerTopic);
 		topicDocuments = getTopicDocuments(model, docSortSmoothing);
 		
-//		getTopicDistributions(model, 5);
-		
-		serializeTopicModel(model);
-
-		// https://mimno.github.io/Mallet/topics-devel
+//		serializeTopicModel(model);
 	}
 
 	private String[][] getTopWords(ParallelTopicModel model, int numWords) {
@@ -181,63 +174,6 @@ public class TopicModeling extends AbstractCorpusTool {
 		return new ArrayList<TopicDocument>(topicDocs.values());
 	}
 	
-	private void getAlphabet(ParallelTopicModel model) {
-        Alphabet dataAlphabet = model.alphabet; // mapping between tokens and integers (IDs)
-
-        FeatureSequence tokens = (FeatureSequence) model.getData() // list of document instances
-        		.get(0).instance.getData(); // the document tokens
-        LabelSequence topics = model.getData().get(0).topicSequence;
-
-        Formatter out = new Formatter(new StringBuilder(), Locale.US);
-        for (int position = 0; position < tokens.getLength(); position++) {
-            out.format("%s-%d ", dataAlphabet.lookupObject(tokens.getIndexAtPosition(position)), topics.getIndexAtPosition(position));
-        }
-        System.out.println(out);
-	}
-	
-	private Integer getInstanceIndexForDocId(ParallelTopicModel model, String docId) {
-		for (int i = 0; i < model.getData().size(); i++) {
-			TopicAssignment ta = model.getData().get(i);
-			if (ta.instance.getName().equals(docId)) {
-				return i;
-			}
-		}
-		return null;
-	}
-	
-	private void getTopicDistributions(ParallelTopicModel model, int numWords) {
-		long start = System.currentTimeMillis();
-		
-		Alphabet dataAlphabet = model.alphabet; // mapping between tokens and integers (IDs)
-		
-		// Get an array of sorted sets of word ID/count pairs
-		ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
-		
-		for (TopicAssignment ta : model.getData()) {
-			double[] topicDistribution = model.getTopicProbabilities(ta.topicSequence);
-			
-			System.out.println(ta.instance.getName());
-			for (int topic = 0; topic < numTopics; topic++) {
-				Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
-
-				Formatter out = new Formatter(new StringBuilder(), Locale.US);
-				out.format("%d\t%.3f\t", topic, topicDistribution[topic]);
-				int rank = 0;
-				while (iterator.hasNext() && rank < 5) {
-					IDSorter idCountPair = iterator.next();
-					out.format("%s (%.0f) ", dataAlphabet.lookupObject(idCountPair.getID()), idCountPair.getWeight());
-					rank++;
-				}
-				System.out.println(out);
-			}
-		}
-		
-		long end = System.currentTimeMillis();
-		long ellapsed = (end-start);
-		System.out.println("dist runtime: "+ellapsed);
-	}
-	
-	@SuppressWarnings("null")
 	private InstanceList getInstanceListFromTokens(CorpusMapper corpusMapper) throws IOException {
 		FlexibleParameters docParams = parameters.clone();
 		docParams.setParameter("stripTags", "all");
@@ -412,10 +348,6 @@ public class TopicModeling extends AbstractCorpusTool {
 		@Override
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			TopicModeling topMod = (TopicModeling) source;
-			
-			ToolSerializer.setNumericNode(writer, "iterations", topMod.numIterations);
-			ToolSerializer.setNumericNode(writer, "topics", topMod.numTopics);
-			ToolSerializer.setNumericNode(writer, "termsPerTopic", topMod.numTermsPerTopic);
 			
 			ToolSerializer.startNode(writer, "topicWords", List.class);
 			for (String[] tw : topMod.getTopWords()) {
