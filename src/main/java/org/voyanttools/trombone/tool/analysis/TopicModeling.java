@@ -89,6 +89,7 @@ public class TopicModeling extends AbstractCorpusTool {
 		numIterations = Math.min(1000, parameters.getParameterIntValue("iterations", 100));
 		numTopics = Math.min(100, parameters.getParameterIntValue("topics", 10));
 		numTermsPerTopic = Math.min(100, parameters.getParameterIntValue("termsPerTopic", 10));
+		seed = parameters.getParameterIntValue("seed", 0);
 //		malletTokenization = parameters.getParameterBooleanValue("malletTokenization");
 	}
 
