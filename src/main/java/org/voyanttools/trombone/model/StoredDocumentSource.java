@@ -54,6 +54,11 @@ public class StoredDocumentSource {
 	};
 	
 	/**
+	 * The ID of the corpus that this document belongs to
+	 */
+	private String corpusId;
+	
+	/**
 	 * the document's ID (to allow the storage to retrieve it)
 	 */
 	private String id;
@@ -65,10 +70,12 @@ public class StoredDocumentSource {
 	
 	/**
 	 * Create a new instance of this object with the specified Id and {@link DocumentMetadata}
+	 * @param corpusId
 	 * @param id the stored document source's ID
 	 * @param metadata the stored document source's {@link DocumentMetadata}
 	 */
-	public StoredDocumentSource(String id, DocumentMetadata metadata) {
+	public StoredDocumentSource(String corpusId, String id, DocumentMetadata metadata) {
+		this.corpusId = corpusId;
 		this.id = id;
 		this.metadata = metadata;
 	}
@@ -89,9 +96,17 @@ public class StoredDocumentSource {
 		return id;
 	}
 	
+	/**
+	 * Get this stored document source's corpus ID
+	 * @return the corpus ID
+	 */
+	public String getCorpusId() {
+		return corpusId;
+	}
+	
 	@Override
 	public String toString() {
-		return id+" "+metadata;
+		return corpusId+" "+id+" "+metadata;
 	}
 
 	public static Comparator<StoredDocumentSource> getComparator(FlexibleParameters parameters) {

@@ -24,7 +24,9 @@ package org.voyanttools.trombone.tool.build;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.tool.build.CorpusBuilder;
@@ -48,6 +50,8 @@ public class RealCorpusCreator extends AbstractTool {
 	
 	private String storedId;
 	
+	private String corpusId;
+	
 	public RealCorpusCreator(Storage storage, FlexibleParameters parameters) {
 		super(storage, parameters);
 	}
@@ -63,6 +67,12 @@ public class RealCorpusCreator extends AbstractTool {
 		long start = Calendar.getInstance().getTimeInMillis();
 		int step = 0;
 		
+		String remoteAddr = parameters.getParameterValue("VOYANT_REMOTE_ID");
+		String rng = UUID.randomUUID().toString();
+		corpusId = DigestUtils.sha3_224Hex(start+remoteAddr+rng); 
+		
+		System.out.println("SHA: "+corpusId);
+		
 		// this is used to go from one step to the next in a single pass, without needing to deal with storedId
 		List<StoredDocumentSource> storedDocumentSources = null;
 		
@@ -71,6 +81,7 @@ public class RealCorpusCreator extends AbstractTool {
 			storer.run();
 			storedDocumentSources = storer.getStoredDocumentSources();
 			storedId = storer.getStoredId();
+			System.out.println("Store ID: "+storedId);
 			nextCorpusCreatorStep = "expand";
 			if (timeout>0 && Calendar.getInstance().getTimeInMillis()-start>timeout) {return;}
 			if (steps>0 && ++step>=steps) {return;}
@@ -82,6 +93,7 @@ public class RealCorpusCreator extends AbstractTool {
 			else {expander.run(storedDocumentSources);}
 			storedDocumentSources = expander.getStoredDocumentSources();
 			storedId = expander.getStoredId();
+			System.out.println("Expand ID: "+storedId);
 			nextCorpusCreatorStep = "extract";
 			if (timeout>0 && Calendar.getInstance().getTimeInMillis()-start>timeout) {return;}
 			if (steps>0 && ++step>=steps) {return;}
@@ -93,6 +105,7 @@ public class RealCorpusCreator extends AbstractTool {
 			else {extractor.run(storedDocumentSources);}
 			storedDocumentSources = extractor.getStoredDocumentSources();
 			storedId = extractor.getStoredId();
+			System.out.println("Extract ID: "+storedId);
 			nextCorpusCreatorStep = "index";
 			if (timeout>0 && Calendar.getInstance().getTimeInMillis()-start>timeout) {return;}
 			if (steps>0 && ++step>=steps) {return;}
@@ -104,6 +117,7 @@ public class RealCorpusCreator extends AbstractTool {
 			else {indexer.run(storedDocumentSources);}
 			storedDocumentSources = indexer.getStoredDocumentSources();
 			storedId = indexer.getStoredId();
+			System.out.println("Index ID: "+storedId);
 			nextCorpusCreatorStep = "corpus";
 			if (timeout>0 && Calendar.getInstance().getTimeInMillis()-start>timeout) {return;}
 			if (steps>0 && ++step>=steps) {return;}
@@ -115,6 +129,7 @@ public class RealCorpusCreator extends AbstractTool {
 			else {builder.run(storedId, storedDocumentSources);}
 //			storedDocumentSources = builder.getStoredDocumentSources();
 			storedId = builder.getStoredId();
+			System.out.println("Corpus ID: "+storedId);
 			nextCorpusCreatorStep = "done";
 		}
 	}

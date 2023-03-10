@@ -95,15 +95,22 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 	public StoredDocumentSource getStoredDocumentSource(
 			InputSource inputSource) throws IOException {
 
+		String corpusId = inputSource.getCorpusId();
 		String id = inputSource.getUniqueId();
-		File directory = getDocumentSourceDirectory(id);
-		File metadataFile = getMetadataFile(id);
-		File rawbytesFile = getRawbytesFile(id);
+		File corpusDirectory = new File(documentSourcesDirectory, corpusId);
+		
+		if (corpusDirectory.exists() == false) {
+			corpusDirectory.mkdir();
+		}
+		
+		File directory = getDocumentSourceDirectory(corpusId, id);
+		File metadataFile = getMetadataFile(corpusId, id);
+		File rawbytesFile = getRawbytesFile(corpusId, id);
 
 		// this directory and contents exists, so just return the DocumentSource
 		if (directory.exists()) {
 			if (metadataFile.exists() && rawbytesFile.exists()) {
-				return new StoredDocumentSource(directory.getName(), inputSource.getMetadata());
+				return new StoredDocumentSource(corpusId, directory.getName(), inputSource.getMetadata());
 			}
 			// let's keep going in case there was an error last time
 		} else {
@@ -113,7 +120,7 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 		InputStream inputStream = null;
 		try {
 			inputStream = inputSource.getInputStream();
-			storeStoredDocumentSourceInputStream(id, inputStream);
+			storeStoredDocumentSourceInputStream(corpusId, id, inputStream);
 		} finally {
 			if (inputStream != null) {
 				inputStream.close();
@@ -122,16 +129,16 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 
 		DocumentMetadata metadata = inputSource.getMetadata(); // get this after reading input stream in case it's changed (like after extraction)
 		
-		storeStoredDocumentSourceMetadata(id, metadata);
-		return new StoredDocumentSource(directory.getName(), metadata);
+		storeStoredDocumentSourceMetadata(corpusId, id, metadata);
+		return new StoredDocumentSource(corpusId, directory.getName(), metadata);
 	}
 	
-	private void storeStoredDocumentSourceMetadata(String id, DocumentMetadata metadata) throws IOException {
-		metadata.getFlexibleParameters().saveFlexibleParameters(getMetadataFile(id));
+	private void storeStoredDocumentSourceMetadata(String corpusId, String id, DocumentMetadata metadata) throws IOException {
+		metadata.getFlexibleParameters().saveFlexibleParameters(getMetadataFile(corpusId, id));
 	}
 	
-	private void storeStoredDocumentSourceInputStream(String id, InputStream inputStream) throws IOException {
-		File rawbytesFile = getRawbytesFile(id);
+	private void storeStoredDocumentSourceInputStream(String corpusId, String id, InputStream inputStream) throws IOException {
+		File rawbytesFile = getRawbytesFile(corpusId, id);
 		OutputStream zippedOutputStream = null;
 		try {
 			OutputStream fileOutputStream = new FileOutputStream(rawbytesFile);
@@ -185,52 +192,52 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 	}
 	*/
 
-	public DocumentMetadata getStoredDocumentSourceMetadata(String id)
+	public DocumentMetadata getStoredDocumentSourceMetadata(String corpusId, String id)
 			throws IOException {
-		FlexibleParameters parameters = FlexibleParameters.loadFlexibleParameters(getMetadataFile(id));
+		FlexibleParameters parameters = FlexibleParameters.loadFlexibleParameters(getMetadataFile(corpusId, id));
 		return new DocumentMetadata(parameters);
 	}
 
-	public InputStream getStoredDocumentSourceInputStream(String id)
+	public InputStream getStoredDocumentSourceInputStream(String corpusId, String id)
 			throws IOException {
-		File file = getRawbytesFile(id);
-		FileInputStream fileInputStream = new FileInputStream(file);		
+		File file = getRawbytesFile(corpusId, id);
+		FileInputStream fileInputStream = new FileInputStream(file);
 		return new GZIPInputStream(fileInputStream);
 	}
 	
 	public List<StoredDocumentSource> getMultipleExpandedStoredDocumentSources(
-			String id) throws IOException {
+			String corpusId, String id) throws IOException {
 		return getMultipleExpandedStoredDocumentSources(id, "");
 	}
 
 	public List<StoredDocumentSource> getMultipleExpandedStoredDocumentSources(
-			String id, String prefix) throws IOException {
+			String corpusId, String id, String prefix) throws IOException {
 		
 		List<StoredDocumentSource> multipleExpandedStoredDocumentSources = new ArrayList<StoredDocumentSource>();
-		File file = getMultipleExpandedStoredDocumentSourcesFile(id, prefix);
+		File file = getMultipleExpandedStoredDocumentSourcesFile(corpusId, id, prefix);
 		if (file.exists()==false) {return multipleExpandedStoredDocumentSources;}
 		
 		List<String> lines = FileUtils.readLines(file);
 		for (String line : lines) {
 			DocumentMetadata metadata = getStoredDocumentSourceMetadata(line.trim());
-			multipleExpandedStoredDocumentSources.add(new StoredDocumentSource(line, metadata));
+			multipleExpandedStoredDocumentSources.add(new StoredDocumentSource(corpusId, line, metadata));
 		}
 		
 		return multipleExpandedStoredDocumentSources;
 	}
 
-	public void setMultipleExpandedStoredDocumentSources(String id,
+	public void setMultipleExpandedStoredDocumentSources(String corpusId, String id,
 			List<StoredDocumentSource> multipleExpandedStoredDocumentSources) throws IOException {
-		setMultipleExpandedStoredDocumentSources(id, multipleExpandedStoredDocumentSources, "");
+		setMultipleExpandedStoredDocumentSources(corpusId, id, multipleExpandedStoredDocumentSources, "");
 	}
 
-	public void setMultipleExpandedStoredDocumentSources(String id,
+	public void setMultipleExpandedStoredDocumentSources(String corpusId, String id,
 			List<StoredDocumentSource> multipleExpandedStoredDocumentSources, String prefix) throws IOException {
 		List<String> multipleExpandedStoredDocumentSourceIds = new ArrayList<String>();
 		for (StoredDocumentSource doc : multipleExpandedStoredDocumentSources) {
 			multipleExpandedStoredDocumentSourceIds.add(doc.getId());
 		}
-		File file = getMultipleExpandedStoredDocumentSourcesFile(id, prefix);
+		File file = getMultipleExpandedStoredDocumentSourcesFile(corpusId, id, prefix);
 		FileUtils.writeLines(file, multipleExpandedStoredDocumentSourceIds);
 	}
 
@@ -243,8 +250,8 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 	 *            the ID of the StoredDocumentSource
 	 * @return the File (directory) of the StoredDocumentSource
 	 */
-	public File getDocumentSourceDirectory(String id) {
-		return new File(documentSourcesDirectory, id);
+	public File getDocumentSourceDirectory(String corpusId, String id) {
+		return new File(new File(documentSourcesDirectory, corpusId), id);
 	}
 
 	/**
@@ -256,8 +263,8 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 	 *            the ID of the StoredDocumentSource
 	 * @return the rawbytes File for the specified StoredDocumentSource
 	 */
-	File getRawbytesFile(String id) {
-		return new File(getDocumentSourceDirectory(id), RAW_BYTES_FILENAME);
+	File getRawbytesFile(String corpusId, String id) {
+		return new File(getDocumentSourceDirectory(corpusId, id), RAW_BYTES_FILENAME);
 	}
 
 	/**
@@ -269,8 +276,8 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 	 *            the ID of the StoredDocumentSource
 	 * @return the rawbytes File for the specified StoredDocumentSource
 	 */
-	File getMetadataFile(String id) {
-		return new File(getDocumentSourceDirectory(id), METADATA_FILENAME);
+	File getMetadataFile(String corpusId, String id) {
+		return new File(getDocumentSourceDirectory(corpusId, id), METADATA_FILENAME);
 	}
 
 	/**
@@ -286,8 +293,8 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 	 * @return the multiple expanded stored document source ids File for the
 	 *         specified StoredDocumentSource
 	 */
-	File getMultipleExpandedStoredDocumentSourcesFile(String id, String prefix) {
-		return new File(getDocumentSourceDirectory(id),
+	File getMultipleExpandedStoredDocumentSourcesFile(String corpusId, String id, String prefix) {
+		return new File(getDocumentSourceDirectory(corpusId, id),
 				prefix+MULTIPLE_EXPANDED_STORED_DOCUMENT_SOURCE_IDS_FILENAME);
 	}
 

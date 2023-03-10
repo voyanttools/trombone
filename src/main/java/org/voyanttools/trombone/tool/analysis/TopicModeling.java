@@ -383,7 +383,7 @@ public class TopicModeling extends AbstractCorpusTool {
 	}
 
 	public static void main(String[] args) throws IOException {
-		File file = new File("D:\\VoyantData\\trombone5_2");
+		File file = new File("D:\\VoyantData\\trombone5_3");
 		Storage storage = new FileStorage(file);
 		FlexibleParameters params = new FlexibleParameters();
 //		params.addParameter("corpus", "435c8bf72a967b1d70682810d93c257a"); // short

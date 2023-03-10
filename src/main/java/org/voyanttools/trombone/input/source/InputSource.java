@@ -64,5 +64,7 @@ public interface InputSource {
 	 * @return the unique ID associate with this input source
 	 */
 	public String getUniqueId();
+	
+	public String getCorpusId();
 
 }

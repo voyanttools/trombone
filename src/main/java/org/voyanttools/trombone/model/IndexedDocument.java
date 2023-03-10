@@ -41,6 +41,8 @@ import com.thoughtworks.xstream.annotations.XStreamConverter;
 @XStreamConverter(DocumentConverter.class)
 public class IndexedDocument implements DocumentContainer, Comparable<IndexedDocument> {
 
+	private String corpusId;
+	
 	private String id;
 	
 	private DocumentMetadata metadata = null;
@@ -69,17 +71,22 @@ public class IndexedDocument implements DocumentContainer, Comparable<IndexedDoc
 	/**
 	 * 
 	 */
-	public IndexedDocument(Storage storage, String id) {
+	public IndexedDocument(Storage storage, String corpusId, String id) {
 		this.storage = storage;
+		this.corpusId = id;
 		this.id = id;
 	}
 
 	public String getId() {
 		return id;
 	}
+	
+	public String getCorpusId() {
+		return corpusId;
+	}
 
 	public StoredDocumentSource asStoredDocumentSource() throws IOException {
-		return new StoredDocumentSource(getId(), getMetadata());
+		return new StoredDocumentSource(getCorpusId(), getId(), getMetadata());
 	}
 
 	public DocumentMetadata getMetadata() throws IOException {

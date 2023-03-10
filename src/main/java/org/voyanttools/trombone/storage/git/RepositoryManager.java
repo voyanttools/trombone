@@ -29,7 +29,7 @@ import org.eclipse.jgit.treewalk.filter.PathFilter;
 
 public class RepositoryManager {
 
-	public static final String DEFAULT_TROMBOME_DIRECTORY_NAME = "trombone5_2";
+	public static final String DEFAULT_TROMBOME_DIRECTORY_NAME = "trombone5_3";
 	
 	public static final File DEFAULT_GIT_DIRECTORY = new File(System.getProperty("java.io.tmpdir"), DEFAULT_TROMBOME_DIRECTORY_NAME);
 	
