@@ -3,12 +3,20 @@ package org.voyanttools.trombone.model;
 import java.text.Normalizer;
 import java.util.Comparator;
 
+import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 
 @XStreamAlias("collocate")
+@XStreamConverter(CorpusCollocate.CorpusCollocateConverter.class)
 public class CorpusCollocate implements Comparable<CorpusCollocate> {
 	
 	private String term;
@@ -185,6 +193,40 @@ public class CorpusCollocate implements Comparable<CorpusCollocate> {
 		return new StringBuilder("{corpus collocate - context: ").append(contextTerm).append(" (").append(contextTermRawFreq).append("); keyword: ").append(term).append(" (").append(rawFreq).append(")}").toString();
 	}
 
+	public static class CorpusCollocateConverter implements Converter {
+
+		@Override
+		public boolean canConvert(Class type) {
+			return CorpusCollocate.class.isAssignableFrom(type);
+		}
+
+		@Override
+		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+			CorpusCollocate cc = (CorpusCollocate) source;
+			
+			writer.startNode("corpusCollocate");
+			
+			writer.startNode("term");
+			writer.setValue(cc.term);
+			writer.endNode();
+			
+			ToolSerializer.setNumericNode(writer, "rawFreq", cc.rawFreq);
+			
+			writer.startNode("contextTerm");
+			writer.setValue(cc.contextTerm);
+			writer.endNode();
+			
+			ToolSerializer.setNumericNode(writer, "contextTermRawFreq", cc.contextTermRawFreq);
+			
+			writer.endNode();
+		}
+
+		@Override
+		public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+			return null;
+		}
+		
+	}
 
 
 }

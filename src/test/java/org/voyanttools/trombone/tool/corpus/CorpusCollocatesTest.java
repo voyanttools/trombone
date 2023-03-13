@@ -55,7 +55,11 @@ public class CorpusCollocatesTest {
 		corpusCollocate = corpusCollocatesList.get(0);
 		assertEquals("should", corpusCollocate.getContextTerm());
 		
-		
+		parameters.setParameter("start", 10);
+		corpusCollocates = new CorpusCollocates(storage, parameters);
+		corpusCollocates.run();
+		corpusCollocatesList = corpusCollocates.getCorpusCollocates();
+		assertEquals(10, corpusCollocates.getCorpusCollocates().size());
 	}
 
 }
