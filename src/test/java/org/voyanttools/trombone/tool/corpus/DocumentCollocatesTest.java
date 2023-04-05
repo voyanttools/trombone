@@ -24,15 +24,9 @@ public class DocumentCollocatesTest {
 	}
 
 	public void test(Storage storage) throws IOException {
-		
-		// add another file to the storage
-		FlexibleParameters parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr/udhr-fr.txt")});
-		CorpusCreator creator = new CorpusCreator(storage, parameters);
-		creator.run();
-		
 		// add the testing file to the storage
-		parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr/udhr-en.txt")});
-		creator = new CorpusCreator(storage, parameters);
+		FlexibleParameters parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr/udhr-en.txt")});
+		CorpusCreator creator = new CorpusCreator(storage, parameters);
 		creator.run();
 		parameters.setParameter("corpus", creator.getStoredId());
 		parameters.setParameter("query", "human");
