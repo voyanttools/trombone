@@ -98,9 +98,9 @@ public class CorpusCollocates extends AbstractContextTerms {
 		FlexibleParameters localParameters = parameters.clone();
 		localParameters.setParameter("limit", Integer.MAX_VALUE); // we need all collocates for documents in order to determine corpus collocates
 		localParameters.setParameter("start", 0);
+		// first get all the document collocates
 		DocumentCollocates documentCollocatesTool = new DocumentCollocates(storage, localParameters);
 		List<DocumentCollocate> documentCollocates = documentCollocatesTool.getCollocates(reader, corpusMapper, corpus, documentSpansDataMap);
-		total = documentCollocates.size();
 		
 		Map<String, Set<DocumentCollocate>> keywordDocumentCollocatesMap = new HashMap<String, Set<DocumentCollocate>>();
 		for (DocumentCollocate documentCollocate : documentCollocates) {
@@ -116,12 +116,13 @@ public class CorpusCollocates extends AbstractContextTerms {
 		FlexibleQueue<CorpusCollocate> flexibleQueue = new FlexibleQueue<CorpusCollocate>(CorpusCollocate.getComparator(sort), start+limit);
 		
 		// now build corpus collocates
-		for (Map.Entry<String, Set<DocumentCollocate>> keywordDocumentCollocaatesEntry : keywordDocumentCollocatesMap.entrySet()) {
+		int count = 0; // track how many collocates we actually have
+		for (Map.Entry<String, Set<DocumentCollocate>> keywordDocumentCollocatesEntry : keywordDocumentCollocatesMap.entrySet()) {
 			int keywordRawFrequency = 0;
 			HashSet<Integer> seenDocumentIds = new HashSet<Integer>();
 			// build map (group) for context terms
 			Map<String, Set<DocumentCollocate>> contextTermDocumentCollocatesMap = new HashMap<String, Set<DocumentCollocate>>();
-			for (DocumentCollocate documentCollocate : keywordDocumentCollocaatesEntry.getValue()) {
+			for (DocumentCollocate documentCollocate : keywordDocumentCollocatesEntry.getValue()) {
 				String contextTerm = documentCollocate.getTerm();
 				if (!contextTermDocumentCollocatesMap.containsKey(contextTerm)) {
 					contextTermDocumentCollocatesMap.put(contextTerm, new HashSet<DocumentCollocate>());
@@ -133,26 +134,21 @@ public class CorpusCollocates extends AbstractContextTerms {
 				}
 			}
 			
-			String keyword = keywordDocumentCollocaatesEntry.getKey();
+			String keyword = keywordDocumentCollocatesEntry.getKey();
 			for (Map.Entry<String, Set<DocumentCollocate>> contextTermCollocatesEntry : contextTermDocumentCollocatesMap.entrySet()) {
 				int contextTermTotal = 0;
 				for (DocumentCollocate documentCollocate : contextTermCollocatesEntry.getValue()) {
 					contextTermTotal += documentCollocate.getContextRawFrequency();
 				}
 				CorpusCollocate c = new CorpusCollocate(keyword, keywordRawFrequency, contextTermCollocatesEntry.getKey(), contextTermTotal);
+				count++;
 				flexibleQueue.offer(c);
 			}
 			
 		}
-		
-		int listStart = Math.max(0, Math.min(total, start));
-		int listEnd = start+limit;
-		if (listEnd < 0) { // adding positive value to Integer.MAX_VALUE creates negative value
-			listEnd = total;
-		} else {
-			listEnd = Math.min(total,  listEnd);
-		}
-		return flexibleQueue.getOrderedList().subList(listStart, listEnd);
+		total = count;
+		List<CorpusCollocate> list = flexibleQueue.getOrderedList();
+		return list.subList(start, Math.min(total, list.size()));
 	}
 
 	List<CorpusCollocate> getCorpusCollocates() {
