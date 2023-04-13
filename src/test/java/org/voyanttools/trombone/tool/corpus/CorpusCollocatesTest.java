@@ -33,34 +33,37 @@ public class CorpusCollocatesTest {
 		
 		CorpusCollocates corpusCollocates;
 		List<CorpusCollocate> corpusCollocatesList;
-		CorpusCollocate corpusCollocate;
 		
 		parameters.removeParameter("limit"); // make sure no limit
 		corpusCollocates = new CorpusCollocates(storage, parameters);
 		corpusCollocates.run();
 		corpusCollocatesList = corpusCollocates.getCorpusCollocates();
-		corpusCollocate = corpusCollocatesList.get(0);
-		assertEquals("should", corpusCollocate.getContextTerm());
+		assertEquals("should", corpusCollocatesList.get(0).getContextTerm());
 		
 		parameters.setParameter("limit", 10); // try with limit
 		corpusCollocates = new CorpusCollocates(storage, parameters);
 		corpusCollocates.run();
 		corpusCollocatesList = corpusCollocates.getCorpusCollocates();
-		corpusCollocate = corpusCollocatesList.get(0);
-		assertEquals("should", corpusCollocate.getContextTerm());
+		assertEquals("should", corpusCollocatesList.get(0).getContextTerm());
 		
 		parameters.setParameter("start", 10);
 		corpusCollocates = new CorpusCollocates(storage, parameters);
 		corpusCollocates.run();
-		corpusCollocatesList = corpusCollocates.getCorpusCollocates();
 		assertEquals(10, corpusCollocates.getCorpusCollocates().size());
 		
 		int total = corpusCollocates.total;
 		parameters.setParameter("start", total-5);
 		corpusCollocates = new CorpusCollocates(storage, parameters);
 		corpusCollocates.run();
-		corpusCollocatesList = corpusCollocates.getCorpusCollocates();
 		assertEquals(5, corpusCollocates.getCorpusCollocates().size());
+		
+		parameters.setParameter("start", 0);
+		parameters.setParameter("sort", "contextTerm");
+		parameters.setParameter("dir", "ASC");
+		corpusCollocates = new CorpusCollocates(storage, parameters);
+		corpusCollocates.run();
+		corpusCollocatesList = corpusCollocates.getCorpusCollocates();
+		assertEquals("allow", corpusCollocatesList.get(1).getContextTerm());
 		
 	}
 
