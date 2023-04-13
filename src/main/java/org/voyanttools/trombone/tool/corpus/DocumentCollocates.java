@@ -66,7 +66,7 @@ public class DocumentCollocates extends AbstractContextTerms {
 	private Comparator<DocumentCollocate> comparator;
 	
 	@XStreamOmitField
-	private Keywords collocatesWhitelist;
+	private Keywords collocatesWhitelist; // used to restrict context terms to a specific list
 		
 	/**
 	 * @param storage
@@ -101,7 +101,7 @@ public class DocumentCollocates extends AbstractContextTerms {
 	}
 
 
-	List<DocumentCollocate> getCollocates(LeafReader reader,
+	public List<DocumentCollocate> getCollocates(LeafReader reader,
 			CorpusMapper corpusMapper, Corpus corpus,
 			Map<Integer, List<DocumentSpansData>> documentSpansDataMap) throws IOException {
 

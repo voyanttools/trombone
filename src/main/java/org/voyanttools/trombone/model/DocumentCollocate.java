@@ -36,9 +36,9 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class DocumentCollocate  implements Serializable {
 
 	private int docIndex;
-	private String keyword;
+	private String keyword; // the term whose collocates we're looking for
 	private int keywordContextRawFrequency;
-	private String term;
+	private String term; // the collocate term
 	@XStreamOmitField
 	private String normalizedString = null;
 	@XStreamOmitField
