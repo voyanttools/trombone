@@ -193,8 +193,7 @@ public class Keywords {
 	public void add(Collection<String> keywords) {
 		for (String keyword : keywords) {
 			if (keyword.trim().startsWith(COMMENT)==false) {
-				for (String word : keyword.split(COMMA_SEPARATOR))
-				this.keywords.add(word.trim());
+				this.keywords.add(keyword.trim());
 			}
 		}
 	}
