@@ -3,7 +3,7 @@ package org.voyanttools.trombone.tool.corpus;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class DocumentDaleChallIndex extends AbstractCorpusTool {
 
         } else
             try(InputStream inputStream = this.getClass().getResourceAsStream(DEFAULT_EASY_WORDS_FILE_PATH)) {
-                easyWords = removeComments(IOUtils.readLines(inputStream, Charset.forName("UTF-8")));
+                easyWords = removeComments(IOUtils.readLines(inputStream, StandardCharsets.UTF_8));
             } catch (NullPointerException e) {
                 throw new RuntimeException("Failed to retrieved the easy words list.");
             }
