@@ -44,14 +44,14 @@ public class GeonamesTest {
 	}
 	
 	@Test
-	public void testGeoanmesAnnotator() throws IOException {
+	public void testGeonamesAnnotator() throws IOException {
 		for (Storage storage : TestHelper.getDefaultTestStorages()) {
 			System.out.println("Testing with "+storage.getClass().getSimpleName()+": "+storage.getLuceneManager().getClass().getSimpleName());
-			testGeoanmesAnnotator(storage);
+			testGeonamesAnnotator(storage);
 		}
 	}
 	
-	public void testGeoanmesAnnotator(Storage storage) throws IOException {
+	public void testGeonamesAnnotator(Storage storage) throws IOException {
 		String text1 = "Most of London, Ontario and Montreal and most of London, England and Montreal and London and Montreal, London.";
 		FlexibleParameters parameters = new FlexibleParameters(new String[]{"string="+text1,"includeCities=true"});
 //		CorpusCreator creator = new CorpusCreator(storage, parameters);
@@ -60,9 +60,9 @@ public class GeonamesTest {
 		CorpusMapper corpusMapper = new CorpusMapper(storage, corpus);
 		GeonamesAnnotator annotator = new GeonamesAnnotator(storage, parameters);
 		List<DocumentLocationToken> tokens = annotator.getDocumentLocationTokens(corpusMapper, parameters);
-		for (DocumentLocationToken token : tokens) {
-			System.out.println(token);
-		}
+		assertEquals(7, tokens.size());
+		assertEquals("London, Ontario", tokens.get(0).getLocation().getPlaces().get(0));
+		assertTrue(tokens.get(2).getLocation().getPlaces().get(0).startsWith("London, United"));
 		storage.destroy();
 		
 	}
