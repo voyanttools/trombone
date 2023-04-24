@@ -362,7 +362,7 @@ public class Geonames extends AbstractContextTerms {
 		}
 		
 		Keywords stop = new Keywords();
-		stop.load(storage, new String[]{"stop.en.people.txt","stop.en.taporware.txt"});
+		stop.load(storage, new String[]{"stop.en.people.txt","stop.en.txt"});
 
 		
 		Map<String, City> citiesById = new HashMap<String, City>();

@@ -331,7 +331,7 @@ public class CorpusTermsTest {
 		// with stopwords
 		parameters.removeParameter("start");
 		parameters.removeParameter("limit");
-		parameters.setParameter("stopList", "stop.en.taporware.txt");
+		parameters.setParameter("stopList", "stop.en.txt");
 		corpusTermFrequencies = new CorpusTerms(storage, parameters);
 		corpusTermFrequencies.run();
 		assertEquals(6, corpusTermFrequencies.getTotal());

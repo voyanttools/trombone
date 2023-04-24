@@ -21,18 +21,14 @@
  ******************************************************************************/
 package org.voyanttools.trombone.tool.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -156,25 +152,8 @@ public abstract class AbstractTool implements RunnableTool {
 		if (parameters.containsKey("stopList")) {
 			if (parameters.getParameterValue("stopList", "").equals("auto")) {
 				Set<String> langs = new HashSet<String>();
-				URL url = this.getClass().getResource("/org/voyanttools/trombone/keywords");
-				File dir = new File(url.getFile());
-				Map<String, String> stopLists = new HashMap<String, String>();
-				if (dir.exists() && dir.isDirectory()) {
-					for (File file : dir.listFiles()) {
-						String filename = file.getName();
-						if (file.isFile() && filename.startsWith("stop.")) {
-							String langCode = filename.substring(5, filename.indexOf('.', 5));
-							stopLists.put(langCode, filename);
-						}
-					}
-				}
 				for (String lang : corpus.getLanguageCodes()) {
-					if (lang.isEmpty() || lang.equals("en")) {langs.add("stop.en.taporware.txt");}
-					else if (lang.equals("fr")) {langs.add("stop.fr.veronis.txt");}
-					else if (lang.equals("se")) {langs.add("stop.se.long.txt");}
-					else if (stopLists.containsKey(lang)) {
-						langs.add(stopLists.get(lang));
-					}
+					langs.add("stop."+lang+".txt");
 				}
 				if (langs.isEmpty()==false) {
 					keywords.load(storage, langs.toArray(new String[0]));

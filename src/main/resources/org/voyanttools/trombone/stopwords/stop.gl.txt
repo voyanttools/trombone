@@ -1,4 +1,4 @@
-# galican stopwords
+# Galician
 a
 aínda
 alí
