@@ -33,7 +33,7 @@ public class Stripper {
 	
 	private Pattern allTags = Pattern.compile("(<\\/?\\w+.*?>|<\\?.*?\\?>)", Pattern.DOTALL);
 	
-	private String[] blockTags = new String[]{"p","div"};
+	private String[] blockTags = new String[]{"p","div","l","lg"}; // "l" and "lg" are to support TEI encoded poetry
 	
 	private Pattern notBlockTags = Pattern.compile("<\\/?(?!((" + StringUtils.join(blockTags, "|") +")(\\s+|>)))\\w+\\b.*?>", Pattern.DOTALL);
 	
@@ -80,7 +80,7 @@ public class Stripper {
 			}
 			
 		} else {
-			return string;		
+			return string;
 		}
 	}
 

@@ -31,6 +31,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -248,7 +249,7 @@ public class FileStorage implements Storage {
 		File file = getResourceFile(id, location);
 		if (file.exists()==false) throw new IOException("An attempt was made to read a store string that that does not exist: "+id);
 		
-		return FileUtils.readFileToString(file);
+		return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 	}
 	
 	@Override

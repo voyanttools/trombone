@@ -52,17 +52,17 @@ public class CategoriesTest {
 		assertEquals(1, corpusTerms.getTotal());
 		for (CorpusTerm term : corpusTerms) {
 			assertEquals("@positive", term.getTerm());
-			assertEquals(7, term.getRawFreq());
+			assertEquals(62, term.getRawFrequency());
 		}
 		
 		parameters.setParameter("categories", "auto");
 		parameters.setParameter("query", "^@positive");
 		corpusTerms = new CorpusTerms(storage, parameters);
 		corpusTerms.run();
-		assertEquals(2, corpusTerms.getTotal());
+		assertEquals(18, corpusTerms.getTotal());
 		for (CorpusTerm term : corpusTerms) {
-			assertEquals("good", term.getTerm());
-			assertEquals(6, term.getRawFreq());
+			assertEquals("right", term.getTerm());
+			assertEquals(27, term.getRawFrequency());
 			break;
 		}
 	}

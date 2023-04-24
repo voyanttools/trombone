@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,7 +106,7 @@ public class Keywords {
 				InputStream inputStream = null;
 				try {
 					inputStream = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
-					List<String> keys = IOUtils.readLines(inputStream);
+					List<String> keys = IOUtils.readLines(inputStream, StandardCharsets.UTF_8);
 					add(keys);
 				}
 				finally {
@@ -119,11 +120,11 @@ public class Keywords {
 				// first check to see if there's a local copy of the file that takes precedence
 				if (storage instanceof FileStorage) {
 					File resources = ((FileStorage) storage).getLocalResourcesDirectory();
-					File keywords = new File(resources, "keywords");
-					File file = new File(keywords, new File(ref).getName());
+					File stopwords = new File(resources, "stopwords");
+					File file = new File(stopwords, new File(ref).getName());
 					if (file.exists()) {
 						try {
-							List<String> refs = FileUtils.readLines(file);
+							List<String> refs = FileUtils.readLines(file, StandardCharsets.UTF_8);
 							add(refs);
 							return;
 						} catch (IOException e) {
@@ -132,11 +133,11 @@ public class Keywords {
 					}
 				}
 				
-				try(InputStream is = getClass().getResourceAsStream("/org/voyanttools/trombone/keywords/"+ref)) {
-					List<String> refs = IOUtils.readLines(is);
+				try(InputStream is = getClass().getResourceAsStream("/org/voyanttools/trombone/stopwords/"+ref)) {
+					List<String> refs = IOUtils.readLines(is, StandardCharsets.UTF_8);
 					add(refs);
-				} catch (IOException e) {
-					throw new IOException("Unable to find local stopwords directory", e);
+				} catch (Exception e) {
+					// fail silently if stopwords can't be found
 				}
 			}
 			else if (ref.startsWith(KEYWORDS_PREFIX)) {
@@ -149,7 +150,7 @@ public class Keywords {
 						File file = FileMigrationFactory.getStoredObjectFile((FileStorage) storage, refId, Location.object);
 						if (file!=null) {
 							// add to lower case here, though not sure we want it this universal
-							String contents = FileUtils.readFileToString(file).toLowerCase();
+							String contents = FileUtils.readFileToString(file, StandardCharsets.UTF_8).toLowerCase();
 							List<String> keywordsList = Arrays.asList(StringUtils.split(contents, "\n"));
 							storage.storeStrings(keywordsList, refId, Storage.Location.object);
 							add(keywordsList);
@@ -192,29 +193,24 @@ public class Keywords {
 	public void add(Collection<String> keywords) {
 		for (String keyword : keywords) {
 			if (keyword.trim().startsWith(COMMENT)==false) {
-				for (String word : keyword.split(COMMA_SEPARATOR))
-				this.keywords.add(word.trim());
+				this.keywords.add(keyword.trim());
 			}
 		}
 	}
 	
 	public static Keywords getStopListForLangCode(Storage storage, String code) throws IOException {
 		Keywords keywords = new Keywords();
-		if (code.equals("en")) {
-			keywords.load(storage, new String[]{"stop.en.taporware.txt"});
-		} else {
-			InputStream in = Keywords.class.getResourceAsStream("/org/voyanttools/trombone/keywords");
-			BufferedReader br = new BufferedReader( new InputStreamReader( in ) );
-			String resource;
-		    while( (resource = br.readLine()) != null ) {
-		    		if (resource.startsWith("stop."+code+".")) {
-		    			keywords.load(storage, new String[]{resource});
-		    			break;
-		    		}
-		    }
-		    br.close();
+		InputStream in = Keywords.class.getResourceAsStream("/org/voyanttools/trombone/stopwords");
+		BufferedReader br = new BufferedReader( new InputStreamReader( in ) );
+		String resource;
+		while( (resource = br.readLine()) != null ) {
+			if (resource.equals("stop."+code+".txt")) {
+				keywords.load(storage, new String[]{resource});
+				break;
+			}
 		}
-	    return keywords;
+		br.close();
+		return keywords;
 	}
 
 }

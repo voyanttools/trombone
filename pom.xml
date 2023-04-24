@@ -6,7 +6,7 @@
 	
 	<groupId>org.voyant-tools</groupId>
 	<artifactId>trombone</artifactId>
-	<version>5.2.8</version>
+	<version>5.2.13</version>
 	
 	<name>Voyant Tools</name>
 	<url>https://github.com/voyanttools/trombone</url>
@@ -153,9 +153,9 @@
 			<version>6.2.1</version>
 		</dependency>
 		<dependency>
-			<groupId>com.optimaize.languagedetector</groupId>
-			<artifactId>language-detector</artifactId>
-			<version>0.6</version>
+			<groupId>com.github.pemistahl</groupId>
+			<artifactId>lingua</artifactId>
+			<version>1.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>net.htmlparser.jericho</groupId>

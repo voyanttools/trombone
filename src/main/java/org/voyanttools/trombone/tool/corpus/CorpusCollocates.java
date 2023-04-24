@@ -36,16 +36,24 @@ import org.voyanttools.trombone.model.CorpusCollocate;
 import org.voyanttools.trombone.model.DocumentCollocate;
 import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.FlexibleQueue;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
  * @author sgs
  *
  */
 @XStreamAlias("corpusCollocates")
+@XStreamConverter(CorpusCollocates.CorpusCollocatesConverter.class)
 public class CorpusCollocates extends AbstractContextTerms {
 
 	private List<CorpusCollocate> collocates = new ArrayList<CorpusCollocate>();
@@ -90,8 +98,10 @@ public class CorpusCollocates extends AbstractContextTerms {
 		FlexibleParameters localParameters = parameters.clone();
 		localParameters.setParameter("limit", Integer.MAX_VALUE); // we need all collocates for documents in order to determine corpus collocates
 		localParameters.setParameter("start", 0);
+		// first get all the document collocates
 		DocumentCollocates documentCollocatesTool = new DocumentCollocates(storage, localParameters);
 		List<DocumentCollocate> documentCollocates = documentCollocatesTool.getCollocates(reader, corpusMapper, corpus, documentSpansDataMap);
+		
 		Map<String, Set<DocumentCollocate>> keywordDocumentCollocatesMap = new HashMap<String, Set<DocumentCollocate>>();
 		for (DocumentCollocate documentCollocate : documentCollocates) {
 			String keyword = documentCollocate.getKeyword();
@@ -105,15 +115,14 @@ public class CorpusCollocates extends AbstractContextTerms {
 		
 		FlexibleQueue<CorpusCollocate> flexibleQueue = new FlexibleQueue<CorpusCollocate>(CorpusCollocate.getComparator(sort), start+limit);
 		
-		
 		// now build corpus collocates
-		for (Map.Entry<String, Set<DocumentCollocate>> keywordDocumentCollocaatesEntry : keywordDocumentCollocatesMap.entrySet()) {
-
+		int count = 0; // track how many collocates we actually have
+		for (Map.Entry<String, Set<DocumentCollocate>> keywordDocumentCollocatesEntry : keywordDocumentCollocatesMap.entrySet()) {
 			int keywordRawFrequency = 0;
 			HashSet<Integer> seenDocumentIds = new HashSet<Integer>();
 			// build map (group) for context terms
 			Map<String, Set<DocumentCollocate>> contextTermDocumentCollocatesMap = new HashMap<String, Set<DocumentCollocate>>();
-			for (DocumentCollocate documentCollocate : keywordDocumentCollocaatesEntry.getValue()) {
+			for (DocumentCollocate documentCollocate : keywordDocumentCollocatesEntry.getValue()) {
 				String contextTerm = documentCollocate.getTerm();
 				if (!contextTermDocumentCollocatesMap.containsKey(contextTerm)) {
 					contextTermDocumentCollocatesMap.put(contextTerm, new HashSet<DocumentCollocate>());
@@ -125,24 +134,54 @@ public class CorpusCollocates extends AbstractContextTerms {
 				}
 			}
 			
-			String keyword = keywordDocumentCollocaatesEntry.getKey();
+			String keyword = keywordDocumentCollocatesEntry.getKey();
 			for (Map.Entry<String, Set<DocumentCollocate>> contextTermCollocatesEntry : contextTermDocumentCollocatesMap.entrySet()) {
 				int contextTermTotal = 0;
 				for (DocumentCollocate documentCollocate : contextTermCollocatesEntry.getValue()) {
 					contextTermTotal += documentCollocate.getContextRawFrequency();
 				}
-				total++;
 				CorpusCollocate c = new CorpusCollocate(keyword, keywordRawFrequency, contextTermCollocatesEntry.getKey(), contextTermTotal);
+				count++;
 				flexibleQueue.offer(c);
 			}
 			
 		}
-		
-		return flexibleQueue.getOrderedList();
+		total = count;
+		List<CorpusCollocate> list = flexibleQueue.getOrderedList();
+		return list.subList(start, Math.min(total, list.size()));
 	}
 
 	List<CorpusCollocate> getCorpusCollocates() {
 		return collocates;
+	}
+	
+	public static class CorpusCollocatesConverter implements Converter {
+
+		@Override
+		public boolean canConvert(Class type) {
+			return CorpusCollocates.class.isAssignableFrom(type);
+		}
+
+		@Override
+		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+			CorpusCollocates parent = (CorpusCollocates) source;
+			
+			final List<CorpusCollocate> ccs = parent.getCorpusCollocates();
+			
+			ToolSerializer.setNumericNode(writer,"total", parent.total);
+			
+			ToolSerializer.startNode(writer, "collocates", Map.Entry.class);
+			for (CorpusCollocate cc : ccs) {
+				context.convertAnother(cc);
+			}
+			ToolSerializer.endNode(writer);
+		}
+
+		@Override
+		public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+			return null;
+		}
+		
 	}
 
 }

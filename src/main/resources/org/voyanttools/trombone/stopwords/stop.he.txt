@@ -1,3 +1,4 @@
+# Hebrew
 #based on list from here: https://raw.githubusercontent.com/stopwords-iso/stopwords-he/master/stopwords-he.txt (MIT license)
 אבל
 או

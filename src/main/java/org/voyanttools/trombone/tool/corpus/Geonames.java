@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -361,7 +362,7 @@ public class Geonames extends AbstractContextTerms {
 		}
 		
 		Keywords stop = new Keywords();
-		stop.load(storage, new String[]{"stop.en.people.txt","stop.en.taporware.txt"});
+		stop.load(storage, new String[]{"stop.en.people.txt","stop.en.txt"});
 
 		
 		Map<String, City> citiesById = new HashMap<String, City>();
@@ -372,7 +373,7 @@ public class Geonames extends AbstractContextTerms {
 		for (String lang : corpus.getLanguageCodes()) {
 			Analyzer analyzer = new LexicalAnalyzer();
 			try(InputStream is = getClass().getResourceAsStream("/org/voyanttools/trombone/geonames/"+lang+".txt")) {
-				for (String line : IOUtils.readLines(is)) {
+				for (String line : IOUtils.readLines(is, StandardCharsets.UTF_8)) {
 					cityPhrases.clear();
 					String[] parts = tabPattern.split(line);
 					Set<String> forms = new HashSet<String>();

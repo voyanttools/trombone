@@ -23,8 +23,7 @@ public class DocumentNgramsTest {
 	}
 
 	public void test(Storage storage) throws IOException {
-		
-		// add another file to the storage
+		// add the testing file to the storage
 		FlexibleParameters parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr")});
 		CorpusCreator creator = new CorpusCreator(storage, parameters);
 		creator.run();

@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -395,7 +395,7 @@ public class GitNotebookManager extends AbstractTool {
 	// checks the key in the parameters to see if it matches the key in the local key file
 	private boolean isRequestAuthentic() throws IOException {
 		try(InputStream inputStream = this.getClass().getResourceAsStream(KEY_FILE_PATH)) {
-			String key = IOUtils.readLines(inputStream, Charset.forName("UTF-8")).get(0).trim();
+			String key = IOUtils.readLines(inputStream, StandardCharsets.UTF_8).get(0).trim();
 			return key.equals(parameters.getParameterValue("key"));
 		} catch (Exception e) {
 			return false;

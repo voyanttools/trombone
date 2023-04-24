@@ -22,15 +22,9 @@ public class CorpusCollocatesTest {
 	}
 
 	public void test(Storage storage) throws IOException {
-		
-		// add another file to the storage
-		FlexibleParameters parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr/udhr-es.txt")});
-		CorpusCreator creator = new CorpusCreator(storage, parameters);
-		creator.run();
-		
 		// add the testing files
-		parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr/udhr-en.txt"),"file="+TestHelper.getResource("udhr/udhr-fr.txt")});
-		creator = new CorpusCreator(storage, parameters);
+		FlexibleParameters parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr/udhr-en.txt")});
+		CorpusCreator creator = new CorpusCreator(storage, parameters);
 		creator.run();
 		
 		
@@ -39,22 +33,37 @@ public class CorpusCollocatesTest {
 		
 		CorpusCollocates corpusCollocates;
 		List<CorpusCollocate> corpusCollocatesList;
-		CorpusCollocate corpusCollocate;
 		
 		parameters.removeParameter("limit"); // make sure no limit
 		corpusCollocates = new CorpusCollocates(storage, parameters);
 		corpusCollocates.run();
 		corpusCollocatesList = corpusCollocates.getCorpusCollocates();
-		corpusCollocate = corpusCollocatesList.get(0);
-		assertEquals("should", corpusCollocate.getContextTerm());
+		assertEquals("should", corpusCollocatesList.get(0).getContextTerm());
 		
 		parameters.setParameter("limit", 10); // try with limit
 		corpusCollocates = new CorpusCollocates(storage, parameters);
 		corpusCollocates.run();
 		corpusCollocatesList = corpusCollocates.getCorpusCollocates();
-		corpusCollocate = corpusCollocatesList.get(0);
-		assertEquals("should", corpusCollocate.getContextTerm());
+		assertEquals("should", corpusCollocatesList.get(0).getContextTerm());
 		
+		parameters.setParameter("start", 10);
+		corpusCollocates = new CorpusCollocates(storage, parameters);
+		corpusCollocates.run();
+		assertEquals(10, corpusCollocates.getCorpusCollocates().size());
+		
+		int total = corpusCollocates.total;
+		parameters.setParameter("start", total-5);
+		corpusCollocates = new CorpusCollocates(storage, parameters);
+		corpusCollocates.run();
+		assertEquals(5, corpusCollocates.getCorpusCollocates().size());
+		
+		parameters.setParameter("start", 0);
+		parameters.setParameter("sort", "contextTerm");
+		parameters.setParameter("dir", "ASC");
+		corpusCollocates = new CorpusCollocates(storage, parameters);
+		corpusCollocates.run();
+		corpusCollocatesList = corpusCollocates.getCorpusCollocates();
+		assertEquals("allow", corpusCollocatesList.get(1).getContextTerm());
 		
 	}
 

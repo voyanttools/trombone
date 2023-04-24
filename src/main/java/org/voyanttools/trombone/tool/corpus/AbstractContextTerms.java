@@ -153,7 +153,7 @@ public abstract class AbstractContextTerms extends AbstractTerms {
 				int leftstart = keywordstart - context;
 				if (leftstart<0) {leftstart = 0;}
 				for (int i = leftstart, len = fill ? keywordstart : leftstart+1; i<len; i++) {
-					termsOfInterest.put(i, null);					
+					termsOfInterest.put(i, null);
 				}
 				
 				// add right

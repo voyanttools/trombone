@@ -418,7 +418,7 @@ public class XmlExtractor implements Extractor, Serializable {
 //			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
 			
 			// try to determine language
-			metadata.setLanguageCode(LangDetector.langDetector.detect(string, parameters));
+			metadata.setLanguageCode(LangDetector.detect(string, parameters));
 
 	        isProcessed = true;
 
