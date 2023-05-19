@@ -23,6 +23,7 @@ import org.voyanttools.trombone.model.DocumentToken;
 import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.storage.file.FileStorage;
+import org.voyanttools.trombone.tool.analysis.TopicModelingDiagnostics.TopicScores;
 import org.voyanttools.trombone.tool.corpus.AbstractCorpusTool;
 import org.voyanttools.trombone.tool.corpus.DocumentTokens;
 import org.voyanttools.trombone.tool.util.ToolSerializer;
@@ -62,8 +63,16 @@ public class TopicModeling extends AbstractCorpusTool {
 	
 	private int seed = 0;
 
+	/**
+	 * Alpha parameter is Dirichlet prior concentration parameter that represents document-topic density.
+	 * With a higher alpha, documents are assumed to be made up of more topics and result in more specific topic distribution per document.
+	 */
 	private double alphaSum = 1.0;
 
+	/**
+	 * Beta parameter is the same prior concentration parameter that represents topic-word density.
+	 * With high beta, topics are assumed to made of up most of the words and result in a more specific word distribution per topic.
+	 */
 	private double beta = 0.01;
 	
 	private double docSortSmoothing = 10.0;
@@ -75,6 +84,8 @@ public class TopicModeling extends AbstractCorpusTool {
 	private String[][] topWords;
 	
 	private List<TopicDocument> topicDocuments;
+	
+	private TopicModelingDiagnostics tmd;
 
 	public String[][] getTopWords() {
 		return topWords;
@@ -119,6 +130,10 @@ public class TopicModeling extends AbstractCorpusTool {
 			model = getModelFromInstances(instances);
 		}
 
+		runModel(model);
+	}
+	
+	private void runModel(ParallelTopicModel model) throws IOException {
 		model.setRandomSeed(seed);
 		
 		long start = System.currentTimeMillis();
@@ -132,6 +147,8 @@ public class TopicModeling extends AbstractCorpusTool {
 		// https://mimno.github.io/Mallet/topics-devel
 		topWords = getTopWords(model, numTermsPerTopic);
 		topicDocuments = getTopicDocuments(model, docSortSmoothing);
+		
+		tmd = getDiagnosticsFromTopicModel(model, topWords.length);
 		
 //		serializeTopicModel(model);
 	}
@@ -234,6 +251,27 @@ public class TopicModeling extends AbstractCorpusTool {
 
 		return instances;
 	}
+	
+	private InstanceList getInstanceListFromStrings(List<Map<String, String>> strings) throws IOException {
+		ArrayList<Pipe> pipeList = new ArrayList<Pipe>();
+		pipeList.add(new CharSequenceLowercase());
+		pipeList.add(new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")));
+
+//		Keywords stopwords = getStopwords(corpusMapper.getCorpus());
+//		if (!stopwords.isEmpty()) {
+//			TokenSequenceRemoveStopwords tsrs = new TokenSequenceRemoveStopwords();
+//			tsrs.addStopWords(stopwords.getKeywords().toArray(new String[] {}));
+//			pipeList.add(tsrs);
+//		}
+
+		pipeList.add(new TokenSequence2FeatureSequence());
+
+		InstanceList instances = new InstanceList(new SerialPipes(pipeList));
+
+		instances.addThruPipe(new DocumentIterator(strings));
+
+		return instances;
+	}
 
 	private List<Map<String, String>> getDocumentsAsStrings(Corpus corpus) throws IOException {
 		List<Map<String, String>> docStrings = new ArrayList<>();
@@ -266,6 +304,13 @@ public class TopicModeling extends AbstractCorpusTool {
 		model.setNumIterations(numIterations);
 
 		return model;
+	}
+	
+	private TopicModelingDiagnostics getDiagnosticsFromTopicModel(ParallelTopicModel model, int numTopWords) {
+		// https://mallet.cs.umass.edu/diagnostics.php
+		TopicModelingDiagnostics tmd = new TopicModelingDiagnostics(model, numTopWords);
+		return tmd;
+		
 	}
 
 	private class DocumentIterator implements Iterator<Instance> {
@@ -350,15 +395,40 @@ public class TopicModeling extends AbstractCorpusTool {
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			TopicModeling topMod = (TopicModeling) source;
 			
-			ToolSerializer.startNode(writer, "topicWords", List.class);
+			ArrayList<TopicScores> diagnostics = topMod.tmd.getDiagnostics();
+			
+			
+			ToolSerializer.startNode(writer, "topics", List.class);
+			int topicIndex = 0;
 			for (String[] tw : topMod.getTopWords()) {
+				writer.startNode("topic");
+				
+				for (TopicScores scores: diagnostics) {
+					ToolSerializer.setNumericNode(writer, scores.name, scores.scores[topicIndex]);	
+				}
+				
 				ToolSerializer.startNode(writer, "words", List.class);
+				int wordIndex = 0;
 				for (String w : tw) {
+					writer.startNode("word");
+					
 					ToolSerializer.startNode(writer, "word", String.class);
 					writer.setValue(w);
 					ToolSerializer.endNode(writer);
+					
+					for (TopicScores scores: diagnostics) {
+						if (wordIndex < scores.topicWordScores[topicIndex].length) {
+							ToolSerializer.setNumericNode(writer, scores.name, scores.topicWordScores[topicIndex][wordIndex]);
+						}
+					}
+					
+					writer.endNode();
+					wordIndex++;
 				}
 				ToolSerializer.endNode(writer);
+				
+				writer.endNode();
+				topicIndex++;
 			}
 			ToolSerializer.endNode(writer);
 			
@@ -386,19 +456,48 @@ public class TopicModeling extends AbstractCorpusTool {
 		File file = new File("D:\\VoyantData\\trombone5_2");
 		Storage storage = new FileStorage(file);
 		FlexibleParameters params = new FlexibleParameters();
-//		params.addParameter("corpus", "435c8bf72a967b1d70682810d93c257a"); // short
-		params.addParameter("corpus", "0d874272bddc7dbe5b88e4534a55b578"); // shakespeare
 //		params.addParameter("docIndex", new String[] {"0", "1", "2"});
 		params.addParameter("stopList", "auto");
-		params.addParameter("iterations", "10");
-		params.addParameter("topics", "5");
+		params.addParameter("iterations", "100");
+		params.addParameter("topics", "7");
+		params.addParameter("termsPerTopic", "20");
 //		params.addParameter("malletTokenization", "true");
 		TopicModeling tm = new TopicModeling(storage, params);
-		tm.run();
+		
+		List<Map<String, String>> docStrings = new ArrayList<>();
+		String[] filenames = new String[]{"ebola.txt", "steel.txt"};
+		for (String filename : filenames) {
+			String text;
+			try {
+				InputStream input = TopicModeling.class.getResourceAsStream("/cc/mallet/util/resources/"+filename);
+				text = IOUtils.toString(input, "UTF-8");
+			} catch (Exception e) {
+				text = "";
+			}
+			Map<String, String> docMap = new HashMap<>();
+			docMap.put("docId", filename);
+			docMap.put("docText", text);
+			docStrings.add(docMap);
+		}
+		
+		
+		InstanceList il = tm.getInstanceListFromStrings(docStrings);
+		ParallelTopicModel model = tm.getModelFromInstances(il);
+		
+		tm.runModel(model);
+		
 		
 		for (String[] tw : tm.getTopWords()) {
 			System.out.println(Arrays.toString(tw));
 		}
+		
+		TopicScores ch = tm.tmd.getCoherence();
+		System.out.println(Arrays.toString(ch.scores));
+		System.out.println(Arrays.toString(ch.topicWordScores));
+		
+		String xml = tm.tmd.toXML();
+		
+		System.out.println(xml);
 		
 //		for (TopicDocument td : tm.getTopicDocuments()) {
 //			System.out.println(td.docId+": "+Arrays.toString(td.weights));
