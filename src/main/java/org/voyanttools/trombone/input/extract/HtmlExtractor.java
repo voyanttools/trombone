@@ -113,7 +113,7 @@ public class HtmlExtractor implements Extractor, Serializable {
 				extractedContent = elements.outerHtml();
 			}
 			
-			metadata.setLanguageCode(LangDetector.langDetector.detect(string, parameters));
+			metadata.setLanguageCode(LangDetector.detect(string, parameters));
 
 			
 			String value = JsoupHelper.getQueryValue(doc, parameters.getParameterValue("htmlTitleQuery", "head title"));

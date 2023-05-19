@@ -120,8 +120,8 @@ public class Keywords {
 				// first check to see if there's a local copy of the file that takes precedence
 				if (storage instanceof FileStorage) {
 					File resources = ((FileStorage) storage).getLocalResourcesDirectory();
-					File keywords = new File(resources, "keywords");
-					File file = new File(keywords, new File(ref).getName());
+					File stopwords = new File(resources, "stopwords");
+					File file = new File(stopwords, new File(ref).getName());
 					if (file.exists()) {
 						try {
 							List<String> refs = FileUtils.readLines(file, StandardCharsets.UTF_8);
@@ -133,11 +133,11 @@ public class Keywords {
 					}
 				}
 				
-				try(InputStream is = getClass().getResourceAsStream("/org/voyanttools/trombone/keywords/"+ref)) {
+				try(InputStream is = getClass().getResourceAsStream("/org/voyanttools/trombone/stopwords/"+ref)) {
 					List<String> refs = IOUtils.readLines(is, StandardCharsets.UTF_8);
 					add(refs);
-				} catch (IOException e) {
-					throw new IOException("Unable to find local stopwords directory", e);
+				} catch (Exception e) {
+					// fail silently if stopwords can't be found
 				}
 			}
 			else if (ref.startsWith(KEYWORDS_PREFIX)) {
@@ -200,21 +200,17 @@ public class Keywords {
 	
 	public static Keywords getStopListForLangCode(Storage storage, String code) throws IOException {
 		Keywords keywords = new Keywords();
-		if (code.equals("en")) {
-			keywords.load(storage, new String[]{"stop.en.taporware.txt"});
-		} else {
-			InputStream in = Keywords.class.getResourceAsStream("/org/voyanttools/trombone/keywords");
-			BufferedReader br = new BufferedReader( new InputStreamReader( in ) );
-			String resource;
-		    while( (resource = br.readLine()) != null ) {
-		    		if (resource.startsWith("stop."+code+".")) {
-		    			keywords.load(storage, new String[]{resource});
-		    			break;
-		    		}
-		    }
-		    br.close();
+		InputStream in = Keywords.class.getResourceAsStream("/org/voyanttools/trombone/stopwords");
+		BufferedReader br = new BufferedReader( new InputStreamReader( in ) );
+		String resource;
+		while( (resource = br.readLine()) != null ) {
+			if (resource.equals("stop."+code+".txt")) {
+				keywords.load(storage, new String[]{resource});
+				break;
+			}
 		}
-	    return keywords;
+		br.close();
+		return keywords;
 	}
 
 }

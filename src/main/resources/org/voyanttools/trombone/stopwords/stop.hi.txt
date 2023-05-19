@@ -1,3 +1,4 @@
+# Hindi
 # Also see http://www.opensource.org/licenses/bsd-license.html
 # See http://members.unine.ch/jacques.savoy/clef/index.html.
 # This file was created by Jacques Savoy and is distributed under the BSD license.

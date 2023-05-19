@@ -112,7 +112,7 @@ public class DocumentTermsTest {
 		assertEquals(0, documentTerms.size());
 		
 		// with stopwords
-		parameters.setParameter("stopList", "stop.en.taporware.txt");
+		parameters.setParameter("stopList", "stop.en.txt");
 		parameters.removeParameter("start");
 		parameters.removeParameter("limit");
 		documentTermFrequencies = new DocumentTerms(storage, parameters);

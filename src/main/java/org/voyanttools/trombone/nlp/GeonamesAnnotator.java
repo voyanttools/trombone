@@ -56,7 +56,7 @@ public class GeonamesAnnotator {
 		Analyzer analyzer = new LexicalAnalyzer();
 		Location reusableLocation = new Location();
 		Map<String, Location> geonameIdToLocation = new HashMap<String, Location>();
-		Map<String, Set<String>> formsToGeonameIds = new HashMap<String, Set<String>>();		
+		Map<String, Set<String>> formsToGeonameIds = new HashMap<String, Set<String>>();
 		Map<String, String> locationStringToForm = new HashMap<String, String>();
 		List<String> words = new ArrayList<String>();
 		Set<String> forms = new HashSet<String>();

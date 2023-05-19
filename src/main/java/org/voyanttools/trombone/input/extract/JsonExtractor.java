@@ -166,7 +166,7 @@ public class JsonExtractor implements Extractor {
 			}
 
 			// try to determine language
-			metadata.setLanguageCode(LangDetector.langDetector.detect(string, parameters));
+			metadata.setLanguageCode(LangDetector.detect(string, parameters));
 			
 	        isProcessed = true;
 

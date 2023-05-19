@@ -24,7 +24,7 @@ public class KeywordsTest {
 		keywords = new Keywords();
 		
 		// test named list, comma-separated values and multiple strings
-		keywords.load(storage, new String[]{"stop.en.taporware.txt,testzz","testaa"});
+		keywords.load(storage, new String[]{"stop.en.txt,testzz","testaa"});
 		assertTrue(keywords.isKeyword("the"));
 		assertTrue(keywords.isKeyword("testzz"));
 		assertTrue(keywords.isKeyword("testaa"));
@@ -44,19 +44,22 @@ public class KeywordsTest {
 		// test with local resources
 		FileStorage fileStorage = new FileStorage(TestHelper.getTemporaryTestStorageDirectory());
 		File resources = fileStorage.getLocalResourcesDirectory();
-		File keywordsFile = new File(resources, "keywords");
-		keywordsFile.mkdirs();
-		File stopListFile = new File(keywordsFile, "stop.en.taporware.txt");
+		File stopwordsFile = new File(resources, "stopwords");
+		stopwordsFile.mkdirs();
+		File stopListFile = new File(stopwordsFile, "stop.en.txt");
 		FileUtils.write(stopListFile, "cheeze\nwhiz", "UTF-8");
-		keywords.load(fileStorage, new String[]{"stop.en.taporware.txt"});
+		keywords.load(fileStorage, new String[]{"stop.en.txt"});
 		assertTrue(keywords.isKeyword("cheeze"));
 		assertFalse(keywords.isKeyword("cheezes"));
 		assertTrue(stopListFile.delete());
-		assertTrue(keywordsFile.delete());
+		assertTrue(stopwordsFile.delete());
 		assertTrue(resources.delete());
 		
 		fileStorage.destroy();
 		
+		
+		keywords = Keywords.getStopListForLangCode(storage, "fr");
+		assertTrue(keywords.isKeyword("cependant"));
 
 		/* FIXME: re-enable this 
 		// try with a URL
