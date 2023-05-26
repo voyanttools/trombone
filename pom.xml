@@ -58,7 +58,9 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.2</version>
 				<configuration>
-					<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine> <!-- required for UTF-8 on windows -->
+					<!-- file.encoding required for UTF-8 on windows -->
+					<!-- setting max memory for github build action -->
+					<argLine>-Dfile.encoding=${project.build.sourceEncoding} -Xmx3g</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
