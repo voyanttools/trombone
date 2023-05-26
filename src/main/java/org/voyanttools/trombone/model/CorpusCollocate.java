@@ -201,7 +201,7 @@ public class CorpusCollocate implements Comparable<CorpusCollocate> {
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			CorpusCollocate cc = (CorpusCollocate) source;
 			
-			writer.startNode("corpusCollocate");
+			writer.startNode("collocate");
 			
 			writer.startNode("term");
 			writer.setValue(cc.term);
