@@ -6,7 +6,10 @@ package org.voyanttools.trombone.input.expand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -98,7 +101,7 @@ public class XlsExpander implements Expander {
 		String id = storedDocumentSource.getId();
 		Workbook wb = getWorkBook(storedDocumentSource);
 		List<StoredDocumentSource> xlsStoredDocumentSources = new ArrayList<StoredDocumentSource>();
-		List<List<Integer>> columns = getInts("tableContent", true);
+		List<List<Integer>> columns = getInts(parameters.getParameterValues("tableContent"));
 		StringBuffer docBuffer = new StringBuffer();
 		int firstRow = parameters.getParameterBooleanValue("tableNoHeadersRow") ? 0 : 1;
 		String title;
@@ -131,7 +134,7 @@ public class XlsExpander implements Expander {
 				if (docBuffer.length()>0) {
 					String location = (k+1)+"."+StringUtils.join(set, "+")+"."+(firstRow+1);
 					title = firstRow == 0 ? location : getValue(sheet.getRow(0), set, " ");
-					xlsStoredDocumentSources.add(getChild(metadata, id, docBuffer.toString(), location, title, null));
+					xlsStoredDocumentSources.add(getChild(metadata, id, docBuffer.toString(), location, title, null, null, null, null, null, null, null));
 					docBuffer.setLength(0); // reset buffer
 				}
 			}
@@ -146,10 +149,18 @@ public class XlsExpander implements Expander {
 		String id = storedDocumentSource.getId();
 		Workbook wb = getWorkBook(storedDocumentSource);
 		List<StoredDocumentSource> xlsStoredDocumentSources = new ArrayList<StoredDocumentSource>();
-		List<List<Integer>> columns = getInts("tableContent", true);
-		List<List<Integer>> titles = getInts("tableTitle", true);
-		List<List<Integer>> authors = getInts("tableAuthor", true);
+		
+		List<List<Integer>> columns = getInts(parameters.getParameterValues("tableContent"));
+		List<List<Integer>> titles = getInts(parameters.getParameterValues("tableTitle"));
+		List<List<Integer>> authors = getInts(parameters.getParameterValues("tableAuthor"));
+		List<List<Integer>> pubDate = getInts(parameters.getParameterValues("tablePubDate"));
+		List<List<Integer>> publisher = getInts(parameters.getParameterValues("tablePublisher"));
+		List<List<Integer>> pubPlace = getInts(parameters.getParameterValues("tablePubPlace"));
+		List<List<Integer>> keywords = getInts(parameters.getParameterValues("tableKeywords"));
+		List<List<Integer>> collection = getInts(parameters.getParameterValues("tableCollection"));
+		Map<String, List<List<Integer>>> extras = processExtras("tableExtraMetadata");
 		int firstRow = parameters.getParameterBooleanValue("tableNoHeadersRow") ? 0 : 1;
+		
 		Row row;
 		String contents;
 		String location;
@@ -177,28 +188,60 @@ public class XlsExpander implements Expander {
 					if (contents.isEmpty()==false) {
 						location = (k+1)+"."+StringUtils.join(columnsSet, "+")+"."+(r+1);
 						String title = location;
-						if (titles.isEmpty()==false && columns.size()==1) {
-							List<String> currentTitles = new ArrayList<String>();
-							for (List<Integer> titleSet : titles) {
-								String t = getValue(row, titleSet, " ");
-								if (t.isEmpty()==false) {
-									currentTitles.add(t);
-								}
-							}
-							if (currentTitles.isEmpty()==false) {
-								title = StringUtils.join(currentTitles, " ");
-							}
-						}
 						List<String> currentAuthors = new ArrayList<String>();
-						if (authors.isEmpty()==false && columns.size()==1) {
-							for (List<Integer> set : authors) {
-								String author = getValue(row, set, " ").trim();
-								if (author.isEmpty()==false) {
-									currentAuthors.add(author);
+						String pubDateStr = "";
+						String publisherStr = "";
+						String pubPlaceStr = "";
+						String keywordsStr = "";
+						String collectionStr = "";
+						Map<String, String> extrasMap = new HashMap<>();
+						
+						if (columns.size()==1) {
+							if (titles.isEmpty()==false) {
+								List<String> currentTitles = getAllValues(row, titles);
+								if (currentTitles.isEmpty()==false) {
+									title = StringUtils.join(currentTitles, " ");
 								}
 							}
+							
+							currentAuthors = getAllValues(row, authors, " ");
+							
+							List<String> currentPubDate = getAllValues(row, pubDate);
+							if (currentPubDate.isEmpty()==false) {
+								pubDateStr = StringUtils.join(currentPubDate, " ");
+							}
+							
+							List<String> currentPublisher = getAllValues(row, publisher);
+							if (currentPublisher.isEmpty()==false) {
+								publisherStr = StringUtils.join(currentPublisher, " ");
+							}
+							
+							List<String> currentPubPlace = getAllValues(row, pubPlace);
+							if (currentPubPlace.isEmpty()==false) {
+								pubPlaceStr = StringUtils.join(currentPubPlace, " ");
+							}
+							
+							List<String> currentKeywords = getAllValues(row, keywords);
+							if (currentKeywords.isEmpty()==false) {
+								keywordsStr = StringUtils.join(currentKeywords, " ");
+							}
+							
+							List<String> currentCollection = getAllValues(row, collection);
+							if (currentCollection.isEmpty()==false) {
+								collectionStr = StringUtils.join(currentCollection, " ");
+							}
+							
+							for (String extraKey : extras.keySet()) {
+								List<String> extraValues = getAllValues(row, extras.get(extraKey));
+								if (extraValues.isEmpty()==false) {
+									extrasMap.put(extraKey, StringUtils.join(extraValues, " "));
+								}
+							}
+							
 						}
-						xlsStoredDocumentSources.add(getChild(metadata, id, contents, location, title, currentAuthors));
+						
+						
+						xlsStoredDocumentSources.add(getChild(metadata, id, contents, location, title, currentAuthors, pubDateStr, publisherStr, pubPlaceStr, keywordsStr, collectionStr, extrasMap));
 						
 					}
 				}
@@ -206,6 +249,37 @@ public class XlsExpander implements Expander {
 		}
 		wb.close();
 		return xlsStoredDocumentSources;
+	}
+	
+	private Map<String, List<List<Integer>>> processExtras(String paramKey) {
+		Map<String, List<List<Integer>>> extras = new HashMap<>();
+		for (String string : parameters.getParameterValues(paramKey)) {
+			for (String x :string.split("(\r\n|\r|\n)+")) {
+				x = x.trim();
+				String[] parts = x.split("=");
+				if (parts.length>1) {
+					String extraKey = parts[0].trim();
+					String[] extraValue = new String[] {StringUtils.join(Arrays.copyOfRange(parts, 1, parts.length), "=").trim()};
+					extras.put(extraKey, getInts(extraValue));
+				}
+			}
+		}
+		return extras;
+	}
+	
+	private List<String> getAllValues(Row row, List<List<Integer>> ints) {
+		return getAllValues(row, ints, " ");
+	}
+	
+	private List<String> getAllValues(Row row, List<List<Integer>> ints, String separator) {
+		List<String> allValues = new ArrayList<String>();
+		for (List<Integer> cells : ints) {
+			String val = getValue(row, cells, separator).trim();
+			if (val.isEmpty()==false) {
+				allValues.add(val);
+			}
+		}
+		return allValues;
 	}
 	
 	private String getValue(Row row, String separator) {
@@ -262,17 +336,17 @@ public class XlsExpander implements Expander {
 		return null;
 	}
 	
-	private List<List<Integer>> getInts(String key, boolean decrement) {
+	private List<List<Integer>> getInts(String[] values) {
 		List<List<Integer>> outerList = new ArrayList<List<Integer>>();
-		for (String string : parameters.getParameterValues(key)) {
+		for (String string : values) {
 			for (String set : string.trim().split(",")) {
 				List<Integer> innerList = new ArrayList<Integer>();
 				for (String s : set.trim().split("\\+")) {
 					try {
-						innerList.add(Integer.valueOf(s.trim()) + (decrement ? -1 : 0));
+						innerList.add(Integer.valueOf(s.trim())-1); // subtract 1 because user input is 1-based but processing is 0-based
 					}
 					catch (NumberFormatException e) {
-						throw new IllegalArgumentException(key+" parameter should only contain numbers: "+string, e);
+						throw new IllegalArgumentException("Table parameter should only contain numbers: "+string, e);
 					}
 				}
 				if (innerList.isEmpty()==false) {
@@ -284,7 +358,8 @@ public class XlsExpander implements Expander {
 	}
 	
 	
-	private StoredDocumentSource getChild(DocumentMetadata parentMetadata, String parentId, String string, String location, String title, List<String> authors) throws IOException {
+	private StoredDocumentSource getChild(DocumentMetadata parentMetadata, String parentId, String string, String location, String title,
+			List<String> authors, String pubDate, String publisher, String pubPlace, String keywords, String collection, Map<String, String> extras) throws IOException {
 		DocumentMetadata metadata = parentMetadata.asParent(parentId, DocumentMetadata.ParentType.EXPANSION);
 		metadata.setModified(parentMetadata.getModified());
 		metadata.setSource(Source.STRING);
@@ -292,6 +367,26 @@ public class XlsExpander implements Expander {
 		metadata.setTitle(title);
 		if (authors!=null && authors.isEmpty()==false) {
 			metadata.setAuthors(authors.toArray(new String[0]));
+		}
+		if (pubDate!=null && pubDate.isEmpty()==false) {
+			metadata.setPubDates(pubDate);
+		}
+		if (publisher!=null && publisher.isEmpty()==false) {
+			metadata.setPublishers(publisher);
+		}
+		if (pubPlace!=null && pubPlace.isEmpty()==false) {
+			metadata.setPubPlaces(pubPlace);
+		}
+		if (keywords!=null && keywords.isEmpty()==false) {
+			metadata.setKeywords(keywords);
+		}
+		if (collection!=null && collection.isEmpty()==false) {
+			metadata.setCollections(collection);
+		}
+		if (extras!=null && extras.isEmpty()==false) {
+			for (String key : extras.keySet()) {
+				metadata.setExtra(key, extras.get(key));
+			}
 		}
 		metadata.setDocumentFormat(DocumentFormat.TEXT);
 		String id = DigestUtils.md5Hex(parentId + location + title + StringUtils.join(authors));

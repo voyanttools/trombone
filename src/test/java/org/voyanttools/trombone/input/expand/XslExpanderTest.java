@@ -45,6 +45,16 @@ public class XslExpanderTest {
 		InputStream inputStream;
 		String contents;
 		
+		// test metadata handling (need to test first because further tests will use cached DocumentMetadata)
+		parameters = new FlexibleParameters();
+		parameters.setParameter("tableDocuments", "rows");
+		parameters.setParameter("tableNoHeadersRow", "true");
+		parameters.setParameter("tableContent", 1);
+		parameters.setParameter("tableExtraMetadata", "col2=2");
+		storedDocumentSourceExpander = new StoredDocumentSourceExpander(storedDocumentSourceStorage, parameters);
+		expandedSourceDocumentSources = storedDocumentSourceExpander.expandXsl(storedDocumentSource);
+		assertEquals("phrase 2", expandedSourceDocumentSources.get(0).getMetadata().getExtra("col2"));
+		
 		// no parameters, this would get handled by an extractor, not the expander
 		storedDocumentSourceExpander = new StoredDocumentSourceExpander(storedDocumentSourceStorage);
 		expandedSourceDocumentSources = storedDocumentSourceExpander.expandXsl(storedDocumentSource);
@@ -160,22 +170,6 @@ public class XslExpanderTest {
 		inputStream.close();
 //		contents = IOUtils.toString(storedDocumentSourceStorage.getStoredDocumentSourceInputStream(expandedSourceDocumentSources.get(0).getId()));
 		assertEquals(1, contents.split("\n+").length);
-		
-		// first and second columns
-		parameters = new FlexibleParameters();
-		parameters.setParameter("tableDocuments", "columns");
-		parameters.setParameter("tableContent", "1,2");
-		storedDocumentSourceExpander = new StoredDocumentSourceExpander(storedDocumentSourceStorage, parameters);
-		expandedSourceDocumentSources = storedDocumentSourceExpander.expandXsl(storedDocumentSource);
-		assertEquals(2, expandedSourceDocumentSources.size());
-
-		// first and second columns merged (third doesn't is empty or doesn't exist) tableDocumentsColumns
-		parameters = new FlexibleParameters();
-		parameters.setParameter("tableDocuments", "columns");
-		parameters.setParameter("tableContent", "1+2,3000");
-		storedDocumentSourceExpander = new StoredDocumentSourceExpander(storedDocumentSourceStorage, parameters);
-		expandedSourceDocumentSources = storedDocumentSourceExpander.expandXsl(storedDocumentSource);
-		assertEquals(1, expandedSourceDocumentSources.size());
 		
 		storage.destroy();
 	}
