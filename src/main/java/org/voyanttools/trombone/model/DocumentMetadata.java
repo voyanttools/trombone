@@ -382,10 +382,6 @@ public class DocumentMetadata implements Comparable<DocumentMetadata> {
 		setProperty("index", String.valueOf(index));
 		this.index = index;
 	}
-	
-	public void setKeywords(String value) {
-		setProperty("keyword", value);
-	}
 
 	public void setLanguageCode(String lang) {
 		setProperty("language", lang);
@@ -434,7 +430,7 @@ public class DocumentMetadata implements Comparable<DocumentMetadata> {
 		parameters.setParameter(key, values);
 	}
 
-	public void setPubDate(String value) {
+	public void setPubDates(String value) {
 		setProperty("pubDate", value);
 	}
 	
@@ -442,16 +438,32 @@ public class DocumentMetadata implements Comparable<DocumentMetadata> {
 		setProperty("pubDate", values);
 	}
 	
+	public void setPublishers(String value) {
+		setProperty("publisher", value);
+	}
+	
 	public void setPublishers(String[] values) {
 		setProperty("publisher", values);
+	}
+	
+	public void setPubPlaces(String value) {
+		setProperty("pubPlace", value);
 	}
 	
 	public void setPubPlaces(String[] values) {
 		setProperty("pubPlace", values);
 	}
 	
+	public void setKeywords(String value) {
+		setProperty("keyword", value);
+	}
+	
 	public void setKeywords(String[] keywords) {
 		setProperty("keyword", keywords);
+	}
+	
+	public void setCollections(String collection) {
+		setProperty("collection", collection);
 	}
 	
 	public void setCollections(String[] collections) {

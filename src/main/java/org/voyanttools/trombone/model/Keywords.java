@@ -200,16 +200,14 @@ public class Keywords {
 	
 	public static Keywords getStopListForLangCode(Storage storage, String code) throws IOException {
 		Keywords keywords = new Keywords();
-		InputStream in = Keywords.class.getResourceAsStream("/org/voyanttools/trombone/stopwords");
-		BufferedReader br = new BufferedReader( new InputStreamReader( in ) );
-		String resource;
-		while( (resource = br.readLine()) != null ) {
-			if (resource.equals("stop."+code+".txt")) {
-				keywords.load(storage, new String[]{resource});
-				break;
-			}
+		
+		try(InputStream is = keywords.getClass().getResourceAsStream("/org/voyanttools/trombone/stopwords/stop."+code+".txt")) {
+			List<String> refs = IOUtils.readLines(is, StandardCharsets.UTF_8);
+			keywords.add(refs);
+		} catch (Exception e) {
+			// fail silently if stopwords can't be found
 		}
-		br.close();
+		
 		return keywords;
 	}
 
