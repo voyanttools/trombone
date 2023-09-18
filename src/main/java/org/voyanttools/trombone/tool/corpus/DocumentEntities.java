@@ -42,6 +42,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import ca.lincsproject.nssi.VoyantNssiClient;
+import ca.lincsproject.nssi.VoyantSpacyClient;
 
 /**
  * @author Andrew MacDonald
@@ -51,7 +52,7 @@ import ca.lincsproject.nssi.VoyantNssiClient;
 public class DocumentEntities extends AbstractAsyncCorpusTool {
 
 	private static enum NLP {
-		Stanford, OpenNLP, NSSI
+		Stanford, OpenNLP, NSSI, SPACY
 	}
 	
 	@XStreamOmitField
@@ -151,6 +152,8 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		String anno = parameters.getParameterValue("annotator", "");
 		if (anno.toLowerCase().equals("nssi")) {
 			annotator = NLP.NSSI;
+		} else if (anno.toLowerCase().equals("spacy")){
+			annotator = NLP.SPACY;
 		} else if (anno.toLowerCase().equals("opennlp")){
 			annotator = NLP.OpenNLP;
 		} else {
@@ -307,6 +310,14 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 			if (annotator.equals(NLP.NSSI)) {
 				int jobId = VoyantNssiClient.submitJob(indexedDocument.getDocumentString());
 				List<DocumentEntity> ents = VoyantNssiClient.getResults(jobId);
+				int docIndex = corpusMapper.getCorpus().getDocumentPosition(docId);
+				for (DocumentEntity ent : ents) {
+					ent.setDocIndex(docIndex);
+				}
+				addPositionsToEntities(corpusMapper, indexedDocument, ents);
+				return new DocResult(docId, "done", ents);
+			} else if (annotator.equals(NLP.SPACY)) {
+				List<DocumentEntity> ents = VoyantSpacyClient.submitJob(indexedDocument.getDocumentString());
 				int docIndex = corpusMapper.getCorpus().getDocumentPosition(docId);
 				for (DocumentEntity ent : ents) {
 					ent.setDocIndex(docIndex);
