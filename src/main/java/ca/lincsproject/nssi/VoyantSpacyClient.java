@@ -34,6 +34,8 @@ public class VoyantSpacyClient {
 	
 	private static boolean debug = true;
 	
+	private static boolean convertToStanfordTypes = false;
+	
 	
 	public static void main(String[] args) throws IOException {
 		String testText = "I had seen little of Holmes lately. My marriage had drifted us away from each other. My own complete happiness, and the home-centred interests which rise up around the man who first finds himself master of his own establishment, were sufficient to absorb all my attention, while Holmes, who loathed every form of society with his whole Bohemian soul, remained in our lodgings in Baker Street, buried among his old books, and alternating from week to week between cocaine and ambition, the drowsiness of the drug, and the fierce energy of his own keen nature. He was still, as ever, deeply attracted by the study of crime, and occupied his immense faculties and extraordinary powers of observation in following out those clues, and clearing up those mysteries which had been abandoned as hopeless by the official police. From time to time I heard some vague account of his doings: of his summons to Odessa in the case of the Trepoff murder, of his clearing up of the singular tragedy of the Atkinson brothers at Trincomalee, and finally of the mission which he had accomplished so delicately and successfully for the reigning family of Holland. Beyond these signs of his activity, however, which I merely shared with all the readers of the daily press, I knew little of my former friend and companion.";
@@ -102,8 +104,8 @@ public class VoyantSpacyClient {
 			JSONObject obj = (JSONObject) item;
 			
 			String entity = obj.getString("name");
-			String classification = obj.getString("label");
-			String stanfordType = VoyantSpacyClient.getStanfordTypeFromSpacyType(classification);
+			String spacyType = obj.getString("label");
+			String stanfordType = VoyantSpacyClient.getStanfordTypeFromSpacyType(spacyType);
 			
 			JSONArray selections = obj.getJSONArray("matches");
 			int rawFreq = selections.length();
@@ -117,7 +119,11 @@ public class VoyantSpacyClient {
 				if (entitiesMap.containsKey(entity)) {
 					currEntity = entitiesMap.get(entity);
 				} else {
-					currEntity = new DocumentEntity(-1, entity, lemma, EntityType.getForgivingly(stanfordType), rawFreq);
+					if (VoyantSpacyClient.convertToStanfordTypes) {
+						currEntity = new DocumentEntity(-1, entity, lemma, EntityType.getForgivingly(stanfordType), rawFreq);
+					} else {
+						currEntity = new DocumentEntity(-1, entity, lemma, EntityType.getForgivingly(spacyType), rawFreq);
+					}
 					entitiesMap.put(entity, currEntity);
 				}
 				int[][] offsets = currEntity.getOffsets();
@@ -163,6 +169,8 @@ public class VoyantSpacyClient {
 		case "gpe":
 		case "loc":
 			return "location";
+		case "norp":
+			return "organization";
 		case "product":
 		case "cardinal":
 		case "ordinal":
@@ -171,7 +179,6 @@ public class VoyantSpacyClient {
 		case "fac":
 		case "language":
 		case "law":
-		case "norp":
 		case "work_of_art":
 			return "misc";
 		default:
