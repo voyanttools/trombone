@@ -418,7 +418,9 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 			else {break;}
 		}
 		
-		for (DocumentEntity entity : entities) {
+		List<Integer> toRemove = new ArrayList<Integer>();
+		for (int i = 0; i < entities.size(); i++) {
+			DocumentEntity entity = entities.get(i);
 			String key = entity.getTerm()+" -- "+entity.getType().name();
 			Map<Integer, List<Integer>> offsetPositions = entityPositionsMap.get(key);
 			if (offsetPositions != null) {
@@ -438,9 +440,15 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 					}
 				}
 				entity.setPositions(posArray);
+			} else {
+				toRemove.add(i);
 			}
 		}
 		
+		for (int j = toRemove.size()-1; j >= 0; j--) {
+			int index = toRemove.get(j);
+			entities.remove(index);
+		}
 	}
 	
 	
