@@ -43,7 +43,7 @@ public class VoyantSpacyClient {
 		
 		long start = System.currentTimeMillis();
 		debug = true;
-		List<DocumentEntity> result = VoyantSpacyClient.submitJob(testText);
+		List<DocumentEntity> result = VoyantSpacyClient.submitJob(testText, "en");
 		long end = System.currentTimeMillis();
 		long ellapsed = (end-start)/1000;
 		System.out.println("ellapsed: "+ellapsed);
@@ -54,7 +54,7 @@ public class VoyantSpacyClient {
 		VoyantSpacyClient.accessToken = "foo";
 	}
 	
-	public static List<DocumentEntity> submitJob(String text) throws IOException {
+	public static List<DocumentEntity> submitJob(String text, String lang) throws IOException {
 		if (VoyantSpacyClient.accessToken == null) {
 			setAccessToken();
 		}
@@ -66,7 +66,7 @@ public class VoyantSpacyClient {
 //			httpPost.setHeader("Authorization", "Bearer "+VoyantSpacyClient.accessToken);
 			
 			JSONObject jsonBody = new JSONObject();
-			jsonBody.put("language", "en"); // TODO
+			jsonBody.put("language", lang);
 			jsonBody.put("text", text);
 			String input = jsonBody.toString();
 			

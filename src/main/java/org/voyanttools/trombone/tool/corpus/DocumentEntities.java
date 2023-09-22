@@ -317,7 +317,8 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 				addPositionsToEntities(corpusMapper, indexedDocument, ents);
 				return new DocResult(docId, "done", ents);
 			} else if (annotator.equals(NLP.SPACY)) {
-				List<DocumentEntity> ents = VoyantSpacyClient.submitJob(indexedDocument.getDocumentString());
+				String lang = corpusMapper.getCorpus().getLanguageCodes().toArray(new String[0])[0];
+				List<DocumentEntity> ents = VoyantSpacyClient.submitJob(indexedDocument.getDocumentString(), lang);
 				int docIndex = corpusMapper.getCorpus().getDocumentPosition(docId);
 				for (DocumentEntity ent : ents) {
 					ent.setDocIndex(docIndex);
