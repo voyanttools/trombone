@@ -42,6 +42,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import ca.lincsproject.nssi.VoyantNssiClient;
+import ca.lincsproject.nssi.VoyantSpacyClient;
 
 /**
  * @author Andrew MacDonald
@@ -51,7 +52,7 @@ import ca.lincsproject.nssi.VoyantNssiClient;
 public class DocumentEntities extends AbstractAsyncCorpusTool {
 
 	private static enum NLP {
-		Stanford, OpenNLP, NSSI
+		Stanford, OpenNLP, NSSI, SPACY
 	}
 	
 	@XStreamOmitField
@@ -151,6 +152,8 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		String anno = parameters.getParameterValue("annotator", "");
 		if (anno.toLowerCase().equals("nssi")) {
 			annotator = NLP.NSSI;
+		} else if (anno.toLowerCase().equals("spacy")){
+			annotator = NLP.SPACY;
 		} else if (anno.toLowerCase().equals("opennlp")){
 			annotator = NLP.OpenNLP;
 		} else {
@@ -313,6 +316,15 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 				}
 				addPositionsToEntities(corpusMapper, indexedDocument, ents);
 				return new DocResult(docId, "done", ents);
+			} else if (annotator.equals(NLP.SPACY)) {
+				String lang = corpusMapper.getCorpus().getLanguageCodes().toArray(new String[0])[0];
+				List<DocumentEntity> ents = VoyantSpacyClient.submitJob(indexedDocument.getDocumentString(), lang);
+				int docIndex = corpusMapper.getCorpus().getDocumentPosition(docId);
+				for (DocumentEntity ent : ents) {
+					ent.setDocIndex(docIndex);
+				}
+				addPositionsToEntities(corpusMapper, indexedDocument, ents);
+				return new DocResult(docId, "done", ents);
 			} else if (annotator.equals(NLP.OpenNLP)) {
 				String lang = indexedDocument.getMetadata().getLanguageCode();
 				if (lang.equals("en")) {
@@ -407,7 +419,9 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 			else {break;}
 		}
 		
-		for (DocumentEntity entity : entities) {
+		List<Integer> toRemove = new ArrayList<Integer>();
+		for (int i = 0; i < entities.size(); i++) {
+			DocumentEntity entity = entities.get(i);
 			String key = entity.getTerm()+" -- "+entity.getType().name();
 			Map<Integer, List<Integer>> offsetPositions = entityPositionsMap.get(key);
 			if (offsetPositions != null) {
@@ -427,9 +441,15 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 					}
 				}
 				entity.setPositions(posArray);
+			} else {
+				toRemove.add(i);
 			}
 		}
 		
+		for (int j = toRemove.size()-1; j >= 0; j--) {
+			int index = toRemove.get(j);
+			entities.remove(index);
+		}
 	}
 	
 	
