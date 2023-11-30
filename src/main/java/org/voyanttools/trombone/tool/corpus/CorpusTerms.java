@@ -336,7 +336,7 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 							}
 							// otherwise use our new query below
 							
-						}						
+						}
 					}
 
 				}
@@ -443,7 +443,7 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 		totalTokens+=corpusTerm.getRawFrequency();
 	}
 
-	List<CorpusTerm> getCorpusTerms() {
+	protected List<CorpusTerm> getCorpusTerms() {
 		return terms;
 	}
 
