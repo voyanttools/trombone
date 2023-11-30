@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.tool.corpus.CorpusManager;
@@ -28,6 +27,8 @@ public class CategoriesTest {
 		Corpus corpus = CorpusManager.getCorpus(storage, parameters);
 	
 		Categories categories;
+		
+		CorpusTerms corpusTerms;
 
 		categories = Categories.getCategories(storage, corpus, "");
 		assertTrue(categories.isEmpty());
@@ -41,13 +42,9 @@ public class CategoriesTest {
 		categories = Categories.getCategories(storage, corpus, "categories.en.txt");
 		assertTrue(categories.hasCategory("positive"));
 		
-		String id = storage.storeString("{\"categories\":{\"negative\":[\"bogeyman\"]}}", Storage.Location.object);
-		categories = Categories.getCategories(storage, corpus, id);
-		assertTrue(categories.hasCategory("negative"));
-		
 		parameters.setParameter("categories", "auto");
 		parameters.setParameter("query", "@positive");
-		CorpusTerms corpusTerms = new CorpusTerms(storage, parameters);
+		corpusTerms = new CorpusTerms(storage, parameters);
 		corpusTerms.run();
 		assertEquals(1, corpusTerms.getTotal());
 		for (CorpusTerm term : corpusTerms) {
@@ -65,6 +62,20 @@ public class CategoriesTest {
 			assertEquals(27, term.getRawFrequency());
 			break;
 		}
+		
+		String id = storage.storeString("{\"categories\":{\"human\":[\".*man\"]}}", Storage.Location.object);
+		categories = Categories.getCategories(storage, corpus, id);
+		assertTrue(categories.hasCategory("human"));
+		
+		parameters.setParameter("categories", id);
+		parameters.setParameter("query", "@human");
+		corpusTerms = new CorpusTerms(storage, parameters);
+		corpusTerms.run();
+		assertEquals(1, corpusTerms.getTotal());
+		for (CorpusTerm term : corpusTerms) {
+			assertEquals(5, term.getRawFrequency());
+		}
+		
 	}
 
 }
