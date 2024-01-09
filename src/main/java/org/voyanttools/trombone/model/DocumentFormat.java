@@ -130,6 +130,12 @@ public enum DocumentFormat {
 	XLSX("xlsx", "xls"),
 	
 	/**
+	 * Non Excel table formats
+	 */
+	CSV("csv"),
+	TSV("tsv"),
+	
+	/**
 	 * An RTF file (.rtf).
 	 */
 	RTF("rtf"),

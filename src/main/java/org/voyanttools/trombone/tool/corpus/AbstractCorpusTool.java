@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,8 +24,6 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.spans.SpanOrQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.search.spans.SpanTermQuery;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.lucene.search.FieldPrefixAwareSimpleQueryParser;
 import org.voyanttools.trombone.lucene.search.FieldPrefixAwareSimpleSpanQueryParser;
@@ -35,7 +34,6 @@ import org.voyanttools.trombone.model.CorpusAccessException;
 import org.voyanttools.trombone.model.CorpusTermMinimalsDB;
 import org.voyanttools.trombone.model.TokenType;
 import org.voyanttools.trombone.storage.Storage;
-import org.voyanttools.trombone.storage.Storage.Location;
 import org.voyanttools.trombone.tool.util.AbstractTool;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
@@ -110,7 +108,6 @@ public abstract class AbstractCorpusTool extends AbstractTool {
 	public abstract void run(CorpusMapper corpusMapper) throws IOException;
 	
 	protected Map<String, SpanQuery> getCategoriesAwareSpanQueryMap(CorpusMapper corpusMapper, String[] queries) throws IOException {
-		
 		FieldPrefixAwareSimpleSpanQueryParser parser = new FieldPrefixAwareSimpleSpanQueryParser(corpusMapper.getLeafReader(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()), parameters.getParameterValue("tokenType", "lexical"));
 		Map<String, SpanQuery> queriesMap;
 		try {
@@ -119,35 +116,56 @@ public abstract class AbstractCorpusTool extends AbstractTool {
 			throw new IllegalArgumentException("Unable to parse queries: "+StringUtils.join(queries, "; "), e);
 		}
 		
-		String tokenType = parameters.getParameterValue("tokenType", "lexical");
+		// get the values from any categories
 		Map<String, Collection<String>> keysToQueryStrings = getKeyToQueryWords(corpusMapper, queriesMap.keySet());
 		
-		Pattern categoryPattern = Pattern.compile("^\\^?@(\\p{L}+)$");		
+		Pattern categoryPattern = Pattern.compile("^\\^?@(\\p{L}+)$");
+		Pattern syntaxPattern = Pattern.compile(".*(\\*|\\~|\\^|\\,|\\|).*");
+		
+		String tokenType = parameters.getParameterValue("tokenType", "lexical");
 		
 		for (Map.Entry<String, Collection<String>> entry : keysToQueryStrings.entrySet()) {
 			String key = entry.getKey();
+			
+			// if the key is a category remove it from queriesMap since we've already gotten its contents
 			if (queriesMap.containsKey(key)) {
 				Matcher matcher = categoryPattern.matcher(key);
 				if (matcher.find()) {
 					String categoryMatch = matcher.group(1);
-//					if (categories.categoryHasWord(categoryMatch)) {
-						SpanQuery q = queriesMap.get(key);
-						if (q instanceof SpanTermQuery) {
-							if (((SpanTermQuery) q).getTerm().text().equals(categoryMatch)) {
-								queriesMap.remove(key);
-							}
+					SpanQuery q = queriesMap.get(key);
+					if (q instanceof SpanTermQuery) {
+						if (((SpanTermQuery) q).getTerm().text().equals(categoryMatch)) {
+							queriesMap.remove(key);
 						}
-//					}
+					}
 				}
 			}
 			
+			// go through the category values and convert them to queries 
 			List<SpanQuery> newQueries = new ArrayList<SpanQuery>();
 			boolean isExpand = key.startsWith("^");
 			for (String queryString : entry.getValue()) {
+				boolean hasSyntax = syntaxPattern.matcher(queryString).matches();
 				if (isExpand) {
-					queriesMap.put(queryString, new SpanTermQuery(new Term(tokenType, queryString)));
+					if (hasSyntax) {
+						Map<String, SpanQuery> moreQueriesMap = parser.getSpanQueriesMap(new String[]{queryString}, false);
+						if (queryString.startsWith("^")) {
+							for (Entry<String, SpanQuery> mqmEntry : moreQueriesMap.entrySet()) {
+								queriesMap.put(mqmEntry.getKey(), mqmEntry.getValue());
+							}
+						} else {
+							queriesMap.put(queryString, new SpanOrQuery(moreQueriesMap.values().toArray(new SpanQuery[0])));
+						}
+					} else {
+						queriesMap.put(queryString, new SpanTermQuery(new Term(tokenType, queryString)));
+					}
 				} else {
-					newQueries.add(new SpanTermQuery(new Term(tokenType, queryString)));
+					if (hasSyntax) {
+						Map<String, SpanQuery> moreQueriesMap = parser.getSpanQueriesMap(new String[]{queryString}, false);
+						newQueries.addAll(moreQueriesMap.values());
+					} else {
+						newQueries.add(new SpanTermQuery(new Term(tokenType, queryString)));
+					}
 				}
 			}
 			if (newQueries.isEmpty()==false && isExpand==false) {
@@ -170,8 +188,8 @@ public abstract class AbstractCorpusTool extends AbstractTool {
 		for (String key : toBeRemoved) {
 			queriesMap.remove(key);
 		}
-
-		return 	queriesMap;
+		
+		return queriesMap;
 		
 	}
 	
@@ -180,7 +198,7 @@ public abstract class AbstractCorpusTool extends AbstractTool {
 		FieldPrefixAwareSimpleQueryParser parser = new FieldPrefixAwareSimpleQueryParser(corpusMapper.getLeafReader(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()), parameters.getParameterValue("tokenType", "lexical"));
 		Map<String, Query> queriesMap;
 		try {
-			queriesMap = queriesMap = parser.getQueriesMap(queries, false);
+			queriesMap = parser.getQueriesMap(queries, false);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Unable to parse queries: "+StringUtils.join(queries, "; "), e);
 		}
@@ -199,9 +217,16 @@ public abstract class AbstractCorpusTool extends AbstractTool {
 				queriesMap.put(key, builder.build());
 			}
 		}
-		return 	queriesMap;
+		return queriesMap;
 	}
 	
+	/**
+	 * Returns the contents of categories
+	 * @param corpusMapper
+	 * @param keys The query keys. Should include at least one category
+	 * @return
+	 * @throws IOException
+	 */
 	private Map<String, Collection<String>> getKeyToQueryWords(CorpusMapper corpusMapper, Collection<String> keys) throws IOException {
 		
 		Map<String, Collection<String>> expandedWords = new HashMap<String, Collection<String>>();
@@ -216,24 +241,13 @@ public abstract class AbstractCorpusTool extends AbstractTool {
 		if (keys.stream().noneMatch(s -> s.contains("@"))) {return expandedWords;}
 		
 		Categories categories = Categories.getCategories(storage, corpusMapper.getCorpus(), categoriesName);
-		
-//		String jsonString;
-//		if (this.storage.existsDB(categoriesName)) {
-//			jsonString = storage.retrieveString(categoriesName, Location.object);
-//		} else {
-//			throw new IllegalArgumentException("Unable to find specified categories: "+categoriesName);
-//		}
-//		
-//		JSONObject all = new JSONObject(jsonString);
-//		JSONObject cats = all.optJSONObject("categories");
 		CorpusTermMinimalsDB corpusTermMinimalsDB = null;
 		TokenType tokenType = TokenType.getTokenTypeForgivingly(parameters.getParameterValue("tokenType", "lexical"));
 
 		
 		
 		Pattern categoryPattern = Pattern.compile("@(\\w+)");
-//		Map<String, SpanQuery> newMap = new HashMap<String, SpanQuery>();
-//		List<SpanQuery> validatedSpanTermQueries = new ArrayList<SpanQuery>();
+		Pattern syntaxPattern = Pattern.compile(".*(\\*|\\~|\\^|\\,|\\|).*");
 		for (String key : keys) {
 			if (key.contains("@")) {
 				Matcher matcher = categoryPattern.matcher(key);
@@ -242,11 +256,11 @@ public abstract class AbstractCorpusTool extends AbstractTool {
 						for (String word : categories.getCategory(matcher.group(1))) {
 							if (word!=null & word.isEmpty()==false) {
 								if (corpusTermMinimalsDB==null) {corpusTermMinimalsDB=CorpusTermMinimalsDB.getInstance(corpusMapper, tokenType);}
-								if  (corpusTermMinimalsDB.exists(word)) {
+								if (corpusTermMinimalsDB.exists(word) || syntaxPattern.matcher(word).matches()) {
 									if (expandedWords.containsKey(key)==false) {
 										expandedWords.put(key, new HashSet<String>());
 									}
-									expandedWords.get(key).add((String) word); 
+									expandedWords.get(key).add((String) word);
 								}
 							}
 						}
