@@ -49,7 +49,8 @@ public class DocumentExtractorTest {
 		try {
 			String id = storedDocumentSources.get(0).getId();
 			is = storage.getStoredDocumentSourceStorage().getStoredDocumentSourceInputStream(id);
-			original = IOUtils.toString(is, "UTF-8");
+			String encoding = storage.getStoredDocumentSourceStorage().getStoredDocumentSourceMetadata(id).getEncoding();
+			original = IOUtils.toString(is, encoding);
 		}
 		finally {
 			if (is!=null) is.close();

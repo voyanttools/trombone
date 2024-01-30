@@ -6,6 +6,7 @@ package org.voyanttools.trombone.input.extract;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import javax.json.Json;
@@ -80,6 +81,7 @@ public class JsonExtractor implements Extractor {
 			this.metadata = storedDocumentSource.getMetadata().asParent(storedDocumentSourceId, DocumentMetadata.ParentType.EXTRACTION);
 			this.metadata.setLocation(storedDocumentSource.getMetadata().getLocation());
 			this.metadata.setDocumentFormat(DocumentFormat.JSON);
+			this.metadata.setEncoding(Charset.forName(storedDocumentSource.getMetadata().getEncoding()));
 			this.localParameters = localParameters;
 		}
 		
@@ -172,7 +174,7 @@ public class JsonExtractor implements Extractor {
 			
 	        isProcessed = true;
 
-	    	return new ByteArrayInputStream(string.getBytes("UTF-8"));
+	    	return new ByteArrayInputStream(string.getBytes(metadata.getEncoding()));
 		}
 		
 		private String[] getValuesFromStructure(JsonStructure jsonStructure, String param, String location) throws IOException {

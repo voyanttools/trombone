@@ -1,8 +1,6 @@
 package org.voyanttools.trombone.lucene.analysis;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.lucene.analysis.Tokenizer;
@@ -12,8 +10,6 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.tika.io.IOUtils;
 import org.voyanttools.trombone.nlp.OpenNlpAnnotator;
 import org.voyanttools.trombone.nlp.PosLemmas;
-
-import opennlp.tools.util.Span;
 
 final public class OpenNlpLemmaTokenizer extends Tokenizer {
 
@@ -54,6 +50,7 @@ final public class OpenNlpLemmaTokenizer extends Tokenizer {
 	@Override
 	public void reset() throws IOException {
 		super.reset();
+		// TODO test if charset needs to be specified
 		String text = IOUtils.toString(input);
 		lemmas =  annotator.getPosLemmas(text, annotator.getLang());
 		tokensIterator = lemmas.iterator();

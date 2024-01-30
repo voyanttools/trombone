@@ -16,7 +16,6 @@ import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
 final public class StanfordNlpLemmaTokenizer extends Tokenizer {
@@ -53,6 +52,7 @@ final public class StanfordNlpLemmaTokenizer extends Tokenizer {
 	@Override
 	public void reset() throws IOException {
 		super.reset();
+		// TODO test if charset needs to be specified
 		Annotation document = annotator.getAnnotated(IOUtils.toString(input));
 		Collection<CoreMap> sentences = document.get(SentencesAnnotation.class);
 		Collection<CoreLabel> tokens = new ArrayList<CoreLabel>();

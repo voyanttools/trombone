@@ -23,11 +23,11 @@ package org.voyanttools.trombone.model;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.Comparator;
 
 import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.storage.StoredDocumentSourceStorage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -91,8 +91,10 @@ public class IndexedDocument implements DocumentContainer, Comparable<IndexedDoc
 	}
 	
 	public String getDocumentString() throws IOException {
-		InputStream is = storage.getStoredDocumentSourceStorage().getStoredDocumentSourceInputStream(id);
-		String string = IOUtils.toString(is, "UTF-8");
+		StoredDocumentSourceStorage sdss = storage.getStoredDocumentSourceStorage();
+		InputStream is = sdss.getStoredDocumentSourceInputStream(id);
+		String charset = sdss.getStoredDocumentSourceMetadata(id).getEncoding();
+		String string = IOUtils.toString(is, charset);
 		is.close();
 		return string;
 	}

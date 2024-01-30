@@ -22,6 +22,8 @@
 package org.voyanttools.trombone.input.expand;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -34,6 +36,7 @@ import org.voyanttools.trombone.model.DocumentFormat;
 import org.voyanttools.trombone.model.DocumentMetadata;
 import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.StoredDocumentSourceStorage;
+import org.voyanttools.trombone.util.EncodingDetector;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
 /**
@@ -162,6 +165,11 @@ public class StoredDocumentSourceExpander implements Expander {
 
 		List<StoredDocumentSource> storedDocumentSources = new ArrayList<StoredDocumentSource>();
 
+		InputStream input = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
+		Charset encoding = EncodingDetector.detect(input);
+		storedDocumentSource.getMetadata().setEncoding(encoding);
+		storedDocumentSourceStorage.updateStoredDocumentSourceMetadata(storedDocumentSource.getId(), storedDocumentSource.getMetadata());
+		
 		DocumentFormat format;
 		
 		format = storedDocumentSource.getMetadata().getDocumentFormat();
@@ -193,8 +201,8 @@ public class StoredDocumentSourceExpander implements Expander {
 			
 			// otherwise have a peek at the contents
 			if (format!=DocumentFormat.XML) {
-				String string = IOUtils.toString(storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId()));
-				format = DocumentFormat.fromString(string);
+				String string = IOUtils.toString(storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId()), encoding.name());
+				format = DocumentFormat.fromString(string, encoding.name());
 			}
 			
 			// if we've found something, write it to the metadata
@@ -212,8 +220,7 @@ public class StoredDocumentSourceExpander implements Expander {
 			storedDocumentSources.addAll(expandArchive(storedDocumentSource));
 		}
 		else if (format == DocumentFormat.COMPRESSED) {
-			storedDocumentSources
-					.addAll(expandCompressed(storedDocumentSource));
+			storedDocumentSources.addAll(expandCompressed(storedDocumentSource));
 		}
 		else if (format == DocumentFormat.XLSX) {
 			storedDocumentSources.addAll(expandXls(storedDocumentSource));

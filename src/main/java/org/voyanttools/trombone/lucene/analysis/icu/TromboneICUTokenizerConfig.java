@@ -5,6 +5,7 @@ package org.voyanttools.trombone.lucene.analysis.icu;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.analysis.icu.segmentation.DefaultICUTokenizerConfig;
@@ -28,7 +29,7 @@ public class TromboneICUTokenizerConfig extends DefaultICUTokenizerConfig {
 		InputStream is = this.getClass().getResourceAsStream("tromboneDefault.rbbi");
 		String rules;
 		try {
-			rules = IOUtils.toString(is);
+			rules = IOUtils.toString(is, Charset.forName("UTF-8"));
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to load trombone break iterator rules.", e);
 		}

@@ -22,16 +22,15 @@
 package org.voyanttools.trombone.input.extract;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.input.source.InputSource;
@@ -40,6 +39,7 @@ import org.voyanttools.trombone.model.DocumentFormat;
 import org.voyanttools.trombone.model.DocumentMetadata;
 import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.StoredDocumentSourceStorage;
+import org.voyanttools.trombone.util.EncodingDetector;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
 /**
@@ -66,22 +66,11 @@ public class StoredDocumentSourceExtractor {
 	
 	private BagItExtractor bagItExtractor = null;
 	
-	private JsonFeaturesExtractor jsonFeaturesExtractor = null; 
+	private JsonFeaturesExtractor jsonFeaturesExtractor = null;
 
-	private JsonExtractor jsonExtractor = null; 
-
-//	static {
-//		try {
-////			DetectorFactory.loadProfiles("af","am","ar","az","be","bg","bn","bo","ca","cs","cy","da","de","dv","el","en","es","et","eu","fa","fi","fo","fr","ga","gn","gu","he","hi","hr","hu","hy","id","is","it","ja","jv","ka","kk","km","kn","ko","ky","lb","lij","ln","lt","lv","mi","mk","ml","mn","mr","mt","my","ne","nl","no","os","pa","pl","pnb","pt","qu","ro","ru","si","sk","so","sq","sr","sv","sw","ta","te","th","tk","tl","tr","tt","ug","uk","ur","uz","vi","yi","yo","zh-cn","zh-tw");
-//		} catch (LangDetectException e) {
-//			throw new IllegalStateException("Unable to initiate language detection profiles", e);
-//		}
-//	}
-
+	private JsonExtractor jsonExtractor = null;
 	
-	public StoredDocumentSourceExtractor(
-			StoredDocumentSourceStorage storedDocumentSourceStorage,
-			FlexibleParameters parameters) {
+	public StoredDocumentSourceExtractor(StoredDocumentSourceStorage storedDocumentSourceStorage, FlexibleParameters parameters) {
 		this.storedDocumentSourceStorage = storedDocumentSourceStorage;
 		this.parameters = parameters;
 		
@@ -125,7 +114,7 @@ public class StoredDocumentSourceExtractor {
 		for (StoredDocumentSource storedDocumentSource : storedDocumentSources) {
 			Callable<StoredDocumentSource> worker = new CallableExtractor(this, storedDocumentSource, verbose);
 			Future<StoredDocumentSource> submit = executor.submit(worker);
-			list.add(submit);	
+			list.add(submit);
 		}
 		try {
 			for (Future<StoredDocumentSource> future : list) {
@@ -174,15 +163,19 @@ public class StoredDocumentSourceExtractor {
 			
 			// next try reading part of string
 			if (format!=DocumentFormat.XML) {
-				String string = IOUtils.toString(storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId()));
-				format = DocumentFormat.fromString(string);
+				DocumentMetadata metadata = storedDocumentSource.getMetadata();
+				String string = IOUtils.toString(storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId()), metadata.getEncoding());
+				format = DocumentFormat.fromString(string, metadata.getEncoding());
 				if (format != DocumentFormat.UNKNOWN) {
-					DocumentMetadata metadata = storedDocumentSource.getMetadata();
 					metadata.setDefaultFormat(format);
 					storedDocumentSourceStorage.updateStoredDocumentSourceMetadata(storedDocumentSource.getId(), metadata);
 				}
 			}
 		}
+		
+		InputStream input = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
+		Charset encoding = EncodingDetector.detect(input);
+		storedDocumentSource.getMetadata().setEncoding(encoding);
 		
 		InputSource extractedInputSource;
 		if (format.isXml()) {

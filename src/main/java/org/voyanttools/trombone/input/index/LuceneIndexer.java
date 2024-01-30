@@ -24,12 +24,8 @@ package org.voyanttools.trombone.input.index;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.text.NumberFormat;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -408,8 +404,9 @@ public class LuceneIndexer implements Indexer {
 				InputStream is = null;
 				try {
 					is = storage.getStoredDocumentSourceStorage().getStoredDocumentSourceInputStream(id);
+					Charset encoding = Charset.forName(this.storedDocumentSource.getMetadata().getEncoding());
 					StringWriter sw = new StringWriter();
-					IOUtils.copy(is, sw);
+					IOUtils.copy(is, sw, encoding);
 					string = sw.toString();
 				}
 				finally {

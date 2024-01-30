@@ -12,7 +12,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -28,7 +27,6 @@ import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.model.DocumentFormat;
 import org.voyanttools.trombone.model.DocumentMetadata;
 import org.voyanttools.trombone.model.IndexedDocument;
-import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.Stripper;
@@ -127,7 +125,7 @@ public class CorpusExporter extends AbstractCorpusTool implements ConsumptiveToo
 					}
 					ZipEntry e = new ZipEntry((documentFormats.size()>1 ? format.toLowerCase()+"/" : "")+fileEntryName);
 					zipOutputStream.putNextEntry(e);
-					byte[] bytes = string.getBytes("UTF-8");
+					byte[] bytes = string.getBytes(documentMetadata.getEncoding());
 					zipOutputStream.write(bytes);
 					zipOutputStream.closeEntry();
 					
@@ -160,7 +158,6 @@ public class CorpusExporter extends AbstractCorpusTool implements ConsumptiveToo
 					}
 				}
 			}
-//			filename = URLEncoder.encode(filename, "UTF-8"); // we're replacing characters instead
 		}
 		
 		if (filename.isEmpty()) {

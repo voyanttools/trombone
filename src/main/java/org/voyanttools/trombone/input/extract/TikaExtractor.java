@@ -25,12 +25,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
@@ -38,7 +36,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
-import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
@@ -47,12 +45,10 @@ import org.apache.tika.parser.html.HtmlMapper;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.model.DocumentFormat;
 import org.voyanttools.trombone.model.DocumentMetadata;
-import org.voyanttools.trombone.model.DocumentMetadata.ParentType;
 import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.StoredDocumentSourceStorage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.LangDetector;
-import org.xml.sax.SAXException;
 
 /**
  * @author sgs
@@ -76,6 +72,7 @@ public class TikaExtractor implements Extractor {
 		context.set(HtmlMapper.class, new CustomHtmlMapper());
 	}
 
+	@Override
 	public InputSource getExtractableInputSource(StoredDocumentSource storedDocumentSource) throws IOException {
 		StringBuilder id = new StringBuilder(storedDocumentSource.getId()).append("tika-extracted");
 		// not sure why we can't use all params, but just in case
@@ -122,33 +119,40 @@ public class TikaExtractor implements Extractor {
 
 		@Override
 		public InputStream getInputStream() throws IOException {
-			org.apache.tika.metadata.Metadata extractedMetadata = new org.apache.tika.metadata.Metadata();
-	
-// added this to override poor unicode detection for non-ascii characters, but upgrade of tika have resolved the issue
-//			if (metadata.getDocumentFormat()==DocumentFormat.TEXT) {
-//				extractedMetadata.set(Metadata.CONTENT_TYPE, MediaType.TEXT_PLAIN.toString());
-//			}
+			Metadata extractedMetadata = new Metadata();
 			
-	        StringWriter sw = new StringWriter(); 
-	        SAXTransformerFactory factory = (SAXTransformerFactory) 
-	                 SAXTransformerFactory.newInstance(); 
-	        
+			String encoding = this.metadata.getEncoding();
+			extractedMetadata.set(Metadata.CONTENT_ENCODING, encoding);
+			
+			if (encoding.startsWith("UTF-16")) {
+				DocumentFormat format = storedDocumentSource.getMetadata().getDocumentFormat();
+				if (format == DocumentFormat.HTML) {
+					// need to explicitly set content-type for parser, otherwise it will guess text/plain
+					// and tags won't be handled properly
+					extractedMetadata.set(Metadata.CONTENT_TYPE, "text/html");
+				}
+			}
+
+	        StringWriter sw = new StringWriter();
+	        SAXTransformerFactory factory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
 	        
 	        // Try with a document containing various tables and formattings 
 	        InputStream input = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
+	        
 	        
 	        // do a first pass to convert various formats to simple HTML
 	        try { 
 	            TransformerHandler handler = factory.newTransformerHandler(); 
 	            // set the output to xhtml instead of html to avoid "Illegal HTML character" exceptions form the transformer
-	            handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xhtml"); 
-	            handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes"); 
+	            handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xhtml");
+	            handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
+	            handler.getTransformer().setOutputProperty(OutputKeys.ENCODING, encoding);
 	            handler.setResult(new StreamResult(sw));
 	            parser.parse(input, handler, extractedMetadata, context);
 	        } catch (Exception e) {
 	        	throw new IOException("Unable to parse document: "+storedDocumentSource.getMetadata(), e);
-			} finally { 
-	            input.close(); 
+			} finally {
+	            input.close();
 	        }
 	        String extractedContent = sw.toString();
 	        
@@ -166,7 +170,6 @@ public class TikaExtractor implements Extractor {
 	        	metadata.setExtra("collection", "Toucher");
 	        }
 
-	        
 	        for (String name : extractedMetadata.names()) {
 	        	String value = extractedMetadata.get(name);
 	        	if (value.trim().isEmpty()) {continue;}
@@ -244,9 +247,9 @@ public class TikaExtractor implements Extractor {
 	        
 	        isProcessed = true;
 	        
-	        return new ByteArrayInputStream(extractedContent.getBytes("UTF-8"));
+	        return new ByteArrayInputStream(extractedContent.getBytes(metadata.getEncoding()));
 		}
-
+		
 		@Override
 		public DocumentMetadata getMetadata() throws IOException {
 			

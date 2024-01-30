@@ -21,28 +21,21 @@
  ******************************************************************************/
 package org.voyanttools.trombone.input.extract;
 
-import java.io.BufferedReader;
-
 //import it.svario.xpathapi.jaxp.XPathAPI;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -232,6 +225,7 @@ public class XmlExtractor implements Extractor, Serializable {
 			this.storedDocumentSource = storedDocumentSource;
 			this.metadata = storedDocumentSource.getMetadata().asParent(storedDocumentSourceId, DocumentMetadata.ParentType.EXTRACTION);
 			this.metadata.setLocation(storedDocumentSource.getMetadata().getLocation());
+			this.metadata.setEncoding(Charset.forName(storedDocumentSource.getMetadata().getEncoding()));
 			try {
 				if (this.metadata.getDocumentFormat().isXml()==false) {
 					this.metadata.setDocumentFormat(DocumentFormat.XML);
@@ -240,6 +234,7 @@ public class XmlExtractor implements Extractor, Serializable {
 				this.metadata.setDocumentFormat(DocumentFormat.XML);
 			}
 			this.localParameters = localParameters;
+			transformer.setOutputProperty(OutputKeys.ENCODING, this.metadata.getEncoding());
 		}
 
 		@Override
@@ -399,17 +394,13 @@ public class XmlExtractor implements Extractor, Serializable {
 			}
 	
 			String string = sw.toString();
-//			String string = StringEscapeUtils.unescapeXml(sw.toString());
-//			byte[] bytes = string.getBytes("UTF-8");
-//			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
 			
 			// try to determine language
 			metadata.setLanguageCode(LangDetector.detect(string, parameters));
 
 	        isProcessed = true;
 
-	        return new ByteArrayInputStream(string.getBytes("UTF-8"));
-//	        return new ByteArrayInputStream(StringEscapeUtils.unescapeXml(string).getBytes("UTF-8"));
+	        return new ByteArrayInputStream(string.getBytes(metadata.getEncoding()));
 			
 		}
 

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Comparator;
 
 import org.voyanttools.trombone.input.source.Source;
@@ -251,6 +252,10 @@ public class DocumentMetadata implements Comparable<DocumentMetadata> {
 	public String getLanguageCode() {
 		return getProperty("language", "");
 	}
+	
+	public String getEncoding() {
+		return getProperty("encoding", "UTF-8");
+	}
 
 	public int getLastTokenPositionIndex(TokenType tokenType) {
 		return Integer.parseInt(getProperty("lastTokenPositionIndex-"+tokenType.name(), "0"));
@@ -385,6 +390,10 @@ public class DocumentMetadata implements Comparable<DocumentMetadata> {
 
 	public void setLanguageCode(String lang) {
 		setProperty("language", lang);
+	}
+	
+	public void setEncoding(Charset encoding) {
+		setProperty("encoding", encoding.name());
 	}
 
 	public void setLastTokenOffsetIndex(TokenType tokenType, int lastOffset) {

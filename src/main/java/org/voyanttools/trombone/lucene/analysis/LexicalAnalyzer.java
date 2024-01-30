@@ -82,6 +82,7 @@ public class LexicalAnalyzer extends Analyzer {
 
 		String text;
 		try {
+			// TODO test if charset needs to be specified
 			text = IOUtils.toString(reader);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

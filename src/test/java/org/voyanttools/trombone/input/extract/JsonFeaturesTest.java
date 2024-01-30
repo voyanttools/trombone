@@ -32,8 +32,8 @@ public class JsonFeaturesTest {
 		Corpus corpus = storage.getCorpusStorage().getCorpus(creator.getStoredId());
 		assertEquals(2, corpus.size());
 		CorpusMetadata corpusMetadata = corpus.getCorpusMetadata();
-		assertEquals(67838, corpusMetadata.getTokensCount(TokenType.lexical));
-		assertEquals(7865, corpusMetadata.getTypesCount(TokenType.lexical));
+		assertEquals(67841, corpusMetadata.getTokensCount(TokenType.lexical));
+		assertEquals(7864, corpusMetadata.getTypesCount(TokenType.lexical));
 		assertEquals(CorpusAccess.NONCONSUMPTIVE, corpusMetadata.getNoPasswordAccess());
 		assertEquals(1, corpusMetadata.getAccessPasswords(CorpusAccess.ACCESS).length);
 		DocumentMetadata documentMetadata = corpus.getDocument(0).getMetadata();

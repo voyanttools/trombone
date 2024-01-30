@@ -144,47 +144,7 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 			}
 		}
 	}
-
-	/*
-	public StoredDocumentSource getStoredDocumentSource(
-			ExtractableStoredDocumentSource extractableStoredDocumentSource)
-			throws IOException {
-
-		String id = extractableStoredDocumentSource.getUniqueId();
-		File directory = getDocumentSourceDirectory(id);
-		File metadataFile = getMetadataFile(id);
-		File rawbytesFile = getRawbytesFile(id);
-
-		// this directory and contents exists, so just return the DocumentSource
-		if (directory.exists()) {
-			if (metadataFile.exists() && rawbytesFile.exists()) {
-				// we'll grab the stored metadata in case it has more goodies
-				Metadata metadata = this.getStoredDocumentSourceMetadata(id);
-				return new StoredDocumentSource(id, metadata);
-			}
-			// let's keep going in case there was an error last time
-		} else {
-			directory.mkdir(); // shouldn't need to create parents
-		}
-
-		InputStream inputStream = null;
-		try {
-			inputStream = extractableStoredDocumentSource.getInputStream();
-			storeStoredDocumentSourceInputStream(id, inputStream);
-		} finally {
-			if (inputStream != null) {
-				inputStream.close();
-			}
-		}
-
-		Metadata metadata = extractableStoredDocumentSource.getMetadata();
-		storeStoredDocumentSourceMetadata(id, metadata);
-
-		return new StoredDocumentSource(directory.getName(), metadata);
-
-	}
-	*/
-
+	
 	public DocumentMetadata getStoredDocumentSourceMetadata(String id)
 			throws IOException {
 		FlexibleParameters parameters = FlexibleParameters.loadFlexibleParameters(getMetadataFile(id));
@@ -194,7 +154,7 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 	public InputStream getStoredDocumentSourceInputStream(String id)
 			throws IOException {
 		File file = getRawbytesFile(id);
-		FileInputStream fileInputStream = new FileInputStream(file);		
+		FileInputStream fileInputStream = new FileInputStream(file);
 		return new GZIPInputStream(fileInputStream);
 	}
 	
