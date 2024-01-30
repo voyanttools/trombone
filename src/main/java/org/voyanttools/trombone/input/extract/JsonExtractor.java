@@ -6,21 +6,19 @@ package org.voyanttools.trombone.input.extract;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonException;
 import javax.json.JsonNumber;
-import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.model.DocumentFormat;
@@ -83,6 +81,7 @@ public class JsonExtractor implements Extractor {
 			this.metadata = storedDocumentSource.getMetadata().asParent(storedDocumentSourceId, DocumentMetadata.ParentType.EXTRACTION);
 			this.metadata.setLocation(storedDocumentSource.getMetadata().getLocation());
 			this.metadata.setDocumentFormat(DocumentFormat.JSON);
+			this.metadata.setEncoding(Charset.forName(storedDocumentSource.getMetadata().getEncoding()));
 			this.localParameters = localParameters;
 		}
 		
@@ -170,7 +169,7 @@ public class JsonExtractor implements Extractor {
 			
 	        isProcessed = true;
 
-	    	return new ByteArrayInputStream(string.getBytes("UTF-8"));
+	    	return new ByteArrayInputStream(string.getBytes(metadata.getEncoding()));
 		}
 		
 		private String[] getValuesFromStructure(JsonStructure jsonStructure, String param, String location) throws IOException {

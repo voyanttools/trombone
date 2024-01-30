@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -79,6 +80,7 @@ public class HtmlExtractor implements Extractor, Serializable {
 			this.storedDocumentSource = storedDocumentSource;
 			this.metadata = storedDocumentSource.getMetadata().asParent(id, DocumentMetadata.ParentType.EXTRACTION);
 			this.metadata.setLocation(storedDocumentSource.getMetadata().getLocation());
+			this.metadata.setEncoding(Charset.forName(storedDocumentSource.getMetadata().getEncoding()));
 			this.metadata.setDocumentFormat(DocumentFormat.HTML);
 		}
 
@@ -88,7 +90,7 @@ public class HtmlExtractor implements Extractor, Serializable {
 			Document doc;
 			try {
 				inputStream = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
-				doc = Jsoup.parse(inputStream, null, "");
+				doc = Jsoup.parse(inputStream, metadata.getEncoding(), "");
 				inputStream.close();
 			} catch (IOException e) {
 				throw new IOException("Unable to read from stored document stream: "+storedDocumentSource.getId()+" ("+storedDocumentSource.getMetadata().getLocation()+")");
@@ -169,7 +171,7 @@ public class HtmlExtractor implements Extractor, Serializable {
 
 	        isProcessed = true;
 	        
-	        return new ByteArrayInputStream(extractedContent.getBytes("UTF-8"));
+	        return new ByteArrayInputStream(extractedContent.getBytes(metadata.getEncoding()));
 
 			
 		}

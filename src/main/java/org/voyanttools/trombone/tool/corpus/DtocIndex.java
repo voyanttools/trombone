@@ -78,7 +78,7 @@ public class DtocIndex extends AbstractTool {
 			
 			try {
 				inputStream = inputSource.getInputStream();
-				string = IOUtils.toString(inputStream);
+				string = IOUtils.toString(inputStream, metadata.getEncoding());
 			}
 			catch (IOException e) {
 				throw new IOException("Unable to read index ("+indexParams.getParameterValue("xmlContentXpath")+") from DToC file: "+metadata, e);

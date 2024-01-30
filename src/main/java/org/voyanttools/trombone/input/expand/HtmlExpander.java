@@ -5,6 +5,7 @@ package org.voyanttools.trombone.input.expand;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,14 +70,14 @@ public class HtmlExpander implements Expander {
 		
 		Document doc;
 		try {
-			// TODO: determine character set implications and usefulness of baseUri
-			doc = Jsoup.parse(inputStream, null, "");
+			// TODO: determine usefulness of baseUri
+			doc = Jsoup.parse(inputStream, storedDocumentSource.getMetadata().getEncoding(), "");
 		} catch (Exception e) {
 			throw new IOException("Unable to HTML parse document: "+storedDocumentSource.getId()+" ("+storedDocumentSource.getMetadata().getLocation()+")", e);
 		}
 		
 		// we know we have a query if we've gotten this far
-		String selector = parameters.getParameterValue("htmlDocumentsQuery");		
+		String selector = parameters.getParameterValue("htmlDocumentsQuery");
 		Elements elements;
 		try {
 			elements = doc.select(selector);
@@ -129,6 +130,7 @@ public class HtmlExpander implements Expander {
 		metadata.setModified(parentMetadata.getModified());
 		metadata.setSource(Source.STRING);
 		metadata.setLocation(location);
+		metadata.setEncoding(Charset.forName(parentMetadata.getEncoding()));
 		metadata.setDocumentFormat(DocumentFormat.HTML);
 		String id = DigestUtils.md5Hex(parentId + location);
 		InputSource inputSource = new StringInputSource(id, metadata, element.outerHtml());

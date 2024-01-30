@@ -319,9 +319,9 @@ public enum DocumentFormat {
 		return UNKNOWN;
 	}
 	
-	public static DocumentFormat fromString(String string) throws UnsupportedEncodingException, IOException {
+	public static DocumentFormat fromString(String string, String encoding) throws UnsupportedEncodingException, IOException {
 		DefaultDetector detector = new DefaultDetector();
-		MediaType mediaType = detector.detect(new ByteArrayInputStream(string.getBytes("UTF-8")), new Metadata());
+		MediaType mediaType = detector.detect(new ByteArrayInputStream(string.getBytes(encoding)), new Metadata());
 		DocumentFormat format = DocumentFormat.fromContentType(mediaType.toString());
 		
 		if (format==DocumentFormat.TEXT) {

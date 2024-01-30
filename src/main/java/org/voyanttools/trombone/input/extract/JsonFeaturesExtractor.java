@@ -6,7 +6,6 @@ package org.voyanttools.trombone.input.extract;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -70,7 +69,7 @@ public class JsonFeaturesExtractor implements Extractor {
 			
 			// load line
 			InputStream is = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
-			String jsonString = IOUtils.toString(is, StandardCharsets.UTF_8);
+			String jsonString = IOUtils.toString(is, this.metadata.getEncoding());
 			
 			// parse doc
 			JSONParser parser = new JSONParser();
@@ -139,7 +138,7 @@ public class JsonFeaturesExtractor implements Extractor {
 	    	isProcessed = true;
 	    	
 	    	
-	    	return new ByteArrayInputStream(string.getBytes("UTF-8"));
+	    	return new ByteArrayInputStream(string.getBytes(metadata.getEncoding()));
 	    }
 		
 		private void setNamesFromContributor(Object object, Set<String> names) {

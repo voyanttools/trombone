@@ -85,7 +85,7 @@ public class StringInputSource implements InputSource {
 	}
 
 	public InputStream getInputStream() throws IOException {
-		return new ByteArrayInputStream(string.getBytes("UTF-8"));
+		return new ByteArrayInputStream(string.getBytes(metadata.getEncoding()));
 	}
 
 	public DocumentMetadata getMetadata() {

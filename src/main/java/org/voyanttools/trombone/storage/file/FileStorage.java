@@ -228,7 +228,8 @@ public class FileStorage implements Storage {
 			file.getParentFile().mkdirs();
 		}
 		if (!isStored(id, location) || canOverwrite) {
-			FileUtils.writeStringToFile(file, string, "UTF-8");		
+			// TODO test if we need to specify non-utf8 encodings
+			FileUtils.writeStringToFile(file, string, "UTF-8");
 		}
 	}
 

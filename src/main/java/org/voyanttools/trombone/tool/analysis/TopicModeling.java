@@ -3,7 +3,6 @@ package org.voyanttools.trombone.tool.analysis;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +21,7 @@ import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.model.DocumentToken;
 import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.storage.StoredDocumentSourceStorage;
 import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.tool.analysis.TopicModelingDiagnostics.TopicScores;
 import org.voyanttools.trombone.tool.corpus.AbstractCorpusTool;
@@ -278,8 +278,10 @@ public class TopicModeling extends AbstractCorpusTool {
 		for (String id : getCorpusStoredDocumentIdsFromParameters(corpus)) {
 			InputStream inputStream = null;
 			try {
-				inputStream = storage.getStoredDocumentSourceStorage().getStoredDocumentSourceInputStream(id);
-				String text = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
+				StoredDocumentSourceStorage sdss = storage.getStoredDocumentSourceStorage();
+				inputStream = sdss.getStoredDocumentSourceInputStream(id);
+				String charset = sdss.getStoredDocumentSourceMetadata(id).getEncoding();
+				String text = IOUtils.toString(inputStream, charset);
 				// TODO subdivide very long documents to get better topic results
 				Map<String, String> docMap = new HashMap<>();
 				docMap.put("docId", id);

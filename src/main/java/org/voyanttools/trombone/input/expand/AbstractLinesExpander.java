@@ -3,17 +3,15 @@
  */
 package org.voyanttools.trombone.input.expand;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.input.source.Source;
@@ -67,12 +65,13 @@ public abstract class AbstractLinesExpander implements Expander {
 		}
 		
 		DocumentMetadata documentMetadata = storedDocumentSource.getMetadata();
+		String charset = documentMetadata.getEncoding();
 		DocumentMetadata docMetadata = null;
 		
 		InputStream inputStream = null;
 		try {
 			inputStream = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
-			InputStreamReader isr = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+			InputStreamReader isr = new InputStreamReader(inputStream, charset);
 			BufferedReader br = new BufferedReader(isr);
 			String line;
 			String childId;
@@ -83,6 +82,7 @@ public abstract class AbstractLinesExpander implements Expander {
 				docMetadata.setTitle(StringUtils.abbreviate(line.trim().substring(0, 100).replaceAll("\\s+", " "),50));
 				docMetadata.setDocumentFormat(getChildDocumentFormat());
 				docMetadata.setSource(Source.STRING);
+				docMetadata.setEncoding(Charset.forName(charset));
 				docMetadata.setLocation(documentMetadata.getLocation()+" ("+(storedDocumentSources.size()+1)+")");
 				InputSource stringInputSource = new StringInputSource(childId, docMetadata, line);
 				StoredDocumentSource sds = storedDocumentSourceStorage.getStoredDocumentSource(stringInputSource);
