@@ -173,8 +173,14 @@ public class StoredDocumentSourceExtractor {
 			}
 		}
 		
-		InputStream input = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
-		Charset encoding = EncodingDetector.detect(input);
+		Charset encoding = null;
+		String encodingParameter = parameters.getParameterValue("encoding", "");
+		if (encodingParameter.isBlank()) {
+			InputStream input = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
+			encoding = EncodingDetector.detect(input);
+		} else {
+			encoding = Charset.forName(encodingParameter);
+		}
 		storedDocumentSource.getMetadata().setEncoding(encoding);
 		
 		InputSource extractedInputSource;
