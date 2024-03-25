@@ -137,6 +137,10 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 		Map<String, SpanQuery> queriesMap = getCategoriesAwareSpanQueryMap(corpusMapper, queries);
 
 		Corpus corpus = corpusMapper.getCorpus();
+		
+		Set<String> validIds = new HashSet<String>();
+		validIds.addAll(this.getCorpusStoredDocumentIdsFromParameters(corpus));
+		
 		int docIndexInCorpus; // this should always be changed on the first span
 		Map<Integer, Map<String, List<int[]>>> docTermPositionsMap = new HashMap<Integer, Map<String, List<int[]>>>();
 		
@@ -145,17 +149,24 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 			Spans spans = corpusMapper.getFilteredSpans(spanQueryEntry.getValue());
 			if (spans != null) {
 				Map<Integer, List<int[]>> documentAndPositionsMap = new HashMap<Integer, List<int[]>>();
+
 				int doc = spans.nextDoc();
 				while(doc!=spans.NO_MORE_DOCS) {
-					int pos = spans.nextStartPosition();
-					docIndexInCorpus = corpusMapper.getDocumentPositionFromLuceneId(doc);
-					documentAndPositionsMap.put(docIndexInCorpus, new ArrayList<int[]>());
-					while(pos!=spans.NO_MORE_POSITIONS) {
-						documentAndPositionsMap.get(docIndexInCorpus).add(new int[]{spans.startPosition(), spans.endPosition()});
-						pos = spans.nextStartPosition();
+					String docId = corpusMapper.getDocumentIdFromLuceneId(doc);
+					if (validIds.contains(docId)) {
+						docIndexInCorpus = corpus.getDocumentPosition(docId);
+						documentAndPositionsMap.put(docIndexInCorpus, new ArrayList<int[]>());
+						
+						int pos = spans.nextStartPosition();
+						while(pos!=spans.NO_MORE_POSITIONS) {
+							documentAndPositionsMap.get(docIndexInCorpus).add(new int[]{spans.startPosition(), spans.endPosition()});
+							pos = spans.nextStartPosition();
+						}
 					}
+					
 					doc = spans.nextDoc();
 				}
+				
 				String queryString = spanQueryEntry.getKey();
 				for (Map.Entry<Integer, List<int[]>> entry : documentAndPositionsMap.entrySet()) {
 					doc = entry.getKey();
@@ -164,6 +175,7 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 					}
 					docTermPositionsMap.get(doc).put(queryString, entry.getValue());
 				}
+				
 				documentAndPositionsMap.clear();
 			}
 		}
