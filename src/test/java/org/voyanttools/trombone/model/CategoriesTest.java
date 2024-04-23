@@ -39,7 +39,10 @@ public class CategoriesTest {
 		categories = Categories.getCategories(storage, corpus, "en");
 		assertTrue(categories.hasCategory("positive"));
 		
-		categories = Categories.getCategories(storage, corpus, "categories.en.txt");
+		categories = Categories.getCategories(storage, corpus, "categories.h_posneg");
+		assertTrue(categories.hasCategory("Positiv"));
+		
+		categories = Categories.getCategories(storage, corpus, "categories.en");
 		assertTrue(categories.hasCategory("positive"));
 		
 		parameters.setParameter("categories", "auto");

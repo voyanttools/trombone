@@ -4,18 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -65,34 +58,23 @@ public class Categories {
 		}
 		
 		if (id.length()==2) { // looks like language code
-			return getCategories(storage, corpus, "categories."+id+".txt");
+			return getCategories(storage, corpus, "categories."+id);
 		}
 		
-		if (id.matches("categories\\.\\w\\w\\..*?txt")) { // looks like local resource
-			return getCategories(Categories.class.getResource("/org/voyanttools/trombone/categories/"+id));
+		if (id.matches("categories\\.\\w+")) { // looks like local resource
+			try(InputStream inputStream = Categories.class.getResourceAsStream("/org/voyanttools/trombone/categories/"+id+".txt")) {
+				StringWriter writer = new StringWriter();
+				IOUtils.copy(inputStream, writer, Charset.forName("UTF-8"));
+				return getCategories(writer.toString());
+			} catch (Exception e) {
+			}
 		}
 		
 		// good 'ol resource
 		String contents = storage.retrieveString(id, Storage.Location.object);
-		return getCategories(contents);
-		
-		
+		return getCategories(contents);	
 	}
 	
-	private static Categories getCategories(URL url) throws IOException {
-		URI uri;
-		try {
-			uri = url.toURI();
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Unable to create URI for categories: "+url);
-		}
-		StringBuilder contentBuilder = new StringBuilder();
-	    Stream<String> stream = Files.lines( Paths.get(uri), StandardCharsets.UTF_8);
-        stream.forEach(s -> contentBuilder.append(s).append("\n"));
-        stream.close();
-		return getCategories(contentBuilder.toString());
-		
-	}
 	private static Categories getCategories(String contents) {
 		if (contents.trim().startsWith("{")==false || contents.contains("categories")==false) {
 			throw new IllegalArgumentException("Unable to find categories.");
