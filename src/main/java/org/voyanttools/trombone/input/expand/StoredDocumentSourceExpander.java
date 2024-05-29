@@ -78,9 +78,9 @@ public class StoredDocumentSourceExpander implements Expander {
 	private Expander htmlExpander;
 	
 	/**
-	 * the expander for XSL documents
+	 * the expander for XLS documents
 	 */
-	private Expander xslExpander;
+	private Expander xlsExpander;
 	
 	private Expander tabularExpander;
 
@@ -216,7 +216,7 @@ public class StoredDocumentSourceExpander implements Expander {
 					.addAll(expandCompressed(storedDocumentSource));
 		}
 		else if (format == DocumentFormat.XLSX) {
-			storedDocumentSources.addAll(expandXsl(storedDocumentSource));
+			storedDocumentSources.addAll(expandXls(storedDocumentSource));
 		}
 		else if (format == DocumentFormat.CSV || format == DocumentFormat.TSV) {
 			storedDocumentSources.addAll(expandTabular(storedDocumentSource, format));
@@ -264,11 +264,11 @@ public class StoredDocumentSourceExpander implements Expander {
 		return obApiSearchJsonExpander.getExpandedStoredDocumentSources(storedDocumentSource);
 	}
 
-	List<StoredDocumentSource> expandXsl(StoredDocumentSource storedDocumentSource) throws IOException {
-		if (this.xslExpander==null) {
-			this.xslExpander = new XlsExpander(storedDocumentSourceStorage, parameters);
+	List<StoredDocumentSource> expandXls(StoredDocumentSource storedDocumentSource) throws IOException {
+		if (this.xlsExpander==null) {
+			this.xlsExpander = new XlsExpander(storedDocumentSourceStorage, parameters);
 		}
-		return this.xslExpander.getExpandedStoredDocumentSources(storedDocumentSource);
+		return this.xlsExpander.getExpandedStoredDocumentSources(storedDocumentSource);
 	}
 	
 	List<StoredDocumentSource> expandTabular(StoredDocumentSource storedDocumentSource, DocumentFormat format) throws IOException {
