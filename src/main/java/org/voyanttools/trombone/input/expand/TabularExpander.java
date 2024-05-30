@@ -73,10 +73,7 @@ public class TabularExpander implements Expander {
 		int numRows = allRows.size();
 		
 		List<List<Integer>> columns = getInts(parameters.getParameterValues("tableContent"));
-		StringBuffer docBuffer = new StringBuffer();
-		int firstRow = parameters.getParameterBooleanValue("tableNoHeadersRow") ? 0 : 1;
 		
-		String title;
 		if (columns.isEmpty()) {
 			int len = allRows.get(0).length;
 			for (int i=0; i<len; i++) {
@@ -85,6 +82,11 @@ public class TabularExpander implements Expander {
 				columns.add(cols);
 			}
 		}
+		
+		
+		StringBuffer docBuffer = new StringBuffer();
+		int firstRow = parameters.getParameterBooleanValue("tableNoHeadersRow") ? 0 : 1;
+		String title;
 		
 		for (List<Integer> set : columns) {
 			for (int c : set) {
@@ -112,8 +114,9 @@ public class TabularExpander implements Expander {
 	}
 
 	private List<StoredDocumentSource> getDocumentsRowCells(StoredDocumentSource storedDocumentSource) throws IOException {
-		DocumentMetadata metadata = storedDocumentSource.getMetadata();
-		String id = storedDocumentSource.getId();
+		DocumentMetadata parentMetadata = storedDocumentSource.getMetadata();
+		String parentId = storedDocumentSource.getId();
+		
 		List<StoredDocumentSource> tabularStoredDocumentSources = new ArrayList<StoredDocumentSource>();
 		
 		List<String[]> allRows = getAllRows(storedDocumentSource);
@@ -130,11 +133,13 @@ public class TabularExpander implements Expander {
 		Map<String, List<List<Integer>>> extras = processExtras("tableExtraMetadata");
 		int firstRow = parameters.getParameterBooleanValue("tableNoHeadersRow") ? 0 : 1;
 		
-		String[] row;
-		String contents;
-		String location;
+		boolean doGrouping = parameters.getKeys().contains("tableGroupBy");
+		
+		List<List<Integer>> groupBy = getInts(parameters.getParameterValues("tableGroupBy"));
+		Map<String, List<String>> groupedRowInputSources = new HashMap<String, List<String>>();
+		
 		for (int r = firstRow; r < numRows; r++) {
-			row = allRows.get(r);
+			String[] row = allRows.get(r);
 			if (columns.isEmpty()) {
 				int len = row.length;
 				if (len > 0) {
@@ -147,9 +152,9 @@ public class TabularExpander implements Expander {
 			}
 			
 			for (List<Integer> columnsSet : columns) {
-				contents = columnsSet.isEmpty() ? getValue(row, "\t") : getValue(row, columnsSet, "\t");
+				String contents = columnsSet.isEmpty() ? getValue(row, "\t") : getValue(row, columnsSet, "\t");
 				if (contents.isEmpty()==false) {
-					location = (1)+"."+StringUtils.join(columnsSet, "+")+"."+(r+1);
+					String location = (1)+"."+StringUtils.join(columnsSet, "+")+"."+(r+1);
 					String title = location;
 					List<String> currentAuthors = new ArrayList<String>();
 					String pubDateStr = "";
@@ -158,6 +163,8 @@ public class TabularExpander implements Expander {
 					String keywordsStr = "";
 					String collectionStr = "";
 					Map<String, String> extrasMap = new HashMap<>();
+					
+					String groupByKey = "";
 					
 					if (columns.size()==1) {
 						if (titles.isEmpty()==false) {
@@ -201,17 +208,47 @@ public class TabularExpander implements Expander {
 							}
 						}
 						
+						List<String> currentGroupByKey = getAllValues(row, groupBy);
+						if (currentGroupByKey.isEmpty()==false) {
+							groupByKey = StringUtils.join(currentGroupByKey, " ");
+						}
+						
 					}
 					
-					
-					tabularStoredDocumentSources.add(getChild(metadata, id, contents, location, title, currentAuthors, pubDateStr, publisherStr, pubPlaceStr, keywordsStr, collectionStr, extrasMap));
-					
+					if (doGrouping) {
+						if (groupedRowInputSources.containsKey(groupByKey) == false) {
+							groupedRowInputSources.put(groupByKey, new ArrayList<String>());
+						}
+						groupedRowInputSources.get(groupByKey).add(contents);
+					} else {
+						DocumentMetadata metadata = createChildMetadata(parentMetadata, parentId, location, title, currentAuthors, pubDateStr, publisherStr, pubPlaceStr, keywordsStr, collectionStr, extrasMap);
+						InputSource inputSource = new StringInputSource(TabularExpander.generateId(parentId, metadata, "row"), metadata, contents);
+						tabularStoredDocumentSources.add(storedDocumentSourceStorage.getStoredDocumentSource(inputSource));
+					}
 				}
 			}
 		}
 		
-		
-		
+		if (doGrouping) {
+			for (Map.Entry<String, List<String>> mappedRowInputSources : groupedRowInputSources.entrySet()) {
+				String key = mappedRowInputSources.getKey();
+				List<String> mappedRowInputSourcesList = mappedRowInputSources.getValue();
+				String location = parentId+";group:"+key;
+				StringBuffer combinedContents = new StringBuffer();
+				for (String rowInputSource : mappedRowInputSourcesList) {
+					combinedContents.append(rowInputSource).append("\n\n");
+				}
+				DocumentMetadata combinedMetadata = parentMetadata.asParent(parentId, DocumentMetadata.ParentType.EXPANSION);
+				combinedMetadata.setModified(parentMetadata.getModified());
+				combinedMetadata.setSource(Source.STRING);
+				combinedMetadata.setLocation(location);
+				combinedMetadata.setDocumentFormat(DocumentFormat.TEXT);
+				String id = DigestUtils.md5Hex(parentId + location);
+				
+				InputSource inputSource = new StringInputSource(id, combinedMetadata, combinedContents.toString());
+				tabularStoredDocumentSources.add(storedDocumentSourceStorage.getStoredDocumentSource(inputSource));
+			}
+		}
 		
 		return tabularStoredDocumentSources;
 	}
@@ -314,6 +351,48 @@ public class TabularExpander implements Expander {
 		return allRows;
 	}
 	
+	private DocumentMetadata createChildMetadata(DocumentMetadata parentMetadata, String parentId, String location, String title,
+			List<String> authors, String pubDate, String publisher, String pubPlace, String keywords, String collection, Map<String, String> extras) {
+		DocumentMetadata metadata = parentMetadata.asParent(parentId, DocumentMetadata.ParentType.EXPANSION);
+		metadata.setModified(parentMetadata.getModified());
+		metadata.setSource(Source.STRING);
+		metadata.setLocation(location);
+		metadata.setTitle(title);
+		if (authors!=null && authors.isEmpty()==false) {
+			metadata.setAuthors(authors.toArray(new String[0]));
+		}
+		if (pubDate!=null && pubDate.isEmpty()==false) {
+			metadata.setPubDates(pubDate);
+		}
+		if (publisher!=null && publisher.isEmpty()==false) {
+			metadata.setPublishers(publisher);
+		}
+		if (pubPlace!=null && pubPlace.isEmpty()==false) {
+			metadata.setPubPlaces(pubPlace);
+		}
+		if (keywords!=null && keywords.isEmpty()==false) {
+			metadata.setKeywords(keywords);
+		}
+		if (collection!=null && collection.isEmpty()==false) {
+			metadata.setCollections(collection);
+		}
+		if (extras!=null && extras.isEmpty()==false) {
+			for (String key : extras.keySet()) {
+				metadata.setExtra(key, extras.get(key));
+			}
+		}
+		metadata.setDocumentFormat(DocumentFormat.TEXT);
+		
+		return metadata;
+	}
+	
+	private static String generateId(String parentId, DocumentMetadata metadata, String extra) {
+		String location = metadata.getLocation();
+		String title = metadata.getTitle();
+		String author = metadata.getAuthor();
+		return DigestUtils.md5Hex(parentId + location + title + author + extra);
+	}
+	
 	private StoredDocumentSource getChild(DocumentMetadata parentMetadata, String parentId, String string, String location, String title,
 			List<String> authors, String pubDate, String publisher, String pubPlace, String keywords, String collection, Map<String, String> extras) throws IOException {
 		DocumentMetadata metadata = parentMetadata.asParent(parentId, DocumentMetadata.ParentType.EXPANSION);
@@ -345,7 +424,7 @@ public class TabularExpander implements Expander {
 			}
 		}
 		metadata.setDocumentFormat(DocumentFormat.TEXT);
-		String id = DigestUtils.md5Hex(parentId + location + title + StringUtils.join(authors));
+		String id = TabularExpander.generateId(parentId, metadata, "");
 		InputSource inputSource = new StringInputSource(id, metadata, string);
 		return storedDocumentSourceStorage.getStoredDocumentSource(inputSource);
 	}
