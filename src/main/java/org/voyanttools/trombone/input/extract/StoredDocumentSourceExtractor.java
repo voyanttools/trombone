@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.input.source.InputSource;
@@ -131,6 +132,14 @@ public class StoredDocumentSourceExtractor {
 			throw new IllegalStateException("An error occurred during multi-threaded document expansion.", e);
 		}
 		executor.shutdown();
+		try {
+			if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+				throw new InterruptedException("StoredDocumentSourceExtractor ran out of time");
+			}
+		} catch (InterruptedException e) {
+			System.out.println("StoredDocumentSourceExtractor ran out of time");
+			executor.shutdownNow();
+		}
 	
 		return extractedStoredDocumentSources;
 
