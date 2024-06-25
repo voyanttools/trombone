@@ -109,13 +109,15 @@ public class StoredDocumentSourceExtractor {
 		*/
 
 		List<StoredDocumentSource> extractedStoredDocumentSources = new ArrayList<StoredDocumentSource>();
+
+		/*
 		int processors = Runtime.getRuntime().availableProcessors();
 		ExecutorService executor = Executors.newFixedThreadPool(processors);
 		List<Future<StoredDocumentSource>> list = new ArrayList<Future<StoredDocumentSource>>();
 		for (StoredDocumentSource storedDocumentSource : storedDocumentSources) {
 			Callable<StoredDocumentSource> worker = new CallableExtractor(this, storedDocumentSource, verbose);
 			Future<StoredDocumentSource> submit = executor.submit(worker);
-			list.add(submit);
+			list.add(submit);	
 		}
 		try {
 			for (Future<StoredDocumentSource> future : list) {
@@ -132,15 +134,13 @@ public class StoredDocumentSourceExtractor {
 			throw new IllegalStateException("An error occurred during multi-threaded document expansion.", e);
 		}
 		executor.shutdown();
-		try {
-			if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-				throw new InterruptedException("StoredDocumentSourceExtractor ran out of time");
-			}
-		} catch (InterruptedException e) {
-			System.out.println("StoredDocumentSourceExtractor ran out of time");
-			executor.shutdownNow();
+		*/
+		
+		for (StoredDocumentSource storedDocumentSource : storedDocumentSources) {
+			extractedStoredDocumentSources.add(getExtractedStoredDocumentSource(storedDocumentSource));
 		}
-	
+		
+		
 		return extractedStoredDocumentSources;
 
 	}
