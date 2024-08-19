@@ -273,6 +273,7 @@ public class XlsExpander implements Expander {
 					combinedContents.append(rowInputSource).append("\n\n");
 				}
 				DocumentMetadata combinedMetadata = parentMetadata.asParent(parentId, DocumentMetadata.ParentType.EXPANSION);
+				combinedMetadata.setTitle(key);
 				combinedMetadata.setModified(parentMetadata.getModified());
 				combinedMetadata.setSource(Source.STRING);
 				combinedMetadata.setLocation(location);
