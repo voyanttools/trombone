@@ -37,6 +37,9 @@ public class DocumentTermTest {
 	
 	public void test(Storage storage) throws IOException {
 		List<DocumentTerm> list = getOrderedList(DocumentTerm.Sort.RAWFREQASC);
+		
+		assertEquals(list.get(3).getRelativeFrequency(), 0.004f, 0.0f);
+		
 		assertEquals(list.get(0).getTerm(), "one");
 		
 		list = getOrderedList(DocumentTerm.Sort.RAWFREQDESC);
@@ -65,7 +68,6 @@ public class DocumentTermTest {
 		
 		list = getOrderedList(DocumentTerm.Sort.ZSCOREDESC);
 		assertEquals(list.get(0).getTerm(), "two");
-		
 
 		storage.destroy();
 	}
