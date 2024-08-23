@@ -40,8 +40,8 @@ public class StoredCategories extends StoredResource {
 				}
 			} else if (id.length()==2) {
 				localId = "categories."+id+".txt"; // assume it's a language code
-			} else if (id.matches("categories\\.\\w\\w\\..*?txt")) { // looks like local resource
-				localId = id;
+			} else if (id.matches("categories\\.\\w+")) { // looks like local resource
+				localId = id+".txt";
 			}
 			if (localId!=null) {
 				try(InputStream inputStream = Categories.class.getResourceAsStream("/org/voyanttools/trombone/categories/"+localId)) {

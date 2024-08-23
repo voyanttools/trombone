@@ -33,13 +33,6 @@ public class DocumentNgramsTest {
 		DocumentNgrams documentNgrams;
 		List<DocumentNgram> ngrams;
 		
-		/*
-		documentNgrams = new DocumentNgrams(storage, parameters);
-		documentNgrams.run();
-		ngrams = documentNgrams.getNgrams();
-		for (DocumentNgram ngram : ngrams) {System.out.println(ngram);}
-		*/
-		
 		parameters.setParameter("query", "toute");
 		parameters.setParameter("minLength", 4);
 		parameters.setParameter("maxLength", 4);
@@ -60,8 +53,22 @@ public class DocumentNgramsTest {
 		ngrams = documentNgrams.getNgrams();
 		for (DocumentNgram ngram : ngrams) {
 			assertEquals(ngram.toString(), ngram.getTerm().split("\\s+").length, ngram.getLength());
-//			System.out.println(ngram);
 		}
+		
+		// docIndex
+		parameters.setParameter("query", "\"toute personne\"");
+		parameters.setParameter("docIndex", 0);
+		documentNgrams = new DocumentNgrams(storage, parameters);
+		documentNgrams.run();
+		ngrams = documentNgrams.getNgrams();
+		assertEquals(0, ngrams.size());
+		
+		parameters.setParameter("query", "\"toute personne\"");
+		parameters.setParameter("docIndex", 2);
+		documentNgrams = new DocumentNgrams(storage, parameters);
+		documentNgrams.run();
+		ngrams = documentNgrams.getNgrams();
+		assertEquals(14, ngrams.size());
 		
 		storage.destroy();
 	}

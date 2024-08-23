@@ -145,8 +145,8 @@ public class XlsExpander implements Expander {
 	}
 	
 	private List<StoredDocumentSource> getDocumentsRowCells(StoredDocumentSource storedDocumentSource) throws IOException {
-		DocumentMetadata metadata = storedDocumentSource.getMetadata();
-		String id = storedDocumentSource.getId();
+		DocumentMetadata parentMetadata = storedDocumentSource.getMetadata();
+		String parentId = storedDocumentSource.getId();
 		Workbook wb = getWorkBook(storedDocumentSource);
 		List<StoredDocumentSource> xlsStoredDocumentSources = new ArrayList<StoredDocumentSource>();
 		
@@ -161,9 +161,11 @@ public class XlsExpander implements Expander {
 		Map<String, List<List<Integer>>> extras = processExtras("tableExtraMetadata");
 		int firstRow = parameters.getParameterBooleanValue("tableNoHeadersRow") ? 0 : 1;
 		
+		boolean doGrouping = parameters.getKeys().contains("tableGroupBy");
+		List<List<Integer>> groupBy = getInts(parameters.getParameterValues("tableGroupBy"));
+		Map<String, List<String>> groupedRowInputSources = new HashMap<String, List<String>>();
+		
 		Row row;
-		String contents;
-		String location;
 		for (int k = 0; k < wb.getNumberOfSheets(); k++) {
 			Sheet sheet = wb.getSheetAt(k);
 			int rows = sheet.getLastRowNum();
@@ -184,9 +186,9 @@ public class XlsExpander implements Expander {
 				}
 				
 				for (List<Integer> columnsSet : columns) {
-					contents = columnsSet.isEmpty() ? getValue(row, "\t") : getValue(row, columnsSet, "\t");
+					String contents = columnsSet.isEmpty() ? getValue(row, "\t") : getValue(row, columnsSet, "\t");
 					if (contents.isEmpty()==false) {
-						location = (k+1)+"."+StringUtils.join(columnsSet, "+")+"."+(r+1);
+						String location = (k+1)+"."+StringUtils.join(columnsSet, "+")+"."+(r+1);
 						String title = location;
 						List<String> currentAuthors = new ArrayList<String>();
 						String pubDateStr = "";
@@ -195,6 +197,8 @@ public class XlsExpander implements Expander {
 						String keywordsStr = "";
 						String collectionStr = "";
 						Map<String, String> extrasMap = new HashMap<>();
+						
+						String groupByKey = "";
 						
 						if (columns.size()==1) {
 							if (titles.isEmpty()==false) {
@@ -238,16 +242,49 @@ public class XlsExpander implements Expander {
 								}
 							}
 							
+							List<String> currentGroupByKey = getAllValues(row, groupBy);
+							if (currentGroupByKey.isEmpty()==false) {
+								groupByKey = StringUtils.join(currentGroupByKey, " ");
+							}
+							
 						}
 						
-						
-						xlsStoredDocumentSources.add(getChild(metadata, id, contents, location, title, currentAuthors, pubDateStr, publisherStr, pubPlaceStr, keywordsStr, collectionStr, extrasMap));
-						
+						if (doGrouping) {
+							if (groupedRowInputSources.containsKey(groupByKey) == false) {
+								groupedRowInputSources.put(groupByKey, new ArrayList<String>());
+							}
+							groupedRowInputSources.get(groupByKey).add(contents);
+						} else {
+							xlsStoredDocumentSources.add(getChild(parentMetadata, parentId, contents, location, title, currentAuthors, pubDateStr, publisherStr, pubPlaceStr, keywordsStr, collectionStr, extrasMap));
+						}
 					}
 				}
 			}
 		}
 		wb.close();
+		
+		if (doGrouping) {
+			for (Map.Entry<String, List<String>> mappedRowInputSources : groupedRowInputSources.entrySet()) {
+				String key = mappedRowInputSources.getKey();
+				List<String> mappedRowInputSourcesList = mappedRowInputSources.getValue();
+				String location = parentId+";group:"+key;
+				StringBuffer combinedContents = new StringBuffer();
+				for (String rowInputSource : mappedRowInputSourcesList) {
+					combinedContents.append(rowInputSource).append("\n\n");
+				}
+				DocumentMetadata combinedMetadata = parentMetadata.asParent(parentId, DocumentMetadata.ParentType.EXPANSION);
+				combinedMetadata.setTitle(key);
+				combinedMetadata.setModified(parentMetadata.getModified());
+				combinedMetadata.setSource(Source.STRING);
+				combinedMetadata.setLocation(location);
+				combinedMetadata.setDocumentFormat(DocumentFormat.TEXT);
+				String id = DigestUtils.md5Hex(parentId + location);
+				
+				InputSource inputSource = new StringInputSource(id, combinedMetadata, combinedContents.toString());
+				xlsStoredDocumentSources.add(storedDocumentSourceStorage.getStoredDocumentSource(inputSource));
+			}
+		}
+		
 		return xlsStoredDocumentSources;
 	}
 	

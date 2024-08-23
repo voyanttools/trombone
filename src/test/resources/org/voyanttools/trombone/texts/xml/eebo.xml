@@ -1,0 +1,84 @@
+<?xml version='1.0'?><EEBO><dreamheader>
+  <tcpdata>
+    <tcpid phase="1">A91818.hdr</tcpid>
+    <fileDesc>
+      <titleStmt>
+        <title>Sir, By virtue of a letter from His Highness the Prince of Orange to the sheriffs of London ...:  Sam. Ridgley, Beadle.</title>
+        <author> Ridgley, Sam.</author>
+      </titleStmt>
+      <publicationStmt>
+        <date>Jan. 1689]</date>
+        <pubPlace>[London :</pubPlace>
+      </publicationStmt>
+      <idno type="DLPS">A91818</idno>
+      <idno type="vid">152345</idno>
+      <idno type="Aleph">5348181</idno>
+      <idno type="stc">Wing (2nd ed.) R1448B</idno>
+      <idno type="bibno">(OCoLC)ocm38875889e</idno>
+      <idno type="lcclassno">DA681</idno>
+    </fileDesc>
+  </tcpdata>
+  <opendata>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>Sir, By virtue of a letter from His Highness the Prince of Orange to the sheriffs of London ...: Sam. Ridgley, Beadle</title>
+        </titleStmt>
+        <publicationStmt>
+          <date>1689</date>
+          <date type="extracted">Jan. 1689</date>
+          <date type="extracted">19uu</date>
+        </publicationStmt>
+        <idno type="oclc">671334980</idno>
+        <idno type="oclc">891505755</idno>
+        <idno type="tcp">A91818</idno>
+        <sourceDesc>
+          <ref type="oclc" target="http://www.worldcat.org/oclc/671334980.rdf">671334980</ref>
+          <ref type="oclc" target="http://www.worldcat.org/oclc/891505755.rdf">891505755</ref>
+        </sourceDesc>
+      </fileDesc>
+      <encodingDesc>
+        <projectDesc>
+          <p>Created by Matthew Milner (matthew.milner@mcgill.ca) for the Distant Reading Early Modernity Project (DREaM) of Early Modern Conversions using EEBO TCP Phases 1 &amp; 2, OCLC, and VIAF Metadata</p>
+        </projectDesc>
+        <editorialDecl>
+          <normalization>
+            <p>Normalized using VARD2</p>
+          </normalization>
+          <confidence>
+            <p>Confidence values for VIAF matches in publicationStmt are based on name matching and dates of the agent in relation to the particular EEBO title. 0 is a confident match, 1 contains a missing date, 2 only matches a name or a permutation of the name, and no date information is present for comparison in VIAF. Confidence values of 3 or 4 appear for unmatched names. 3 indicates a possible VIAF match, however, due to data inconsistencies no permutations of the canonical name were close enough to permit a confident match. This usually occurs with pseudonyms. A value of 4 failed to find any VIAF matches, however it is clear that the text does or could represent an individual. In many cases strings with two initials (such as M. S.) will mismatch. Any clarifications or edits to this data can be submitted for future revisions.</p>
+          </confidence>
+          <phases>
+            <p>In order to comply with EEBO TCP licensing, each header contains the EEBO TCP Phase number as an attribute in tcpid.</p>
+          </phases>
+        </editorialDecl>
+      </encodingDesc>
+      <revisionDesc>
+        <date>2016-05-03</date>
+      </revisionDesc>
+    </teiHeader>
+  </opendata>
+</dreamheader><TEXTS type='varded' set='cleaned' match='45' date='2015-06-10' version='2.0' metadata='dream'><TEXT LANG="eng">
+<BODY>
+<DIV1 TYPE="text">
+<PB REF="1" MS="y"/><!-- PDF PAGE 3 -->
+<PB REF="1" MS="y"/>
+<HEAD TYPE="illustration"><FIGURE>
+<P>SERVE &amp; OBEY</P>
+<FIGDESC>blazon or coat of arms</FIGDESC>
+</FIGURE></HEAD>
+<OPENER><SALUTE>SIR,</SALUTE></OPENER>
+<P>BY virtue of a Letter from his Highness the Prince
+of ORANGE to the Sheriffs of London to this
+purpose directed, you are desired to meet the
+Master and Wardens of the Worshipful Company of
+HABERDASHERS at Haberdashers-Hall, on Wednesday
+next, the Ninth day of▪ January, at Eight of
+the Clock in the Morning; from thence to accompany
+them to Guild-Hall, there to Elect four Representatives
+for the City of London, to meet at Westminster the 22th.
+day of this Instant.</P>
+<CLOSER><SIGNED>Sam. Ridgley, Beadle.</SIGNED></CLOSER>
+</DIV1>
+</BODY>
+</TEXT></TEXTS></EEBO>

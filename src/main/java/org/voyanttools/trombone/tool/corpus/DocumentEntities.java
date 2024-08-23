@@ -31,6 +31,7 @@ import org.voyanttools.trombone.model.TokenType;
 import org.voyanttools.trombone.nlp.NlpAnnotator;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.util.FlexibleParameters;
+import org.voyanttools.trombone.util.Stripper;
 
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.FutureCallback;
@@ -310,6 +311,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 			if (annotator.equals(NLP.NSSI)) {
 				int jobId = VoyantNssiClient.submitJob(indexedDocument.getDocumentString());
 				List<DocumentEntity> ents = VoyantNssiClient.getResults(jobId);
+				cleanEntities(ents);
 				int docIndex = corpusMapper.getCorpus().getDocumentPosition(docId);
 				for (DocumentEntity ent : ents) {
 					ent.setDocIndex(docIndex);
@@ -319,6 +321,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 			} else if (annotator.equals(NLP.SPACY)) {
 				String lang = corpusMapper.getCorpus().getLanguageCodes().toArray(new String[0])[0];
 				List<DocumentEntity> ents = VoyantSpacyClient.submitJob(indexedDocument.getDocumentString(), lang);
+				cleanEntities(ents);
 				int docIndex = corpusMapper.getCorpus().getDocumentPosition(docId);
 				for (DocumentEntity ent : ents) {
 					ent.setDocIndex(docIndex);
@@ -333,6 +336,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 						System.out.println(docId+": getting entities");
 					}
 					List<DocumentEntity> ents = nlpAnnotator.getEntities(corpusMapper, indexedDocument, parameters);
+					cleanEntities(ents);
 					if (verbose) {
 						System.out.println(docId+": got entities");
 					}
@@ -355,6 +359,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 						System.out.println(docId+": getting entities");
 					}
 					List<DocumentEntity> ents = nlpAnnotator.getEntities(corpusMapper, indexedDocument, parameters);
+					cleanEntities(ents);
 					if (verbose) {
 						System.out.println(docId+": got entities");
 					}
@@ -370,6 +375,13 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 		
 	}
 	
+	private void cleanEntities(List<DocumentEntity> entities) {
+		Stripper stripper = new Stripper(Stripper.TYPE.ALL);
+		for (DocumentEntity ent : entities) {
+			ent.setTerm(stripper.strip(ent.getTerm()));
+			ent.setNormalized(stripper.strip(ent.getNormalized()));
+		}
+	}
 	
 	private void addPositionsToEntities(CorpusMapper corpusMapper, IndexedDocument indexedDocument, List<DocumentEntity> entities) throws IOException {
 		// term/type key -> offsetIndex key -> [startPosition, endPosition]

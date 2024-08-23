@@ -130,7 +130,10 @@ public class CorrespondenceAnalysis {
 //			percentevals[j] = runningtotal + 100.0*Evals[j]/(tot-1.0);
 //			rate[j] = Evals[j]/trce;
 //			runningtotal = percentevals[j];
-			this.dimensionPercentages[j-1] = 100.0*Evals[j]/trce;
+
+			// very small values can cause a dimension total higher than 100%
+			// this leads to negative dimensions, so use Math.max to clamp it
+			this.dimensionPercentages[j-1] = Math.max(100.0*Evals[j]/trce, 0.0);
 		}
 
 	}

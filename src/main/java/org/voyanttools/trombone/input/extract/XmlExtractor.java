@@ -268,22 +268,12 @@ public class XmlExtractor implements Extractor, Serializable {
 			}
 			
 			if (localParameters.containsKey("xmlExtractorTemplate")) {
-
-				Source source = null;
-				String xmlExtractorTemplate = localParameters.getParameterValue("xmlExtractorTemplate");
-			
-				URI templateUrl;
-				try {
-					templateUrl = this.getClass().getResource("/org/voyanttools/trombone/templates/"+xmlExtractorTemplate).toURI();
-				} catch (URISyntaxException e1) {
-					throw new IOException("Unable to find local template directory", e1);
-				}
-				File file = new File(templateUrl);
-				if (file.exists()) {
-					source = new StreamSource(file);
-				}
 				
-				if (source!=null) {
+				String xmlExtractorTemplate = localParameters.getParameterValue("xmlExtractorTemplate");
+				try (InputStream is = this.getClass().getResourceAsStream("/org/voyanttools/trombone/templates/"+xmlExtractorTemplate)) {
+					if (is == null) throw new Error("Unable to find extractor template "+xmlExtractorTemplate);
+					Source source = new StreamSource(is);
+					
 					DOMResult result = new DOMResult();
 					try {
 						Transformer extractorTransformer = TransformerFactory.newInstance().newTransformer(source);
@@ -297,12 +287,8 @@ public class XmlExtractor implements Extractor, Serializable {
 						throw new IllegalStateException("Unable to create new XML document during templated extraction.", e);
 					}
 					doc = (Document) result.getNode();
-//					   DOMImplementationLS domImplementation = (DOMImplementationLS) doc.getImplementation();
-//					    LSSerializer lsSerializer = domImplementation.createLSSerializer();
-//					    System.out.println(lsSerializer.writeToString(doc).substring(0, 3000));
-				}
-				else {
-					throw new IOException("Unable to find extractor template "+xmlExtractorTemplate);
+				} catch (Exception e) {
+					throw new IOException(e);
 				}
 			}
 			

@@ -154,6 +154,14 @@ public class XmlExtractorTest {
 		inputStream.close();
 		assertFalse(contents.contains("<!--")); // make sure we've stripped out XML comments during extraction
 		
+		// try with EEBO input that has a XSL transform
+		extractor = new StoredDocumentSourceExtractor(storeDocumentSourceStorage, new FlexibleParameters());
+		inputSource = new FileInputSource(TestHelper.getResource("xml/eebo.xml"));
+		storedDocumentSource = storeDocumentSourceStorage.getStoredDocumentSource(inputSource);
+		extractedStoredDocumentSource = extractor.getExtractedStoredDocumentSource(storedDocumentSource);
+		metadata = extractedStoredDocumentSource.getMetadata();
+		assertEquals("A91818", metadata.getExtra("tcpId"));
+		
 		// make sure that we can keep multiple values for metadata
 		extractor = new StoredDocumentSourceExtractor(storeDocumentSourceStorage, new FlexibleParameters(new String[]{"xmlTitleXpath=//title"}));
 		inputSource = new FileInputSource(TestHelper.getResource("xml/rss.xml"));

@@ -57,7 +57,7 @@ public class DocumentTerm {
 			String dir = parameters.getParameterValue("dir", "").toUpperCase();
 			String dirSuffix = "DESC";
 			if (dir.endsWith("ASC")) {dirSuffix="ASC";}
-			return valueOf(sortPrefix+dirSuffix);			
+			return valueOf(sortPrefix+dirSuffix);
 		}
 	}
 
@@ -83,7 +83,7 @@ public class DocumentTerm {
 		this.term = term;
 		this.rawFreq = rawFreq;
 		this.totalTermsCount = totalTokens;
-		this.relativeFreq = totalTokens > 0 ? ((float) rawFreq / totalTokens) * 1000000 : 0;
+		this.relativeFreq = totalTokens > 0 ? ((float) rawFreq / totalTokens) : 0;
 		this.zscore = zscore;
 		this.positions = positions;
 		this.offsets = offsets;

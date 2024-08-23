@@ -52,8 +52,16 @@ public class DocumentEntity implements Serializable, Comparable<DocumentEntity> 
 		return term;
 	}
 	
+	public void setTerm(String term) {
+		this.term = term;
+	}
+
 	public String getNormalized() {
 		return normalized;
+	}
+
+	public void setNormalized(String normalized) {
+		this.normalized = normalized;
 	}
 
 	@Override
