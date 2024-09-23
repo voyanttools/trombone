@@ -16,7 +16,9 @@ import com.github.pemistahl.lingua.api.LanguageDetectorBuilder;
  */
 public class LangDetector {
 	
-	private static final LanguageDetector detector = LanguageDetectorBuilder.fromAllLanguages().build();
+	// English gets misidentified as Yoruba often enough that we're excluding it
+	// https://github.com/pemistahl/lingua/issues/125
+	private static final LanguageDetector detector = LanguageDetectorBuilder.fromAllLanguagesWithout(Language.YORUBA).withLowAccuracyMode().build();
 	
 	private static Pattern tagStripper = Pattern.compile("<.+?>", Pattern.DOTALL);
 	
