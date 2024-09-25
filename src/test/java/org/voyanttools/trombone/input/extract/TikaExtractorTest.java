@@ -71,7 +71,7 @@ public class TikaExtractorTest {
 //		contents = IOUtils.toString(storeDocumentSourceStorage.getStoredDocumentSourceInputStream(extractedStoredDocumentSource.getId()));
 		assertTrue("Text string shouldn't contain tags", contents.contains("&lt;b&gt;a&lt;/b&gt;"));
 
-		inputSource = new StringInputSource("<html><body><div>This is <b>a</b> test.</div></body></html>");
+		inputSource = new StringInputSource("<html><body><div>This is <b>a</b> test.</div> It's a document that contains words.</body></html>");
 		storedDocumentSource = storeDocumentSourceStorage.getStoredDocumentSource(inputSource);
 		extractedStoredDocumentSource = extractor.getExtractedStoredDocumentSource(storedDocumentSource);
 		inputStream = storeDocumentSourceStorage.getStoredDocumentSourceInputStream(extractedStoredDocumentSource.getId());
