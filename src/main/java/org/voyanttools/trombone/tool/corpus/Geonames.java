@@ -388,14 +388,16 @@ public class Geonames extends AbstractContextTerms {
 					if (forms.isEmpty()) {
 						continue;
 					}
-					for (int i=6; i<8; i++) {
-						String[] admins = StringUtils.split(parts[i], '+');
-						for (String c : cityParts) {
-							for (String a : admins) {
-								forms.add(c+", "+a);
+					if (parts.length == 8) {
+						for (int i=6; i<8; i++) {
+							String[] admins = StringUtils.split(parts[i], '+');
+							for (String c : cityParts) {
+								for (String a : admins) {
+									forms.add(c+", "+a);
+								}
 							}
+							// for admin and country send city + admin or country
 						}
-						// for admin and country send city + admin or country
 					}
 					for (String form : forms) {
 						if (stop.isKeyword(form)==false) {
