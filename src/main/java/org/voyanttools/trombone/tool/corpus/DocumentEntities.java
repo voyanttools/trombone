@@ -67,6 +67,8 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 
 	private final static int TIMEOUT_FAIL = 60; // how many minutes need to pass before failing
 	
+	private final static int CHARS_PER_TEXT_CHUNK = 100000; // text chunk size to divide documents into
+	
 	private static ListeningExecutorService workThreadPool = null;
 	private static ListeningExecutorService listenThreadPool = null;
 	
@@ -308,71 +310,119 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 			storage.storeString(startTime, getDocumentCacheId(docId, annotator)+"-status", Storage.Location.object, true);
 			
 			IndexedDocument indexedDocument = corpusMapper.getCorpus().getDocument(docId);
-			if (annotator.equals(NLP.NSSI)) {
-				int jobId = VoyantNssiClient.submitJob(indexedDocument.getDocumentString());
-				List<DocumentEntity> ents = VoyantNssiClient.getResults(jobId);
-				cleanEntities(ents);
-				int docIndex = corpusMapper.getCorpus().getDocumentPosition(docId);
-				for (DocumentEntity ent : ents) {
-					ent.setDocIndex(docIndex);
-				}
-				addPositionsToEntities(corpusMapper, indexedDocument, ents);
-				return new DocResult(docId, "done", ents);
-			} else if (annotator.equals(NLP.SPACY)) {
-				String lang = corpusMapper.getCorpus().getLanguageCodes().toArray(new String[0])[0];
-				List<DocumentEntity> ents = VoyantSpacyClient.submitJob(indexedDocument.getDocumentString(), lang);
-				cleanEntities(ents);
-				int docIndex = corpusMapper.getCorpus().getDocumentPosition(docId);
-				for (DocumentEntity ent : ents) {
-					ent.setDocIndex(docIndex);
-				}
-				addPositionsToEntities(corpusMapper, indexedDocument, ents);
-				return new DocResult(docId, "done", ents);
-			} else if (annotator.equals(NLP.OpenNLP)) {
-				String lang = indexedDocument.getMetadata().getLanguageCode();
-				if (lang.equals("en")) {
-					NlpAnnotator nlpAnnotator = storage.getNlpAnnotatorFactory().getOpenNlpAnnotator(lang);
-					if (verbose) {
-						System.out.println(docId+": getting entities");
-					}
-					List<DocumentEntity> ents = nlpAnnotator.getEntities(corpusMapper, indexedDocument, parameters);
-					cleanEntities(ents);
-					if (verbose) {
-						System.out.println(docId+": got entities");
+			String lang = corpusMapper.getCorpus().getLanguageCodes().toArray(new String[0])[0];
+			
+			String docString = indexedDocument.getDocumentString();
+			
+			List<DocumentEntity> ents = new ArrayList<DocumentEntity>();
+			
+			if (hasChunkSupport(annotator)) {
+				Map<String, DocumentEntity> entitiesMap = new HashMap<>();
+				
+				List<String> chunks = getTextChunks(docString, CHARS_PER_TEXT_CHUNK);
+				
+				int currOffset = 0;
+				for (String chunk : chunks) {
+					
+					List<DocumentEntity> chunkEnts;
+					if (annotator.equals(NLP.NSSI)) {
+						int jobId = VoyantNssiClient.submitJob(chunk);
+						chunkEnts = VoyantNssiClient.getResults(jobId);
+					} else if (annotator.equals(NLP.SPACY)) {
+						chunkEnts = VoyantSpacyClient.submitJob(chunk, lang);
+					} else {
+						chunkEnts = new ArrayList<DocumentEntity>();
 					}
 					
-					// FIXME OpenNLP offsets and positions don't match up with Lucene because of how tokens are provided to OpenNLP
-//					addPositionsToEntities(corpusMapper, indexedDocument, ents);
+					// go through the offsets and adjust them
+					for (DocumentEntity chunkEnt : chunkEnts) {
+						int[][] offsets = chunkEnt.getOffsets();
+						int[][] adjOffsets = new int[offsets.length][2];
+						for (int i = 0; i < offsets.length; i++) {
+							int[] offset = offsets[i];
+							adjOffsets[i] = new int[] {offset[0]+currOffset, offset[1]+currOffset};
+						}
+						chunkEnt.setOffsets(adjOffsets);
+						
+						// add/update the map
+						if (entitiesMap.containsKey(chunkEnt.getTerm())) {
+							DocumentEntity match = entitiesMap.get(chunkEnt.getTerm());
+							match.setOffsets(concatOffsets(match.getOffsets(), chunkEnt.getOffsets()));
+						} else {
+							entitiesMap.put(chunkEnt.getTerm(), chunkEnt);
+						}
+					}
 					
-					return new DocResult(docId, "done", ents);
-				} else {
-					return new DocResult(docId, "done", new ArrayList<DocumentEntity>());
+					currOffset += chunk.length();
+				}
+				
+				// convert map to list
+				for (DocumentEntity ent : entitiesMap.values()) {
+					ents.add(ent);
 				}
 			} else {
-//				if (Math.random() > .5f) {
-//					throw new Exception("random failure");
-//				}
-				String lang = indexedDocument.getMetadata().getLanguageCode();
 				if (lang.equals("en")) {
-					NlpAnnotator nlpAnnotator = storage.getNlpAnnotatorFactory().getNlpAnnotator(lang);
-					if (verbose) {
-						System.out.println(docId+": getting entities");
+					if (annotator.equals(NLP.OpenNLP)) {
+						NlpAnnotator nlpAnnotator = storage.getNlpAnnotatorFactory().getOpenNlpAnnotator(lang);
+						if (verbose) {
+							System.out.println(docId+": getting entities");
+						}
+						ents = nlpAnnotator.getEntities(corpusMapper, indexedDocument, parameters);
+						if (verbose) {
+							System.out.println(docId+": got entities");
+						}
+					} else {
+						NlpAnnotator nlpAnnotator = storage.getNlpAnnotatorFactory().getNlpAnnotator(lang);
+						if (verbose) {
+							System.out.println(docId+": getting entities");
+						}
+						ents = nlpAnnotator.getEntities(corpusMapper, indexedDocument, parameters);
+						if (verbose) {
+							System.out.println(docId+": got entities");
+						}
 					}
-					List<DocumentEntity> ents = nlpAnnotator.getEntities(corpusMapper, indexedDocument, parameters);
-					cleanEntities(ents);
-					if (verbose) {
-						System.out.println(docId+": got entities");
-					}
-					
-					addPositionsToEntities(corpusMapper, indexedDocument, ents);
-					
-					return new DocResult(docId, "done", ents);
 				} else {
 					return new DocResult(docId, "done", new ArrayList<DocumentEntity>());
 				}
 			}
+			
+			cleanEntities(ents);
+			int docIndex = corpusMapper.getCorpus().getDocumentPosition(docId);
+			for (DocumentEntity ent : ents) {
+				ent.setDocIndex(docIndex);
+			}
+			// FIXME OpenNLP offsets and positions don't match up with Lucene because of how tokens are provided to OpenNLP
+			addPositionsToEntities(corpusMapper, indexedDocument, ents);
+			
+			return new DocResult(docId, "done", ents);
 		}
 		
+	}
+	
+	private boolean hasChunkSupport(NLP annotator) {
+		return annotator.equals(NLP.NSSI) || annotator.equals(NLP.SPACY);
+	}
+	
+	// split a string into chunks at the nearest space character
+	private List<String> getTextChunks(String text, int chunkSize) {
+		List<String> chunks = new ArrayList<String>();
+		
+		if (text.length() < chunkSize) {
+			chunks.add(text);
+			return chunks;
+		}
+		
+		int nextPos = chunkSize;
+		int currPos = 0;
+		while (nextPos < text.length()) {
+			nextPos = text.lastIndexOf(" ", nextPos);
+			chunks.add(text.substring(currPos, nextPos));
+			currPos = nextPos;
+			nextPos = currPos + chunkSize;
+		}
+		chunks.add(text.substring(currPos));
+		
+		return chunks;
 	}
 	
 	private void cleanEntities(List<DocumentEntity> entities) {
@@ -381,6 +431,13 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 			ent.setTerm(stripper.strip(ent.getTerm()));
 			ent.setNormalized(stripper.strip(ent.getNormalized()));
 		}
+	}
+	
+	private int[][] concatOffsets(int[][] array1, int[][] array2) {
+		int[][] array1and2 = new int[array1.length + array2.length][2];
+		System.arraycopy(array1, 0, array1and2, 0, array1.length);
+		System.arraycopy(array2, 0, array1and2, array1.length, array2.length);
+		return array1and2;
 	}
 	
 	private void addPositionsToEntities(CorpusMapper corpusMapper, IndexedDocument indexedDocument, List<DocumentEntity> entities) throws IOException {
