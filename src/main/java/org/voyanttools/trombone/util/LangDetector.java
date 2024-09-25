@@ -29,6 +29,7 @@ public class LangDetector {
 	private static final LanguageDetector detector = LanguageDetectorBuilder.fromAllLanguagesWithout(
 			// English gets misidentified often enough that we're excluding more rare languages
 			// https://github.com/pemistahl/lingua/issues/125
+			Language.ESPERANTO,
 			Language.SHONA, Language.SOTHO, Language.SWAHILI,
 			Language.TAGALOG, Language.TSWANA, Language.TSONGA,
 			Language.XHOSA, Language.YORUBA
@@ -57,7 +58,14 @@ public class LangDetector {
 		// aiming for around 3 chunks of MAX_CHARS_PER_TEXT_CHUNK each
 		int chunkLength = MAX_CHARS_PER_TEXT_CHUNK;
 		int textLength = text.length();
-		if (textLength < MAX_CHARS_PER_TEXT_CHUNK * 3) {
+		if (textLength <= 120) {
+			// special handling for 120 character limit and low accuracy mode ( https://github.com/pemistahl/lingua/?tab=readme-ov-file#915-low-accuracy-mode-versus-high-accuracy-mode )
+			StringBuilder sb = new StringBuilder(text);
+			sb.append(text);
+			sb.append(text);
+			text = sb.toString();
+			chunkLength = text.length();
+		} else if (textLength < MAX_CHARS_PER_TEXT_CHUNK * 3) {
 			chunkLength = (int) Math.ceil(textLength / 3);
 		}
 		
