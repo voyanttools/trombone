@@ -138,9 +138,7 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 								rawFreqsMap.put(term, new HashMap<Integer, Integer>());
 							}
 							int rawF = (int) termsEnum.totalTermFreq();
-							if (rawF>minRawFreq) {
-								rawFreqsMap.get(term).put(corpusMapper.getDocumentPositionFromLuceneId(doc), rawF);
-							}
+							rawFreqsMap.get(term).put(corpusMapper.getDocumentPositionFromLuceneId(doc), rawF);
 						}
 						bytesRef = termsEnum.next();
 					}
