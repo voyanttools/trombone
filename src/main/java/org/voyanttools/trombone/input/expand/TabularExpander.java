@@ -342,7 +342,9 @@ public class TabularExpander implements Expander {
 		InputStream input = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
 		List<String[]> allRows;
 		if (format == DocumentFormat.CSV) {
-			CsvParser parser = new CsvParser(new CsvParserSettings());
+			CsvParserSettings settings = new CsvParserSettings();
+			settings.setMaxCharsPerColumn(524288);
+			CsvParser parser = new CsvParser(settings);
 			allRows = parser.parseAll(input);
 		} else {
 			TsvParser parser = new TsvParser(new TsvParserSettings());
