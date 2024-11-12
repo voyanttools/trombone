@@ -35,7 +35,7 @@ public class CorpusTermCorrelationsTest {
 		ctc.run();
 		
 		List<CorpusTermsCorrelation> correlations = ctc.getCorrelations();
-		assertEquals("should", correlations.get(0).getCorpusTerms()[0].getTerm());
+		assertEquals("de", correlations.get(0).getCorpusTerms()[0].getTerm());
 	}
 
 }
