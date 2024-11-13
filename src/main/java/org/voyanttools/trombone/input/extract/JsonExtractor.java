@@ -6,21 +6,18 @@ package org.voyanttools.trombone.input.extract;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonException;
 import javax.json.JsonNumber;
-import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.model.DocumentFormat;
@@ -93,7 +90,12 @@ public class JsonExtractor implements Extractor {
 			InputStream is = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
 			JsonReader jsonReader = Json.createReader(is);
 			
-			JsonStructure jsonStructure = jsonReader.read();
+			JsonStructure jsonStructure = null;
+			try {
+				jsonStructure = jsonReader.read();
+			} catch (JsonException e) {
+				throw new IOException("Invalid JSON document");
+			}
 			
 			String location = metadata.getLocation();
 			// try to find title if needed
