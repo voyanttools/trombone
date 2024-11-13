@@ -27,11 +27,6 @@ import java.util.List;
 
 import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.Storage;
-import org.voyanttools.trombone.tool.build.CorpusBuilder;
-import org.voyanttools.trombone.tool.build.DocumentExpander;
-import org.voyanttools.trombone.tool.build.DocumentExtractor;
-import org.voyanttools.trombone.tool.build.DocumentIndexer;
-import org.voyanttools.trombone.tool.build.DocumentStorer;
 import org.voyanttools.trombone.tool.util.AbstractTool;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
@@ -71,6 +66,8 @@ public class RealCorpusCreator extends AbstractTool {
 			storer.run();
 			storedDocumentSources = storer.getStoredDocumentSources();
 			storedId = storer.getStoredId();
+			// TODO (cleanup) original document is stored and never used again after expansion & extraction
+			// also IDs are not linked with the eventually created corpus
 			nextCorpusCreatorStep = "expand";
 			if (timeout>0 && Calendar.getInstance().getTimeInMillis()-start>timeout) {return;}
 			if (steps>0 && ++step>=steps) {return;}
