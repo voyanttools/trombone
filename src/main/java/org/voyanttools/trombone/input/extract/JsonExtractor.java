@@ -185,7 +185,7 @@ public class JsonExtractor implements Extractor {
 			// we don't handle object type, what would we do with it?
 			case ARRAY:
 				JsonArray jsonArray = jsonValue.asJsonArray();
-				return jsonArray.getValuesAs(JsonString.class).toArray(new String[0]);
+				return jsonArray.getValuesAs(JsonString::getString).toArray(new String[0]);
 			case NUMBER:
 				return new String[] {String.valueOf(((JsonNumber) jsonValue).numberValue())};
 			case STRING:

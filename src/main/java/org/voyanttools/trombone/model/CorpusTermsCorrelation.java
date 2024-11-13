@@ -92,7 +92,7 @@ public class CorpusTermsCorrelation {
 	public static Comparator<CorpusTermsCorrelation> CorrelationAscending = new Comparator<CorpusTermsCorrelation>() {
 		@Override
 		public int compare(CorpusTermsCorrelation o1, CorpusTermsCorrelation o2) {
-			int compare = Float.compare(o2.getCorrelation(), o1.getCorrelation());
+			int compare = Float.compare(o1.getCorrelation(), o2.getCorrelation());
 			if (compare==0) {return TieBreaker.compare(o1, o2);}
 			else {return compare;}
 		}
@@ -101,7 +101,7 @@ public class CorpusTermsCorrelation {
 	public static Comparator<CorpusTermsCorrelation> CorrelationDescending = new Comparator<CorpusTermsCorrelation>() {
 		@Override
 		public int compare(CorpusTermsCorrelation o1, CorpusTermsCorrelation o2) {
-			int compare = Float.compare(o1.getCorrelation(), o2.getCorrelation());
+			int compare = Float.compare(o2.getCorrelation(), o1.getCorrelation());
 			if (compare==0) {return TieBreaker.compare(o1, o2);}
 			else {return compare;}
 		}
@@ -119,7 +119,7 @@ public class CorpusTermsCorrelation {
 	public static Comparator<CorpusTermsCorrelation> SignificanceAscending = new Comparator<CorpusTermsCorrelation>() {
 		@Override
 		public int compare(CorpusTermsCorrelation o1, CorpusTermsCorrelation o2) {
-			int compare = Float.compare(o2.getSignificance(), o1.getSignificance());
+			int compare = Float.compare(o1.getSignificance(), o2.getSignificance());
 			if (compare==0) {return TieBreaker.compare(o1, o2);}
 			else {return compare;}
 		}
@@ -128,7 +128,7 @@ public class CorpusTermsCorrelation {
 	public static Comparator<CorpusTermsCorrelation> SignificanceDescending = new Comparator<CorpusTermsCorrelation>() {
 		@Override
 		public int compare(CorpusTermsCorrelation o1, CorpusTermsCorrelation o2) {
-			int compare = Float.compare(o1.getSignificance(), o2.getSignificance());
+			int compare = Float.compare(o2.getSignificance(), o1.getSignificance());
 			if (compare==0) {return TieBreaker.compare(o1, o2);}
 			else {return compare;}
 		}

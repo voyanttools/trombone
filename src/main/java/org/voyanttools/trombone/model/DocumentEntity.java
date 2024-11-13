@@ -95,6 +95,8 @@ public class DocumentEntity implements Serializable, Comparable<DocumentEntity> 
 
 	public void setOffsets(int[][] offsets) {
 		this.offsets = offsets;
+		// update rawFreq
+		this.rawFreq = this.offsets.length;
 	}
 
 }

@@ -26,7 +26,7 @@ public class GeonamesTest {
 
 	public void test(Storage storage) throws IOException {
 
-		String text1 = "Most of London, Ontario and Montreal and most of London, England and Montreal and London and Montreal.";
+		String text1 = "An initial sentence written in order to pad the text length. Most of London, Ontario and Montreal and most of London, England and Montreal and London and Montreal.";
 		FlexibleParameters parameters = new FlexibleParameters(new String[]{"string="+text1,"includeCities=true"});
 		Geonames geonamesTool = new Geonames(storage, parameters);
 		geonamesTool.run();
@@ -52,7 +52,7 @@ public class GeonamesTest {
 	}
 	
 	public void testGeonamesAnnotator(Storage storage) throws IOException {
-		String text1 = "Most of London, Ontario and Montreal and most of London, England and Montreal and London and Montreal, London.";
+		String text1 = "An initial sentence written in order to pad the text length. Most of London, Ontario and Montreal and most of London, England and Montreal and London and Montreal, London.";
 		FlexibleParameters parameters = new FlexibleParameters(new String[]{"string="+text1,"includeCities=true"});
 //		CorpusCreator creator = new CorpusCreator(storage, parameters);
 //		creator.run();
