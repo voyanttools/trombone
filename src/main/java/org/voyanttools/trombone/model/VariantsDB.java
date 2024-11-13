@@ -44,7 +44,7 @@ public class VariantsDB extends AbstractDB {
 				db.close();
 				setDB("variants-"+dbId, false);
 				map = db.getHashMap("variants");
-				for (String line : FileUtils.readLines(file)) {
+				for (String line : FileUtils.readLines(file, "UTF-8")) {
 					List<String> parts = Arrays.asList(StringUtils.split(line, "\t"));
 					put(parts.remove(0), parts.toArray(new String[0]));
 				}
