@@ -92,7 +92,12 @@ public class JsonExtractor implements Extractor {
 			InputStream is = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
 			JsonReader jsonReader = Json.createReader(is);
 			
-			JsonStructure jsonStructure = jsonReader.read();
+			JsonStructure jsonStructure = null;
+			try {
+				jsonStructure = jsonReader.read();
+			} catch (JsonException e) {
+				throw new IOException("Invalid JSON document");
+			}
 			
 			String location = metadata.getLocation();
 			// try to find title if needed

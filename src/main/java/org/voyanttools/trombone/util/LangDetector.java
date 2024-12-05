@@ -3,15 +3,19 @@
  */
 package org.voyanttools.trombone.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.SortedMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.apache.commons.io.IOUtils;
 
 import com.github.pemistahl.lingua.api.Language;
 import com.github.pemistahl.lingua.api.LanguageDetector;
@@ -26,14 +30,7 @@ public class LangDetector {
 	
 	private final static int MAX_CHARS_PER_TEXT_CHUNK = 100000;
 	
-	private static final LanguageDetector detector = LanguageDetectorBuilder.fromAllLanguagesWithout(
-			// English gets misidentified often enough that we're excluding more rare languages
-			// https://github.com/pemistahl/lingua/issues/125
-			Language.ESPERANTO,
-			Language.SHONA, Language.SOTHO, Language.SWAHILI,
-			Language.TAGALOG, Language.TSWANA, Language.TSONGA,
-			Language.XHOSA, Language.YORUBA
-		)
+	private static final LanguageDetector detector = LanguageDetectorBuilder.fromAllLanguages()
 		// https://github.com/pemistahl/lingua/?tab=readme-ov-file#915-low-accuracy-mode-versus-high-accuracy-mode
 		.withLowAccuracyMode()
 		.build();
@@ -86,6 +83,34 @@ public class LangDetector {
 		}
 		
 		return modeLang;
+	}
+	
+	public static void main(String args[]) throws IOException {
+		String text = "";
+		URL url;
+		URLConnection c;
+		InputStream is = null;
+		try {
+			url = new URL("https://www.gutenberg.org/cache/epub/158/pg158.txt"); // Emma by Jane Austen
+			c = url.openConnection();
+			is = c.getInputStream();
+			text = IOUtils.toString(is, "UTF-8");
+		} finally {
+			if (is != null) {
+				is.close();
+			}
+		}
+		
+		LanguageDetector testDetector = LanguageDetectorBuilder.fromAllLanguages()
+//			.withLowAccuracyMode() // even without low accuracy mode it's still wrong
+			.build();
+			
+		Language detectedLanguage = testDetector.detectLanguageOf(text);
+		String lang1 = detectedLanguage.getIsoCode639_1().toString(); // should be "yo"
+		System.out.println("no chunking: "+lang1);
+		
+		String lang2 = LangDetector.detect(text); // should be "en"
+		System.out.println("chunking: "+lang2);
 	}
 
 }
