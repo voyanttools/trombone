@@ -271,7 +271,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 		// don't allow non-consumptive access to all terms if we need positions or offsets
 		if (parameters.getParameterBooleanValue("withPositions") || parameters.getParameterBooleanValue("withOffsets")) {
 			CorpusAccess corpusAccess = corpusMapper.getCorpus().getValidatedCorpusAccess(parameters);
-			if (corpusAccess==CorpusAccess.NONCONSUMPTIVE) {
+			if (corpusAccess==CorpusAccess.NONCONSUMPTIVE || corpusAccess==CorpusAccess.NONE) {
 				throw new CorpusAccessException("This is requesting data that's incompatible with the limited access of this corpus.");
 			}
 		}

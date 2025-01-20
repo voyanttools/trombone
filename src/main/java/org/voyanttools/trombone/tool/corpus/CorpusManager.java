@@ -210,7 +210,7 @@ public class CorpusManager extends AbstractTool {
 			
 			// make sure we have permissions to do this
 			CorpusAccess corpusAccess = corpus.getValidatedCorpusAccess(parameters);
-			if (corpusAccess==CorpusAccess.NONCONSUMPTIVE) {
+			if (corpusAccess != CorpusAccess.ADMIN && corpusAccess != CorpusAccess.NORMAL) {
 				throw new CorpusAccessException("You aren't permitted to set an alias to this corpus.");
 			}
 			
