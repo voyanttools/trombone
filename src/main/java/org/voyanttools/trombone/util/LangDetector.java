@@ -58,10 +58,10 @@ public class LangDetector {
 		if (textLength <= 240) {
 			// special handling for small text size and low accuracy mode ( https://github.com/pemistahl/lingua/?tab=readme-ov-file#915-low-accuracy-mode-versus-high-accuracy-mode )
 			StringBuilder sb = new StringBuilder(text);
-			sb.append(" ");
-			sb.append(text);
-			sb.append(" ");
-			sb.append(text);
+			while (sb.length() < 500) {
+				sb.append(" ");
+				sb.append(text);
+			}
 			text = sb.toString();
 			chunkLength = text.length();
 		} else if (textLength < MAX_CHARS_PER_TEXT_CHUNK * 3) {

@@ -190,7 +190,7 @@ public class XmlExtractorTest {
 
 		// make sure we recognize HTML in a string
 		extractor = new StoredDocumentSourceExtractor(storeDocumentSourceStorage, new FlexibleParameters());
-		inputSource = new StringInputSource("<html><body><div>This is a current sentence.</div><div>d</div></body></html>");
+		inputSource = new StringInputSource("<html><body><div>This is a current sentence in the English language.</div><div>d</div></body></html>");
 		storedDocumentSource = storeDocumentSourceStorage.getStoredDocumentSource(inputSource);
 		extractedStoredDocumentSource = extractor.getExtractedStoredDocumentSource(storedDocumentSource);
 		metadata = extractedStoredDocumentSource.getMetadata();
