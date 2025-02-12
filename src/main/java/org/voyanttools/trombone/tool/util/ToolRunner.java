@@ -107,7 +107,7 @@ public class ToolRunner extends AbstractTool {
 		if (parameters.containsKey("corpus")) { // add corpus to make it easier to find
 			sb.append(parameters.getParameterValue("corpus")).append("-");
 		}
-		List<String> names = new ArrayList(parameters.getKeys());
+		List<String> names = new ArrayList<String>(parameters.getKeys());
 		Collections.sort(names);
 		StringBuilder paramsBuilder = new StringBuilder();
 		for (String name : names) {
