@@ -13,7 +13,7 @@ import org.voyanttools.trombone.util.Stripper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias("texts")
-public class CorpusTexts extends AbstractCorpusTool {
+public class CorpusTexts extends AbstractCorpusTool implements ConsumptiveTool {
 
 	private List<String> texts;
 	

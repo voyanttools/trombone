@@ -60,7 +60,7 @@ public abstract class AbstractCorpusTool extends AbstractTool {
 	protected CorpusMapper getCorpusMapper(Corpus corpus) throws IOException {
 		if (this instanceof CorpusMetadata == false && this instanceof DocumentsMetadata == false) {
 			CorpusAccess corpusAccess = corpus.getValidatedCorpusAccess(parameters);
-			if (corpusAccess==CorpusAccess.NONCONSUMPTIVE && this instanceof ConsumptiveTool) {
+			if ((corpusAccess==CorpusAccess.NONCONSUMPTIVE || corpusAccess==CorpusAccess.NONE) && this instanceof ConsumptiveTool) {
 				throw new CorpusAccessException("This tool isn't compatible with the limited access of this corpus.");
 			}
 		}

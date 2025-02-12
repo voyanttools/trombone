@@ -120,7 +120,7 @@ public class DocumentsFinder extends AbstractTerms {
 				
 				// make sure we have permissions to do this
 				CorpusAccess corpusAccess = corpus.getValidatedCorpusAccess(parameters);
-				if (corpusAccess==CorpusAccess.NONCONSUMPTIVE) {
+				if (corpusAccess != CorpusAccess.ADMIN && corpusAccess != CorpusAccess.NORMAL) {
 					throw new CorpusAccessException("This tool isn't compatible with the limited access of this corpus.");
 				}
 

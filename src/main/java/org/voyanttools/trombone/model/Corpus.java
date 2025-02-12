@@ -261,15 +261,9 @@ public class Corpus implements Iterable<IndexedDocument> {
 					if (pass.isEmpty()==false && pass.equals(password)) {return mode;}
 				}
 				
-				// if we have defined passwords for full and no matches, we raise error
+				// we have defined passwords for full access but no matches from user
 				if (mode==CorpusAccess.ACCESS) {
-					CorpusAccess noPasswordAccess = corpusMetadata.getNoPasswordAccess();
-					if (noPasswordAccess==CorpusAccess.ACCESS) {
-						throw new CorpusAccessException("Access to this tool requires a valid password.");
-					}
-					else if (noPasswordAccess==CorpusAccess.NONCONSUMPTIVE) {
-						return CorpusAccess.NONCONSUMPTIVE;
-					}
+					return corpusMetadata.getNoPasswordAccess(); // can only be either NONCONSUMPTIVE or NONE
 				}
 			}
 		}

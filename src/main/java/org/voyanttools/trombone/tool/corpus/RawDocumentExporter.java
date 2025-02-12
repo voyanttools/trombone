@@ -84,7 +84,7 @@ public class RawDocumentExporter extends AbstractTool implements RawSerializable
 			
 			Corpus corpus = CorpusManager.getCorpus(storage, parameters);
 			CorpusAccess corpusAccess = corpus.getValidatedCorpusAccess(parameters);
-			if (corpusAccess==CorpusAccess.NONCONSUMPTIVE) {
+			if (corpusAccess==CorpusAccess.NONCONSUMPTIVE || corpusAccess==CorpusAccess.NONE) {
 				throw new CorpusAccessException("This tool isn't compatible with the limited access of this corpus.");
 			}
 
