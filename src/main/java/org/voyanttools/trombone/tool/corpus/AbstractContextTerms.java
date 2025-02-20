@@ -61,7 +61,7 @@ public abstract class AbstractContextTerms extends AbstractTerms {
 	protected String[] queries;
 
 	@XStreamOmitField
-	protected Set<Integer> positions;
+	protected int position;
 
 	/**
 	 * @param storage
@@ -71,10 +71,7 @@ public abstract class AbstractContextTerms extends AbstractTerms {
 		super(storage, parameters);
 		this.queries = parameters.getParameterValues("query");
 		this.context = parameters.getParameterIntValue("context", 5);
-		this.positions = new HashSet<Integer>();
-		for (String i : parameters.getParameterValues("position")) {
-			this.positions.add(Integer.parseInt(i));
-		}
+		this.position = parameters.getParameterIntValue("position", -1);
 	}
 	
 	protected Map<Integer, List<DocumentSpansData>> getDocumentSpansData(CorpusMapper corpusMapper, String[] queries) throws IOException {

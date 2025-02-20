@@ -57,7 +57,6 @@ public class DocumentContexts extends AbstractContextTerms implements Consumptiv
 		
 		int[] totalTokens = corpusMapper.getCorpus().getLastTokenPositions(tokenType);
 		FlexibleQueue<Kwic> queue = new FlexibleQueue<Kwic>(comparator, limit == Integer.MAX_VALUE ? limit : start+limit);
-		int position = parameters.getParameterIntValue("position", -1);
 		for (Map.Entry<Integer, List<DocumentSpansData>> dsd : documentSpansDataMap.entrySet()) {
 			int luceneDoc = dsd.getKey();
 			int corpusDocIndex = corpusMapper.getDocumentPositionFromLuceneId(luceneDoc);
@@ -66,7 +65,7 @@ public class DocumentContexts extends AbstractContextTerms implements Consumptiv
 			int offeredForThisDocument = 0;
 			for (Kwic k : q.getUnorderedList()) {
 				if (k!=null){
-					if (position>-1 && k.getPosition()!=position) {continue;}
+					if (this.position>-1 && k.getPosition()!=this.position) {continue;}
 					queue.offer(k);
 					offeredForThisDocument++;
 					// we have enough for this document (and we already have an accurate total count if needed)
@@ -83,8 +82,6 @@ public class DocumentContexts extends AbstractContextTerms implements Consumptiv
 	
 	private FlexibleQueue<Kwic> getKwics(CorpusMapper corpusMapper, int luceneDoc, int corpusDocumentIndex,
 			int lastToken, List<DocumentSpansData> documentSpansData) throws IOException {
-
-		int position = parameters.getParameterIntValue("position", -1);
 		
 		Map<Integer, TermInfo> termsOfInterest = getTermsOfInterest(corpusMapper.getLeafReader(), luceneDoc, lastToken, documentSpansData, overlapStrategy==Kwic.OverlapStrategy.merge);
 		
@@ -101,7 +98,7 @@ public class DocumentContexts extends AbstractContextTerms implements Consumptiv
 		
 		for (DocumentSpansData dsd : documentSpansData) {
 			for (int[] dsddata : dsd.spansData) {
-				if (position>-1 && dsddata[0]!=position) {continue;}
+				if (this.position>-1 && dsddata[0]!=this.position) {continue;}
 				datas.add(dsddata);
 				queriesMap.put(dsddata[0], dsd.queryString);
 			}
@@ -192,7 +189,7 @@ public class DocumentContexts extends AbstractContextTerms implements Consumptiv
 				break;
 			}
 			
-			previousrightend = rightend;			
+			previousrightend = rightend;
 		}
 		
 
