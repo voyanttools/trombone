@@ -55,6 +55,10 @@ public class VoyantSpacyClient {
 	}
 	
 	public static List<DocumentEntity> submitJob(String text, String lang) throws IOException {
+		return VoyantSpacyClient.submitJob(text, lang, debug);
+	}
+	
+	public static List<DocumentEntity> submitJob(String text, String lang, boolean debug) throws IOException {
 		if (VoyantSpacyClient.accessToken == null) {
 			setAccessToken();
 		}

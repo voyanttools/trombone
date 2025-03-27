@@ -320,6 +320,9 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 				Map<String, DocumentEntity> entitiesMap = new HashMap<>();
 				
 				List<String> chunks = getTextChunks(docString, CHARS_PER_TEXT_CHUNK);
+				if (verbose) {
+					System.out.println(docId+": chunks "+chunks.size());
+				}
 				
 				int currOffset = 0;
 				for (String chunk : chunks) {
@@ -329,7 +332,10 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 						int jobId = VoyantNssiClient.submitJob(chunk);
 						chunkEnts = VoyantNssiClient.getResults(jobId);
 					} else if (annotator.equals(NLP.SPACY)) {
-						chunkEnts = VoyantSpacyClient.submitJob(chunk, lang);
+						if (verbose) {
+							System.out.println(docId+": submitting chunk "+chunk.getBytes().length);
+						}
+						chunkEnts = VoyantSpacyClient.submitJob(chunk, lang, verbose);
 					} else {
 						chunkEnts = new ArrayList<DocumentEntity>();
 					}
