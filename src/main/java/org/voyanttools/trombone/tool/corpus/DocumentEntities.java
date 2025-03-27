@@ -67,7 +67,7 @@ public class DocumentEntities extends AbstractAsyncCorpusTool {
 
 	private final static int TIMEOUT_FAIL = 60; // how many minutes need to pass before failing
 	
-	private final static int CHARS_PER_TEXT_CHUNK = 100000; // text chunk size to divide documents into
+	private final static int CHARS_PER_TEXT_CHUNK = 10000; // text chunk size to divide documents into
 	
 	private static ListeningExecutorService workThreadPool = null;
 	private static ListeningExecutorService listenThreadPool = null;
