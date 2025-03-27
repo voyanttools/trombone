@@ -90,7 +90,7 @@ public class VoyantSpacyClient {
 //					setAccessToken();
 //					return submitJob(text);
 //				} else {
-					throw new IOException("Error submitting job. Status code: "+e.getStatusCode());
+					throw new IOException("Error submitting job. Status code: "+e.getStatusCode()+". Status reason: "+e.getReasonPhrase());
 //				}
 			}
 		}
@@ -193,9 +193,10 @@ public class VoyantSpacyClient {
 	
 	private static JSONObject getJSONResponse(CloseableHttpResponse response) throws HttpResponseException, IOException {
 		int statusCode = response.getStatusLine().getStatusCode();
-		if (debug) System.out.println("status: "+statusCode);
+		String statusReason = response.getStatusLine().getReasonPhrase();
+		if (debug) System.out.println("status: "+statusCode+", reason: "+statusReason);
 		if (statusCode >= 400) {
-			throw new HttpResponseException(statusCode, "Error getting response.");
+			throw new HttpResponseException(statusCode, statusReason);
 		} else if (statusCode == 204) {
 			if (debug) System.out.println("no response");
 			return null;
