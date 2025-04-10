@@ -81,8 +81,9 @@ public class CA extends CorpusAnalysisTool {
 
         double[][] columnProjections = ca.getColumnProjections();
 		if (divisionType == DivisionType.DOCS) {
-			for (i = 0; i < numDocs; i++) {
-		    	IndexedDocument doc = corpus.getDocument(i);
+			i = 0;
+			for (String	docId : ids) {
+		    	IndexedDocument doc = corpus.getDocument(docId);
 		    	
 		    	v = new double[dimensions];
 		    	for (j = 0; j < dimensions; j++) {
@@ -92,6 +93,7 @@ public class CA extends CorpusAnalysisTool {
 		    	if (doc.getMetadata().getTitle().equals(getTarget())) setTargetVector(v);
 			    
 		    	getAnalysisTerms().add(new RawCATerm(doc.getMetadata().getTitle(), doc.getMetadata().getTokensCount(TokenType.lexical), 0.0, v, CategoryType.DOCUMENT, corpus.getDocumentPosition(doc.getId())));
+				i++;
 		    }
 			
 		} else {
