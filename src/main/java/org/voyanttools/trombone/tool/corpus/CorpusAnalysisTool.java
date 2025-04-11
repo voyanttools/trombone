@@ -169,25 +169,29 @@ public abstract class CorpusAnalysisTool extends AbstractCorpusTool implements A
 			numDocs = bins; // bins are the new docs
 			
 			// get the top terms
-			FlexibleParameters params = parameters.clone();
-			params.setParameter("withDistributions", "false");
-			CorpusTerms cts = new CorpusTerms(storage, params);
-			cts.run(corpusMapper);
-			
-			// get the distributions for the top terms in each document
-			Map<String, SortedMap<Integer, int[]>> distributionsMap = new HashMap<String, SortedMap<Integer, int[]>>();
+			String queryString = "";
+			if (docIds.size() > 1) {
+				FlexibleParameters params = parameters.clone();
+				params.setParameter("withDistributions", "false");
+				CorpusTerms cts = new CorpusTerms(storage, params);
+				cts.run(corpusMapper);
+				
+				StringBuilder qsb = new StringBuilder();
+				for (CorpusTerm ct : cts) {
+					qsb.append(ct.getTerm()).append(",");
+				}
+				queryString = qsb.substring(0, qsb.length()-1);
+			}
 			
 			FlexibleParameters docParams = parameters.clone();
 			docParams.setParameter("withDistributions", "true");
 			docParams.setParameter("minRawFreq", 1);//binsPerDoc); // need at least this many occurrences for proper bin distribution
 			docParams.setParameter("sort", "rawFreq");
 			docParams.setParameter("dir", "DESC");
-			StringBuilder qsb = new StringBuilder();
-			for (CorpusTerm ct : cts) {
-				qsb.append(ct.getTerm()).append(",");
-			}
-			String queryString = qsb.substring(0, qsb.length()-1);
 			docParams.setParameter("query", queryString);
+
+			// get the distributions for the top terms in each document
+			Map<String, SortedMap<Integer, int[]>> distributionsMap = new HashMap<String, SortedMap<Integer, int[]>>();
 			
 			for (String docId : docIds) {
 				docParams.setParameter("docId", docId);
