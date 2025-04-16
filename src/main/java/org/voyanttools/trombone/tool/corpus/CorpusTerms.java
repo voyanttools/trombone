@@ -220,8 +220,7 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 			createComparisonCorpusTermMinimals();
 		}
 		if (whiteList.isEmpty()==false) {
-			String[] queries = whiteList.getKeywords().stream()
-				.toArray(String[]::new);
+			String[] queries = whiteList.getKeywords().stream().toArray(String[]::new);
 			runQueries(corpusMapper, stopwords, queries);
 			return;
 		}
@@ -248,11 +247,11 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 			FlexibleQueue<CorpusTerm> queue = new FlexibleQueue<CorpusTerm>(comparator, start+limit);
 			if (parameters.getParameterBooleanValue("inDocumentsCountOnly")) { // no spans required to count per-document frequencies
 				Map<String, Query> queriesMap = getCategoriesAwareQueryMap(corpusMapper, queries);
-				runQueriesInDocumentsCountOnly(corpusMapper, queue, queriesMap);
+				runQueriesInDocumentsCountOnly(corpusMapper, queue, queriesMap, stopwords);
 			}
 			else {
 				Map<String, SpanQuery> queriesMap = getCategoriesAwareSpanQueryMap(corpusMapper, queries);
-				runSpanQueries(corpusMapper, queue, queriesMap);
+				runSpanQueries(corpusMapper, queue, queriesMap, stopwords);
 			}
 			terms.addAll(queue.getOrderedList());
 		} finally {
@@ -262,7 +261,7 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 		}
 	}
 
-	private void runSpanQueries(CorpusMapper corpusMapper, FlexibleQueue<CorpusTerm> queue, Map<String, SpanQuery> queriesMap) throws IOException {
+	private void runSpanQueries(CorpusMapper corpusMapper, FlexibleQueue<CorpusTerm> queue, Map<String, SpanQuery> queriesMap, Keywords stopwords) throws IOException {
 		Map<Term, TermContext> termContexts = new HashMap<Term, TermContext>();
 		boolean needDistributions = withDistributions || corpusTermSort.needDistributions();
 		CorpusTermMinimalsDB corpusTermMinimalsDB = null; // only create it if we need it
@@ -270,6 +269,10 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 		for (Map.Entry<String, SpanQuery> entry : queriesMap.entrySet()) {
 			SpanQuery query = entry.getValue();
 			String queryString = entry.getKey();
+			
+			if (stopwords.isKeyword(queryString)) {
+				continue;
+			}
 
 			boolean corpusTermOffered = false;
 			if (needDistributions) {
@@ -348,13 +351,18 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 		}
 		if (corpusTermMinimalsDB!=null) {corpusTermMinimalsDB.close();}
 	}
-	private void runQueriesInDocumentsCountOnly(CorpusMapper corpusMapper, FlexibleQueue<CorpusTerm> queue, Map<String, Query> queriesMap) throws IOException {
+	private void runQueriesInDocumentsCountOnly(CorpusMapper corpusMapper, FlexibleQueue<CorpusTerm> queue, Map<String, Query> queriesMap, Keywords stopwords) throws IOException {
 		Map<String, CorpusTermMinimalsDB> corpusTermMinimalsDBMap = new HashMap<String, CorpusTermMinimalsDB>();
 //		CorpusTermMinimalsDB corpusTermMinimalsDB = null; // only create it if we need it
 		int totalTokens = corpusMapper.getCorpus().getTokensCount(tokenType);
 		for (Map.Entry<String, Query> entry : queriesMap.entrySet()) {
 			Query query = entry.getValue();
 			String queryString = entry.getKey();
+			
+			if (stopwords.isKeyword(queryString)) {
+				continue;
+			}
+			
 			if (query instanceof TermQuery) {
 				String field = ((TermQuery) query).getTerm().field();
 				if (corpusTermMinimalsDBMap.containsKey(field)==false) {

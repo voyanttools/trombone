@@ -147,6 +147,11 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 		
 		for (Map.Entry<String, SpanQuery> spanQueryEntry : queriesMap.entrySet()) {
 			String queryString = spanQueryEntry.getKey();
+			
+			if (stopwords.isKeyword(queryString)) {
+				continue;
+			}
+			
 			CorpusTermMinimal corpusTermMinimal = corpusTermMinimalsDB.get(queryString);
 			Spans spans = corpusMapper.getFilteredSpans(spanQueryEntry.getValue(), bitset);
 			if (spans != null) {
