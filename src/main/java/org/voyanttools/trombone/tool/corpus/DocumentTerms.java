@@ -79,22 +79,19 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 	private Comparator<DocumentTerm> comparator;
 	
 	@XStreamOmitField
-	boolean withDistributions;
+	private boolean withDistributions;
 	
 	@XStreamOmitField
-	boolean isNeedsPositions;
+	private boolean isNeedsPositions;
 	
 	@XStreamOmitField
-	boolean isNeedsOffsets;
+	private boolean isNeedsOffsets;
 	
 	@XStreamOmitField
-	int distributionBins;
-	
-	@XStreamOmitField
-	int perDocLimit;
+	private int perDocLimit;
 
 	@XStreamOmitField
-	int minRawFreq;
+	private int minRawFreq;
 	
 	@XStreamOmitField
 	private Keywords whiteList;
@@ -108,7 +105,6 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 		documentTermsSort = DocumentTerm.Sort.getForgivingly(parameters);
 		comparator = DocumentTerm.getComparator(documentTermsSort);
 		withDistributions = parameters.getParameterBooleanValue("withDistributions");
-		distributionBins = parameters.getParameterIntValue("bins", 10);
 		isNeedsPositions = withDistributions || parameters.getParameterBooleanValue("withPositions");
 		isNeedsOffsets = parameters.getParameterBooleanValue("withOffsets");
 		perDocLimit = parameters.getParameterIntValue("perDocLimit", Integer.MAX_VALUE);
@@ -317,7 +313,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 			ToolSerializer.endNode(writer);
 			
 			FlexibleParameters parameters = documentTerms.getParameters();
-			String freqsMode = parameters.getParameterValue("withDistributions");			
+			String freqsMode = parameters.getParameterValue("withDistributions");
 			boolean withRawDistributions = freqsMode != null && freqsMode.equals("raw");
 			boolean withRelativeDistributions = freqsMode != null && !withRawDistributions && (freqsMode.equals("relative") || parameters.getParameterBooleanValue("withDistributions"));		
 			int bins = parameters.getParameterIntValue("bins", 10);
