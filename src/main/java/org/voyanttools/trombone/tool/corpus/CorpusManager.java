@@ -186,7 +186,6 @@ public class CorpusManager extends AbstractTool {
 				// prepare other documents
 				RealCorpusCreator realCorpusCreator = new RealCorpusCreator(storage, parameters);
 				realCorpusCreator.run(4); // make sure to create corpus
-				realCorpusCreator.getStoredId();
 				String id = realCorpusCreator.getStoredId();
 				List<String> documentIds = storage.retrieveStrings(id, Storage.Location.object);
 				keepers.addAll(documentIds);
