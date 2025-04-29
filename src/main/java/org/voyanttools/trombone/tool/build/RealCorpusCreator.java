@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.tool.util.AbstractTool;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
@@ -61,13 +62,19 @@ public class RealCorpusCreator extends AbstractTool {
 		// this is used to go from one step to the next in a single pass, without needing to deal with storedId
 		List<StoredDocumentSource> storedDocumentSources = null;
 		
+		String initialStoredId = null;
+		String expandId = null;
+		
+		log("nextCorpusCreatorStep: "+nextCorpusCreatorStep);
+		log("steps: "+steps);
+		
 		if (nextCorpusCreatorStep.equals("store")) {
 			DocumentStorer storer = new DocumentStorer(storage, parameters);
 			storer.run();
 			storedDocumentSources = storer.getStoredDocumentSources();
 			storedId = storer.getStoredId();
-			// TODO (cleanup) original document is stored and never used again after expansion & extraction
-			// also IDs are not linked with the eventually created corpus
+			initialStoredId = storedId;
+			log(step+") storing: "+storedId);
 			nextCorpusCreatorStep = "expand";
 			if (timeout>0 && Calendar.getInstance().getTimeInMillis()-start>timeout) {return;}
 			if (steps>0 && ++step>=steps) {return;}
@@ -79,6 +86,8 @@ public class RealCorpusCreator extends AbstractTool {
 			else {expander.run(storedDocumentSources);}
 			storedDocumentSources = expander.getStoredDocumentSources();
 			storedId = expander.getStoredId();
+			expandId = storedId;
+			log(step+") expanding: "+storedId);
 			nextCorpusCreatorStep = "extract";
 			if (timeout>0 && Calendar.getInstance().getTimeInMillis()-start>timeout) {return;}
 			if (steps>0 && ++step>=steps) {return;}
@@ -90,10 +99,14 @@ public class RealCorpusCreator extends AbstractTool {
 			else {extractor.run(storedDocumentSources);}
 			storedDocumentSources = extractor.getStoredDocumentSources();
 			storedId = extractor.getStoredId();
+			log(step+") extracting: "+storedId);
 			nextCorpusCreatorStep = "index";
 			if (timeout>0 && Calendar.getInstance().getTimeInMillis()-start>timeout) {return;}
 			if (steps>0 && ++step>=steps) {return;}
 		}
+		
+//		cleanup(initialStoredId);
+//		cleanup(expandId);
 		
 		if (nextCorpusCreatorStep.equals("index")) {
 			DocumentIndexer indexer = new DocumentIndexer(storage, parameters);
@@ -101,6 +114,7 @@ public class RealCorpusCreator extends AbstractTool {
 			else {indexer.run(storedDocumentSources);}
 			storedDocumentSources = indexer.getStoredDocumentSources();
 			storedId = indexer.getStoredId();
+			log(step+") indexing: "+storedId);
 			nextCorpusCreatorStep = "corpus";
 			if (timeout>0 && Calendar.getInstance().getTimeInMillis()-start>timeout) {return;}
 			if (steps>0 && ++step>=steps) {return;}
@@ -112,7 +126,26 @@ public class RealCorpusCreator extends AbstractTool {
 			else {builder.run(storedId, storedDocumentSources);}
 //			storedDocumentSources = builder.getStoredDocumentSources();
 			storedId = builder.getStoredId();
+			log(step+") corpus: "+storedId);
 			nextCorpusCreatorStep = "done";
+		}
+	}
+	
+	private void cleanup(String id) {
+		if (id == null) return;
+		try {
+			log("cleaning: "+id);
+			List<String> docIds = storage.retrieveStrings(id, Storage.Location.object);
+			for (String docId : docIds) {
+				log("    removing doc: "+docId);
+				storage.getStoredDocumentSourceStorage().deleteStoredDocumentSource(docId);
+			}
+			if (storage instanceof FileStorage) {
+				log("    removing resource: "+id);
+				((FileStorage)storage).deleteResourceFile(id, Storage.Location.object);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	

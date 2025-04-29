@@ -171,4 +171,9 @@ class MemoryStoredDocumentSourceStorage implements StoredDocumentSourceStorage {
 		storedDocumentSourcesMap.put(id, new StoredDocumentSource(id, metadata));
 	}
 
+	@Override
+	public void deleteStoredDocumentSource(String id) throws IOException {
+		storedDocumentSourcesMap.remove(id);
+	}
+
 }

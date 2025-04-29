@@ -288,6 +288,11 @@ public class FileStorage implements Storage {
 		else {return new File(getObjectStoreDirectory(location),  id);}
 	}
 	
+	public void deleteResourceFile(String id, Location location) {
+		File file = getResourceFile(id, location);
+		file.delete();
+	}
+	
 	public boolean copyResource(File source, String id, Location location) throws IOException {
 		File destination = getResourceFile(id, location);
 		if (destination.exists()) {return false;}

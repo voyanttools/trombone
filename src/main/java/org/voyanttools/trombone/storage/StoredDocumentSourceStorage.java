@@ -160,4 +160,5 @@ public interface StoredDocumentSourceStorage {
 	
 	public void updateStoredDocumentSourceMetadata(String id, DocumentMetadata metadata) throws IOException;
 
+	public void deleteStoredDocumentSource(String id) throws IOException;
 }

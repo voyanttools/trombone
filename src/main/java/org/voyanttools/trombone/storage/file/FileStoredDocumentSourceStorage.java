@@ -256,4 +256,14 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 		storeStoredDocumentSourceMetadata(id, metadata);
 	}
 
+	@Override
+	public void deleteStoredDocumentSource(String id) throws IOException {
+		File directory = getDocumentSourceDirectory(id);
+		if (directory.exists()) {
+			FileUtils.forceDelete(directory);
+		} else {
+			throw new IOException("Directory does not exist for "+id);
+		}
+	}
+
 }
