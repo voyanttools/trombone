@@ -29,13 +29,8 @@ public class CA extends CorpusAnalysisTool {
 	
 	protected CorrespondenceAnalysis ca;
 	
-	private Keywords whitelist;
-	
 	public CA(Storage storage, FlexibleParameters parameters) throws IOException {
 		super(storage, parameters);
-
-		whitelist = new Keywords();
-		whitelist.load(storage, parameters.getParameterValues("whitelist", new String[0]));
 	}
 
 	@Override
@@ -67,7 +62,6 @@ public class CA extends CorpusAnalysisTool {
 		double[] v;
         for (i = 0; i < getAnalysisTerms().size(); i++) {
         	RawCATerm term = getAnalysisTerms().get(i);
-        	if (whitelist.isEmpty()==false && whitelist.isKeyword(term.getTerm())==false) {continue;}
 	    	
 	    	v = new double[dimensions];
 	    	for (j = 0; j < dimensions; j++) {

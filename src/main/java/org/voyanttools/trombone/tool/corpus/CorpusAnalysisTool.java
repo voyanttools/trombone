@@ -17,7 +17,6 @@ import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.model.CorpusTerm;
 import org.voyanttools.trombone.model.DocumentTerm;
-import org.voyanttools.trombone.model.RawAnalysisTerm;
 import org.voyanttools.trombone.model.RawCATerm;
 import org.voyanttools.trombone.model.RawPCATerm;
 import org.voyanttools.trombone.model.TokenType;
