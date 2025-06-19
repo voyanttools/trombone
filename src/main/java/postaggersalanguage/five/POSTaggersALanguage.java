@@ -49,19 +49,18 @@ public class POSTaggersALanguage {
 
     public POSTaggersALanguage(String lang) throws IOException {
     	this.lang = lang;
-    	String file = this.getClass().getResource("").getFile();
-        nounDic = Util.loadDictionary(file + "//dictionaries//" + lang + "//nounDic.txt");
-        adjDic = Util.loadDictionary(file + "//dictionaries//" + lang + "//adjDic.txt");
-        advDic = Util.loadDictionary(file + "//dictionaries//" + lang + "//advDic.txt");
-        verbDic = Util.loadDictionary(file + "//dictionaries//" + lang + "//verbDic.txt");
-        detDic = Util.loadDictionary(file + "//dictionaries//" + lang + "//detDic.txt");
-        pronDic = Util.loadDictionary(file + "//dictionaries//" + lang + "//pronounDic.txt");
-        posMap = Util.getFileContentAsMap(file + "/universal-pos-tags/" + lang + "POSMapping.txt", "######", true);
+        nounDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/nounDic.txt");
+        adjDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/adjDic.txt");
+        advDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/advDic.txt");
+        verbDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/verbDic.txt");
+        detDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/detDic.txt");
+        pronDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/pronounDic.txt");
+        posMap = Util.getFileContentAsMap("/postaggersalanguage/five/universal-pos-tags/" + lang + "POSMapping.txt", "######", true);
 	}
 
-    public Span[] tokenizePos(String aSentence, String aResourceFolder) throws InvalidFormatException, IOException {
+    public Span[] tokenizePos(String aSentence) throws InvalidFormatException, IOException {
         if (itsTokenizerModel == null) {
-            InputStream is = new FileInputStream(aResourceFolder + "/tokenizerModels/" + lang + "-token.bin");
+            InputStream is = Util.class.getResourceAsStream("/postaggersalanguage/five/tokenizerModels/" + lang + "-token.bin");
             itsTokenizerModel = new TokenizerModel(is);
             is.close();
         }
@@ -108,7 +107,7 @@ public class POSTaggersALanguage {
 
     public Span[] sentenceDetectPos(String aText) throws InvalidFormatException, IOException {
     	if (itsSentenceModel == null) {
-            InputStream is = new FileInputStream(this.getClass().getResource("").getFile() + "/setenceDetectionModels/" + lang + "-sent.bin");
+            InputStream is = Util.class.getResourceAsStream("/postaggersalanguage/five/setenceDetectionModels/" + lang + "-sent.bin");
             itsSentenceModel = new SentenceModel(is);
             is.close();
         }
@@ -118,11 +117,12 @@ public class POSTaggersALanguage {
         return sentences;
     }
 
-    public String[] posTag(String aSentence[], String aResourceFolder) {
+    public String[] posTag(String aSentence[]) throws IOException {
         String posTaggedVersion[] = null;
         if (itsPOSModel == null) {
-            itsPOSModel = new POSModelLoader()
-                    .load(new File(this.getClass().getResource("").getFile() + "/posModels/" + lang + "-pos-maxent.bin"));
+        	InputStream is = Util.class.getResourceAsStream("/postaggersalanguage/five/posModels/" + lang + "-pos-maxent.bin");
+            itsPOSModel = new POSModel(is);
+            is.close();
         }
         //PerformanceMonitor perfMon = new PerformanceMonitor(System.err, "sent");
         POSTaggerME tagger = new POSTaggerME(itsPOSModel);
@@ -132,16 +132,14 @@ public class POSTaggersALanguage {
     }
     
     public PosLemmas getLemmatized(String text) throws IOException {
-    	
-    	String file = this.getClass().getResource("").getFile();
     	PosLemmas posLemmas = new PosLemmas(text);
     	Span[] sentences = sentenceDetectPos(text);
     	for (Span sentence : sentences) {
     		int sentenceStart = sentence.getStart();
     		String sentenceString = text.substring(sentenceStart, sentence.getEnd());
-    		Span[] tokens = tokenizePos(sentenceString, file);
+    		Span[] tokens = tokenizePos(sentenceString);
     		String[] strings = Span.spansToStrings(tokens, sentenceString);
-    		String[] pos = posTag(strings, file);
+    		String[] pos = posTag(strings);
     		for (int i=0; i<tokens.length; i++) {
                 String token = strings[i];
                 String lemma = null;
@@ -168,10 +166,10 @@ public class POSTaggersALanguage {
                         }
                         if (!"nl".equalsIgnoreCase(lang) && lemma == null) {
                             try {
-                                lemma = Lemmatizer.getLemma(file, token, lang, generalType);
+                                lemma = Lemmatizer.getLemma(token, lang, generalType);
                             } catch (Exception e) {
                                 try {
-                                    lemma = Lemmatizer.getLemma(file, token.toLowerCase(), lang, generalType);
+                                    lemma = Lemmatizer.getLemma(token.toLowerCase(), lang, generalType);
                                 } catch (Exception e2) {
                                 }
                             }

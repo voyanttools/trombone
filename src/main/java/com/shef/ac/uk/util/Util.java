@@ -17,6 +17,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,6 +29,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * @author Ahmet Aker
@@ -151,44 +154,44 @@ public class Util {
 
     public static Map<String, String> getFileContentAsMap(String aFileName, String aDivider, boolean inLowerCased) throws IOException {
         Map<String, String> map = new HashMap<String, String>();
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(aFileName)), "UTF-8"));
-        String str;
-        while ((str = in.readLine()) != null) {
-            if (!"".equals(str.trim())) {
-                String values[] = str.split(aDivider);
-                if (values.length == 2) {
-                    if (inLowerCased) {
-                    map.put(values[0].trim().toLowerCase(), values[1].trim());
-                        
-                    } else {
-                    map.put(values[0].trim(), values[1].trim());
-                        
+        try (InputStream is = Util.class.getResourceAsStream(aFileName)) {
+        	List<String> lines = IOUtils.readLines(is, StandardCharsets.UTF_8);
+        	for (String str : lines) {
+        		if (!"".equals(str.trim())) {
+                    String values[] = str.split(aDivider);
+                    if (values.length == 2) {
+                        if (inLowerCased) {
+                        map.put(values[0].trim().toLowerCase(), values[1].trim());
+                            
+                        } else {
+                        map.put(values[0].trim(), values[1].trim());
+                            
+                        }
                     }
                 }
-            }
+        	}
         }
-        in.close();
         return map;
     }
 
     public static Map<String, String> loadDictionary(String aFileName) throws IOException {
         Map<String, String> map = new HashMap<String, String>();
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(aFileName)), "UTF-8"));
-        String str;
-        while ((str = in.readLine()) != null) {
-            if (!"".equals(str.trim())) {
-                String values[] = str.split("===");
-                if (values.length == 2) {
-                    String vals[] = values[1].split(";");
-                    for (int i = 0; i < vals.length; i++) {
-                        String val = vals[i];
-                        map.put(val.toLowerCase(), values[0].trim());
+        try (InputStream is = Util.class.getResourceAsStream(aFileName)) {
+        	List<String> lines = IOUtils.readLines(is, StandardCharsets.UTF_8);
+        	for (String str : lines) {
+        		if (!"".equals(str.trim())) {
+                    String values[] = str.split("===");
+                    if (values.length == 2) {
+                        String vals[] = values[1].split(";");
+                        for (int i = 0; i < vals.length; i++) {
+                            String val = vals[i];
+                            map.put(val.toLowerCase(), values[0].trim());
 
+                        }
                     }
                 }
-            }
+        	}
         }
-        in.close();
         return map;
     }
 

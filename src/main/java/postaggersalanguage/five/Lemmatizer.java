@@ -39,10 +39,10 @@ public class Lemmatizer {
         P, N, R, D, C, U
     };
 
-    public static String getLemma(String aResourceFolder, String aWord, String aLang, String aPOSType) throws IOException, NoTokenizationException, FormatException {
+    public static String getLemma(String aWord, String aLang, String aPOSType) throws IOException, NoTokenizationException, FormatException {
         if (transducer == null) {
             FileInputStream transducerfile = null;
-            transducerfile = new FileInputStream(aResourceFolder + "/lemmaModels/" + aLang + ".hfst.ol");
+            transducerfile = new FileInputStream("/postaggersalanguage/five/lemmaModels/" + aLang + ".hfst.ol");
             TransducerHeader h = new TransducerHeader(transducerfile);
             DataInputStream charstream = new DataInputStream(transducerfile);
             TransducerAlphabet a = new TransducerAlphabet(charstream, h.getSymbolCount());
@@ -240,8 +240,7 @@ public class Lemmatizer {
     }
 
     public static void main(String args[]) throws IOException, NoTokenizationException, FormatException {
-    	URL url = Lemmatizer.class.getResource("");
-        String lemma = Lemmatizer.getLemma(url.getFile(), "hochenergetischen", "de", "adj");
+        String lemma = Lemmatizer.getLemma("hochenergetischen", "de", "adj");
         //lemma = "M" + lemma.substring(1);
         System.out.println(lemma);
     }
