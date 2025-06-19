@@ -112,6 +112,7 @@ public class DocumentsFinder extends AbstractTerms {
 			}
 		}
 		if (createNewCorpus) {
+			// TODO this is broken, throws: org.apache.lucene.index.IndexNotFoundException: no segments* file found in NIOFSDirectory
 			Set<String> ids = new HashSet<String>();
 			for(String[] strings : queryDocumentidsMap.values()) {
 				ids.addAll(Arrays.asList(strings));
