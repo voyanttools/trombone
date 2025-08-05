@@ -408,11 +408,7 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 					int freq = postingsEnum.freq();
 					for (int i=0, len = freq; i<len; i++) {
 						int pos = postingsEnum.nextPosition();
-						if (freq > 1) {
-							simplifiedTermInfoArray[pos] = new SimplifiedTermInfo(termString, pos, 1, freq, postingsEnum.startOffset(), postingsEnum.endOffset());
-						} else {
-							simplifiedTermInfoArray[pos] = new SimplifiedTermInfo(""); // empty string if not repeating	
-						}
+						simplifiedTermInfoArray[pos] = new SimplifiedTermInfo(termString, pos, 1, freq, postingsEnum.startOffset(), postingsEnum.endOffset());
 					}
 				}
 			}
