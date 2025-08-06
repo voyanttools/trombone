@@ -54,6 +54,8 @@ public class PCA extends AbstractTool {
 		int numRows = -1;
 		int numCols = -1;
 		
+		inputString = inputString.replaceAll("\\s+", "");
+		
 		String[] rows = inputString.split("],");
 		if (rows.length > 0) {
 			numRows = rows.length;
@@ -68,7 +70,7 @@ public class PCA extends AbstractTool {
 			throw new IOException("No rows found!");
 		}
 		
-		try (Scanner sc = new Scanner(inputString).useDelimiter("\\[+|\\],\\s*\\[|\\]+|,")) {
+		try (Scanner sc = new Scanner(inputString).useDelimiter("\\[+|\\],\\[|\\]+|,")) {
 			double[][] matrix = new double[numRows][numCols];
 			for (int r = 0; r < numRows; r++) {
 				for (int c = 0; c < numCols; c++) {
