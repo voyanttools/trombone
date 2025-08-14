@@ -2,7 +2,6 @@ package org.voyanttools.trombone.tool.analysis;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Scanner;
 
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.tool.util.AbstractTool;
@@ -17,23 +16,26 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-@XStreamAlias("pcaAnalysis")
-@XStreamConverter(PCA.PCAConverter.class)
+@XStreamAlias("tsneAnalysis")
+@XStreamConverter(TSNE.TSNEConverter.class)
 /**
- * A wrapper to facilitate sending vector inputs directly to PrincipalComponentsAnalysis
+ * A wrapper to facilitate sending vector inputs directly to TSNEAnalysis
  * @author Andrew MacDonald
  *
  */
-public class PCA extends AbstractTool {
+public class TSNE extends AbstractTool {
 
-	private PrincipalComponentsAnalysis pca;
+	private TSNEAnalysis tsner;
 	
 	private String vectors;
+    private int iterations = 2000;
+	private float perplexity;
+	private float theta;
 	private int dimensions;
 	
 	private double[][] result;
 	
-	public PCA(Storage storage, FlexibleParameters parameters) {
+	public TSNE(Storage storage, FlexibleParameters parameters) {
 		super(storage, parameters);
 		
 		// the input vectors, a 2 dimensional array of floats/doubles
@@ -49,19 +51,23 @@ public class PCA extends AbstractTool {
 			throw new IOException("Too few vectors submitted. Analysis requires at least 5.");
 		}
 		
-		pca = new PrincipalComponentsAnalysis(input);
-		pca.runAnalysis();
-		result = pca.getResult(dimensions);
+		tsner = new TSNEAnalysis(input);
+		tsner.setIterations(parameters.getParameterIntValue("iterations"));
+		tsner.setPerplexity(parameters.getParameterFloatValue("perplexity"));
+		tsner.setTheta(parameters.getParameterFloatValue("theta"));
+		tsner.setDimensions(parameters.getParameterIntValue("dimensions", 2));
+		tsner.runAnalysis();
+		result = tsner.getResult();
 	}
 
-	public static class PCAConverter implements Converter {
+	public static class TSNEConverter implements Converter {
 
 		/* (non-Javadoc)
 		 * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
 		 */
 		@Override
 		public boolean canConvert(Class type) {
-			return PCA.class.isAssignableFrom(type);
+			return TSNE.class.isAssignableFrom(type);
 		}
 
 		/* (non-Javadoc)
@@ -70,8 +76,8 @@ public class PCA extends AbstractTool {
 		@Override
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			
-			PCA pca = (PCA) source;
-			final double[][] result = pca.getResult();
+			TSNE tsne = (TSNE) source;
+			final double[][] result = tsne.getResult();
 			
 			ToolSerializer.startNode(writer, "vectors", List.class);
 			context.convertAnother(result);

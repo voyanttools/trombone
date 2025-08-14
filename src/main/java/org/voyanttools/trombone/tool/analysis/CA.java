@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.voyanttools.trombone.model.RawCATerm;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.tool.util.AbstractTool;
 import org.voyanttools.trombone.tool.util.ToolSerializer;
@@ -17,28 +19,28 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-@XStreamAlias("pcaAnalysis")
-@XStreamConverter(PCA.PCAConverter.class)
+@XStreamAlias("caAnalysis")
+@XStreamConverter(CA.CAConverter.class)
 /**
- * A wrapper to facilitate sending vector inputs directly to PrincipalComponentsAnalysis
+ * A wrapper to facilitate sending vector inputs directly to CorrespondenceAnalysis
  * @author Andrew MacDonald
  *
  */
-public class PCA extends AbstractTool {
+public class CA extends AbstractTool {
 
-	private PrincipalComponentsAnalysis pca;
+	private CorrespondenceAnalysis ca;
 	
 	private String vectors;
 	private int dimensions;
-	
+
 	private double[][] result;
 	
-	public PCA(Storage storage, FlexibleParameters parameters) {
+	public CA(Storage storage, FlexibleParameters parameters) {
 		super(storage, parameters);
 		
 		// the input vectors, a 2 dimensional array of floats/doubles
 		vectors = parameters.getParameterValue("vectors");
-		// the number of dimensions to reduce to
+
 		dimensions = parameters.getParameterIntValue("dimensions", 2);
 	}
 
@@ -49,19 +51,25 @@ public class PCA extends AbstractTool {
 			throw new IOException("Too few vectors submitted. Analysis requires at least 5.");
 		}
 		
-		pca = new PrincipalComponentsAnalysis(input);
-		pca.runAnalysis();
-		result = pca.getResult(dimensions);
+		ca = new CorrespondenceAnalysis(input);
+		ca.runAnalysis();
+		result = ca.getRowProjections();
+		
+		if (result.length > 0 && result[0].length > dimensions) {
+			for (int i = 0; i < result.length; i++) {
+				result[i] = ArrayUtils.subarray(result[i], 0, dimensions);
+			}
+		}
 	}
 
-	public static class PCAConverter implements Converter {
+	public static class CAConverter implements Converter {
 
 		/* (non-Javadoc)
 		 * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
 		 */
 		@Override
 		public boolean canConvert(Class type) {
-			return PCA.class.isAssignableFrom(type);
+			return CA.class.isAssignableFrom(type);
 		}
 
 		/* (non-Javadoc)
@@ -70,8 +78,8 @@ public class PCA extends AbstractTool {
 		@Override
 		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 			
-			PCA pca = (PCA) source;
-			final double[][] result = pca.getResult();
+			CA ca = (CA) source;
+			final double[][] result = ca.getResult();
 			
 			ToolSerializer.startNode(writer, "vectors", List.class);
 			context.convertAnother(result);
