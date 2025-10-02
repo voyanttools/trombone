@@ -95,9 +95,9 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 	@Override
 	public void run(CorpusMapper corpusMapper) throws IOException {
 		stopwords = getStopwords(corpusMapper.getCorpus());
-		if (parameters.containsKey("whitelist")) {
+		if (parameters.containsKey("whiteList")) {
 			whitelist = new Keywords();
-			whitelist.load(storage, parameters.getParameterValues("whitelist"));
+			whitelist.load(storage, parameters.getParameterValues("whiteList"));
 		}
 		boolean noOthers = parameters.getParameterBooleanValue("noOthers");
 		total = Integer.MAX_VALUE;

@@ -31,7 +31,7 @@ public class CA extends TableAnalysisTool {
 		super(storage, parameters);
 		
 		whitelist = new Keywords();
-		whitelist.load(storage, parameters.getParameterValues("whitelist", new String[0]));
+		whitelist.load(storage, parameters.getParameterValues("whiteList", new String[0]));
 	}
 
 	@Override
