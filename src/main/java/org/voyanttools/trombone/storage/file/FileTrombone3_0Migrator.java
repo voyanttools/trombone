@@ -18,6 +18,7 @@ import org.voyanttools.trombone.model.DocumentMetadata;
 import org.voyanttools.trombone.model.DocumentMetadata.ParentType;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.storage.Storage.Location;
+import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
@@ -128,7 +129,7 @@ class FileTrombone3_0Migrator extends AbstractFileMigrator {
 	}
 
 	private FlexibleParameters getOldFlexibleParameters(File file) {
-		final XStream xstream = FlexibleParameters.secureXStream(new XStream());
+		final XStream xstream = ToolSerializer.getXMLXStream();
 		xstream.allowTypes(new Class[] { ca.hermeneuti.trombone.util.FlexibleParameters.class });
 		ca.hermeneuti.trombone.util.FlexibleParameters oldFlexibleParameters = (ca.hermeneuti.trombone.util.FlexibleParameters) xstream.fromXML(file);
 		FlexibleParameters params = new FlexibleParameters();

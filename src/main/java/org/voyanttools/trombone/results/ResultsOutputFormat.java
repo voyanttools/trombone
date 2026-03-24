@@ -1,11 +1,7 @@
 package org.voyanttools.trombone.results;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
-import com.thoughtworks.xstream.io.json.JsonWriter;
-
-import java.io.Writer;
+import org.voyanttools.trombone.tool.util.ToolSerializer;
 
 /**
  * @author Cyril Briquet, Stéfan Sinclair
@@ -15,30 +11,19 @@ public enum ResultsOutputFormat {
 	none {
 		@Override
 		public XStream getXStream() {
-
 			return null;
-		
 		}
 
 		@Override
 		public String getContentType() {
-
 			return null;
-
 		}
 	},
 	
 	json {
 		@Override
 		public XStream getXStream() {
-
-			return new XStream(new JsonHierarchicalStreamDriver() {
-				@Override
-				public HierarchicalStreamWriter createWriter(Writer writer) {
-					return new JsonWriter(writer, JsonWriter.DROP_ROOT_MODE);
-				}
-			});
-			
+			return ToolSerializer.getJSONXStream();
 		}
 
 		@Override
@@ -52,68 +37,52 @@ public enum ResultsOutputFormat {
 	html {
 		@Override
 		public XStream getXStream() {
-
 			throw new UnsupportedOperationException();
-			
 		}
 
 		@Override
 		public String getContentType() {
-
 			return "text/html;charset=UTF-8";
-
 		}
 	},
 
 	text {
 		@Override
 		public XStream getXStream() {
-
 			throw new UnsupportedOperationException();
-			
 		}
 
 		@Override
 		public String getContentType() {
-
 			return "text/plain;charset=UTF-8";
-
 		}
 	},
 
 	xml {
 		@Override
 		public XStream getXStream() {
-
-			return new XStream();
-			
+			return ToolSerializer.getXMLXStream();
 		}
 
 		@Override
 		public String getContentType() {
-
 			return "application/xml;charset=UTF-8";
-
 		}
 	},
 	
 	zip {
 		@Override
 		public XStream getXStream() {
-
-			return new XStream();
-			
+			return ToolSerializer.getXMLXStream(); // TODO verify
 		}
 
 		@Override
 		public String getContentType() {
 			return "application/zip";
-
 		}
 	};
 
 	public static ResultsOutputFormat getResultsOutputFormat(String outputFormat) {
-		
 		if (outputFormat == null) {
 			throw new NullPointerException("illegal output format");
 		}
@@ -121,7 +90,6 @@ public enum ResultsOutputFormat {
 		outputFormat = outputFormat.trim().toLowerCase();
 		
 		return ResultsOutputFormat.valueOf(outputFormat);
-		
 	}
 
 	public abstract XStream getXStream();
