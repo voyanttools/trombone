@@ -297,6 +297,8 @@ public class TopicModeling extends AbstractCorpusTool {
 	}
 
 	private ParallelTopicModel getModelFromInstances(InstanceList instances) throws IOException {
+		ParallelTopicModel.logger.setUseParentHandlers(debug);
+
 		// Note that the first parameter is passed as the sum over topics, while
 		// the second is the parameter for a single dimension of the Dirichlet prior.
 		ParallelTopicModel model = new ParallelTopicModel(numTopics, alphaSum, beta);
