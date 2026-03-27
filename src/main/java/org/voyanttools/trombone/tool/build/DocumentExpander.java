@@ -42,7 +42,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  *
  */
 @XStreamAlias("expandedStoredDocuments")
-class DocumentExpander extends AbstractTool {
+public class DocumentExpander extends AbstractTool {
 
 	private String storedId = null;
 	
