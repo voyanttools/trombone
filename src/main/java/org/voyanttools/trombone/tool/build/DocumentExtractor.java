@@ -27,7 +27,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.lucene.search.Sort;
 import org.voyanttools.trombone.input.extract.StoredDocumentSourceExtractor;
 import org.voyanttools.trombone.model.DocumentMetadata;
 import org.voyanttools.trombone.model.StoredDocumentSource;
@@ -44,7 +43,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  *
  */
 @XStreamAlias("extractedStoredDocuments")
-class DocumentExtractor extends AbstractTool {
+public class DocumentExtractor extends AbstractTool {
 
 	private String storedId = null;
 	
