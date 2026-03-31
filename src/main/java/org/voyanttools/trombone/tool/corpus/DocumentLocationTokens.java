@@ -16,7 +16,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.DocumentLocationToken;
 import org.voyanttools.trombone.model.Keywords;
-import org.voyanttools.trombone.nlp.CrimGeonameAnnotator;
 import org.voyanttools.trombone.nlp.GeonamesAnnotator;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.storage.Storage.Location;
@@ -128,15 +127,7 @@ public class DocumentLocationTokens extends AbstractTerms implements Progressabl
 			
 			progress = Progress.retrieve(storage, id);
 			if (progress.isNew()) {
-				Source source = Source.valueOfForgivingly(parameters.getParameterValue("source", ""));
-				switch(source) {
-					case CRIM:
-						getCrimLocationTokens(corpusMapper, progress);
-						break;
-					default:
-						getGeonamesLocationTokens(corpusMapper, progress);
-						break;
-				}
+				getGeonamesLocationTokens(corpusMapper, progress);
 			}
 			return null;
 		}
@@ -150,41 +141,6 @@ public class DocumentLocationTokens extends AbstractTerms implements Progressabl
 		StringBuilder sb = new StringBuilder();
 		sb.append("preferredCoordinates").append(parameters.getParameterValue("preferredCoordinates", ""));
 		return "locationTokens-"+getVersion()+"-"+source.name()+DigestUtils.md5Hex(sb.toString());
-	}
-	
-	private void getCrimLocationTokens(CorpusMapper corpusMapper, Progress progress) throws IOException {
-		String configFilename = System.getProperty("ca.crim.nlp.configfile","");
-		if (configFilename.isEmpty()) {
-			throw new IllegalStateException("No configuration file exists for CRIM NLP.");
-		}
-		File configFile = new File(configFilename);
-		if (configFile.exists()==false) {
-			throw new IllegalArgumentException("Configuration file not found for CRIM NLP.");
-		}
-		CrimGeonameAnnotator annotator = new CrimGeonameAnnotator(configFile, "en");
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
-		executorService.execute(new Runnable() {
-			@Override
-			public void run() {
-				List<DocumentLocationToken> tokens;
-				try {
-					// TODO, it might be better to do this one document at a time
-					progress.update(.5f, Status.RUNNING, "geolocationRunning", "Geolocation is running.");
-					tokens = annotator.getDocumentLocationTokens(corpusMapper, parameters, progress);
-					storage.store(tokens, progress.getId(), Location.cache); // corpus
-					cacheForDocuments(corpusMapper, tokens); // docs
-					progress.update(1, Status.FINISHED, "geolocationFinished", "Geolocation has completed.");
-				} catch (Exception e) {
-					try {
-						progress.update(1, Status.ABORTED, "geolocationException", "Geolocation has failed. "+e.getMessage());
-					} catch (IOException e1) {
-					}
-					throw new RuntimeException(e);
-				} finally {
-					executorService.shutdown();
-				}
-			}
-		});
 	}
 	
 	private void getGeonamesLocationTokens(CorpusMapper corpusMapper, Progress progress) {
