@@ -35,8 +35,8 @@ import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
 
-import com.google.gson.Gson;
-import com.google.gson.internal.StringMap;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 
@@ -92,10 +92,8 @@ public class DocumentExpanderTest {
 		xstream = new XStream(new JsonHierarchicalStreamDriver());
 		xstream.autodetectAnnotations(true);
 		String json = xstream.toXML(expander);
-		Gson gson = new Gson();
-		StringMap<StringMap> obj = gson.fromJson(json, StringMap.class);
-		StringMap<String> sd = obj.get("expandedStoredDocuments");
-		String idString = (String) sd.get("storedId");
+		JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+		String idString = obj.get("expandedStoredDocuments").getAsJsonObject().get("storedId").getAsString();
 		assertEquals(id, idString);
 	}
 

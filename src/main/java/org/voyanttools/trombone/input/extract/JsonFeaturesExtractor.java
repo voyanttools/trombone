@@ -9,16 +9,16 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.model.DocumentMetadata;
 import org.voyanttools.trombone.model.StoredDocumentSource;
@@ -72,36 +72,31 @@ public class JsonFeaturesExtractor implements Extractor {
 			String jsonString = IOUtils.toString(is, this.metadata.getEncoding());
 			
 			// parse doc
-			JSONParser parser = new JSONParser();
-			Object obj;
+			JsonObject jsonObject;
 			try {
-				obj = parser.parse(jsonString);
-			} catch (ParseException e) {
+				jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+			} catch (JsonSyntaxException | IllegalStateException e) {
 				throw new IOException("Unable to parse JSON features "+storedDocumentSource.getId()+" ("+storedDocumentSource.getMetadata().getLocation()+")");
 			}
 			
-			JSONObject jsonObject = (JSONObject) obj;
 	        List<String> words = new ArrayList<String>();
 
-	        
-	        JSONObject features = (JSONObject) jsonObject.get("features");
-	        if (features!=null) {
+			JsonObject features = jsonObject.getAsJsonObject("features");
+			if (features!=null) {
 	        		        
-		        JSONArray pages = (JSONArray) features.get("pages");
-		        Iterator<JSONObject> iterator = pages.iterator();
-		        int j=0;
-		        while (iterator.hasNext()) {
-		        	JSONObject page = iterator.next();
-		        	JSONObject body = (JSONObject) page.get("body");
-		        	if (body==null) {continue;}
-		        	JSONObject tokenPosCount = (JSONObject) body.get("tokenPosCount");
+				JsonArray pages = features.getAsJsonArray("pages");
+				for (JsonElement pageEl : pages) {
+					JsonObject page = pageEl.getAsJsonObject();
+					JsonObject body = page.getAsJsonObject("body");
+					if (body==null) {continue;}
+					JsonObject tokenPosCount = body.getAsJsonObject("tokenPosCount");
 		        	Set<String> terms = tokenPosCount.keySet();
 		        	for (String term : terms) {
-		        		if (!Character.isLetter(term.charAt(0))) {continue;} // skip if not starting with alphabetic
-		        		JSONObject posCounts = (JSONObject) tokenPosCount.get(term);
-		        		for (String pos : (Set<String>) posCounts.keySet()) {
-		        			int count = ((Long) posCounts.get(pos)).intValue();
-		        			for (int i=0; i<count; i++) {
+						if (term.isEmpty() || !Character.isLetter(term.charAt(0))) {continue;} // skip if not starting with alphabetic
+						JsonObject posCounts = tokenPosCount.getAsJsonObject(term);
+						for (String pos : posCounts.keySet()) {
+							int count = posCounts.get(pos).getAsInt();
+							for (int i=0; i<count; i++) {
 		        				words.add(term);
 		        			}
 		        		}
@@ -109,24 +104,23 @@ public class JsonFeaturesExtractor implements Extractor {
 		        }
 	        }
 	        
-			JSONObject metadataObj = (JSONObject) jsonObject.get("metadata");
+			JsonObject metadataObj = jsonObject.getAsJsonObject("metadata");
 			
 			if (metadataObj!=null) {
 				
-				String title = (String) metadataObj.get("name");
+				String title = metadataObj.has("name") && !metadataObj.get("name").isJsonNull() ? metadataObj.get("name").getAsString() : null;
 				if (title==null) {
-					title = (String) metadataObj.get("title");
+					title = metadataObj.has("title") && !metadataObj.get("title").isJsonNull() ? metadataObj.get("title").getAsString() : null;
 				}
 				if (title!=null) {
 					metadata.setTitle(title);
 				}
-
 				
 				// loop array
 				Set<String> authors = new HashSet<String>();
-				Object contributor = metadataObj.get("contributor");
-				if (contributor!=null) {
-					setNamesFromContributor(metadataObj.get("contributor"), authors);
+				JsonElement contributor = metadataObj.get("contributor");
+				if (contributor!=null && !contributor.isJsonNull()) {
+					setNamesFromContributor(contributor, authors);
 				}
 				if (authors.isEmpty()==false) {
 					metadata.setAuthors(authors.toArray(new String[0]));
@@ -137,30 +131,32 @@ public class JsonFeaturesExtractor implements Extractor {
 	    	String string = String.join(" ", words);
 	    	isProcessed = true;
 	    	
-	    	
 	    	return new ByteArrayInputStream(string.getBytes(metadata.getEncoding()));
 	    }
 		
-		private void setNamesFromContributor(Object object, Set<String> names) {
-			if (object instanceof JSONObject) {
-				setNamesFromName(((JSONObject) object).get("name"), names);
-			} else if (object instanceof JSONArray) {
-				Iterator<Object> iterator = ((JSONArray) object).iterator();
-				while(iterator.hasNext()) {
-					setNamesFromContributor(iterator.next(), names);
+		private void setNamesFromContributor(JsonElement object, Set<String> names) {
+			if (object.isJsonObject()) {
+				setNamesFromName(object.getAsJsonObject().get("name"), names);
+			} else if (object.isJsonArray()) {
+				for (JsonElement el : object.getAsJsonArray()) {
+					setNamesFromContributor(el, names);
 				}
 			} else {
 				throw new IllegalStateException("contributor should be an array or object");
 			}
 		}
 		
-		private void setNamesFromName(Object object, Set<String> names) {
-			if (object instanceof String && ((String) object).trim().isEmpty()==false) {
-				names.add((String) object); 
-			} else if (object instanceof JSONArray) {
-				Iterator<Object> iterator = ((JSONArray) object).iterator();
-				while (iterator.hasNext()) {
-					setNamesFromName(iterator.next(), names);
+		private void setNamesFromName(JsonElement object, Set<String> names) {
+			if (object == null || object.isJsonNull())
+				return;
+			if (object.isJsonPrimitive() && object.getAsJsonPrimitive().isString()) {
+				String str = object.getAsString();
+				if (str.trim().isEmpty() == false) {
+					names.add(str);
+				}
+			} else if (object.isJsonArray()) {
+				for (JsonElement el : object.getAsJsonArray()) {
+					setNamesFromName(el, names);
 				}
 			}
 		}

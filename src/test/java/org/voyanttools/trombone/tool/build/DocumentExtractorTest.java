@@ -13,13 +13,11 @@ import org.apache.tika.io.IOUtils;
 import org.junit.Test;
 import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.Storage;
-import org.voyanttools.trombone.tool.build.DocumentExtractor;
-import org.voyanttools.trombone.tool.build.DocumentStorer;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
 
-import com.google.gson.Gson;
-import com.google.gson.internal.StringMap;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 
@@ -81,10 +79,9 @@ public class DocumentExtractorTest {
 		xstream = new XStream(new JsonHierarchicalStreamDriver());
 		xstream.autodetectAnnotations(true);
 		String json = xstream.toXML(extractor);
-		Gson gson = new Gson();
-		StringMap<StringMap> obj = gson.fromJson(json, StringMap.class);
-		StringMap<String> sd = obj.get("extractedStoredDocuments");
-		String idString = (String) sd.get("storedId");
-		assertEquals(id, idString);	}
+		JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+		String idString = obj.get("extractedStoredDocuments").getAsJsonObject().get("storedId").getAsString();
+		assertEquals(id, idString);
+	}
 
 }

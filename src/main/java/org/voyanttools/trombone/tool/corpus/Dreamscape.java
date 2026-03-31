@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.json.JSONObject;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.lucene.LuceneHelper;
 import org.voyanttools.trombone.model.Confidence;
@@ -34,6 +33,8 @@ import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.GeonamesIterator;
 import org.voyanttools.trombone.util.Stripper;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.converters.Converter;
@@ -91,9 +92,9 @@ public class Dreamscape extends AbstractCorpusTool implements Progressable {
 			Map<String, String> overrides = new HashMap<String, String>();
 			if (parameters.containsKey("overridesId")) {
 				String overridesString = storage.retrieveString(parameters.getParameterValue("overridesId"), Storage.Location.object);
-				JSONObject all = new JSONObject(overridesString);
+				JsonObject all = JsonParser.parseString(overridesString).getAsJsonObject();
 				for (String key : all.keySet()) {
-					String val =  all.getString(key);
+					String val =  all.get(key).getAsString();
 					overrides.put(key,val);
 					if (val.isEmpty()==false) {
 						locationIdToLocationsMap.put(val, null);
