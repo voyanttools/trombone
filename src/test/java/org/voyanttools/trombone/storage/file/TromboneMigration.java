@@ -24,7 +24,7 @@ import org.voyanttools.trombone.tool.build.RealCorpusCreator;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
 
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
 /**
@@ -46,7 +46,9 @@ public class TromboneMigration {
 		File oldStorageDirectory = dummyMigrator.getSourceTromboneDirectory();
 		oldStorageDirectory.mkdir();
 		File file = TestHelper.getResource("migration/trombone3_0.zip");
-		new ZipFile(file).extractAll(oldStorageDirectory.getPath());
+		try (ZipFile zipFileObj = new ZipFile(file)) {
+			zipFileObj.extractAll(oldStorageDirectory.getPath());
+		}
 
 		FileMigrator migrator;
 		String id;
@@ -94,7 +96,9 @@ public class TromboneMigration {
 		File oldStorageDirectory = dummyMigrator.getSourceTromboneDirectory();
 		oldStorageDirectory.mkdir();
 		File file = TestHelper.getResource("migration/trombone4_0.zip");
-		new ZipFile(file).extractAll(oldStorageDirectory.getPath());
+		try (ZipFile zipFileObj = new ZipFile(file)) {
+			zipFileObj.extractAll(oldStorageDirectory.getPath());
+		}
 
 		FileMigrator migrator;
 		String id;
@@ -138,7 +142,9 @@ public class TromboneMigration {
 		File oldStorageDirectory = dummyMigrator.getSourceTromboneDirectory();
 		oldStorageDirectory.mkdir();
 		File file = TestHelper.getResource("migration/trombone4_1.zip");
-		new ZipFile(file).extractAll(oldStorageDirectory.getPath());
+		try (ZipFile zipFileObj = new ZipFile(file)) {
+			zipFileObj.extractAll(oldStorageDirectory.getPath());
+		}
 
 		FileMigrator migrator;
 		String id;
@@ -254,7 +260,9 @@ public class TromboneMigration {
 		File oldStorageDirectory = dummyMigrator.getSourceTromboneDirectory();
 		oldStorageDirectory.mkdir();
 		File file = TestHelper.getResource("migration/trombone4_2.zip");
-		new ZipFile(file).extractAll(oldStorageDirectory.getPath());
+		try (ZipFile zipFileObj = new ZipFile(file)) {
+			zipFileObj.extractAll(oldStorageDirectory.getPath());
+		}
 
 		FileMigrator migrator;
 		String id;
