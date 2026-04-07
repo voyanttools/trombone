@@ -243,7 +243,7 @@
 		<dependency>
 			<groupId>edu.stanford.nlp</groupId>
 			<artifactId>stanford-corenlp</artifactId>
-			<version>3.9.2</version>
+			<version>4.5.10</version>
 			<exclusions>
 				<exclusion><!-- exclude here since newer version gets included under org.ejml -->
 					<groupId>com.googlecode.efficient-java-matrix-library</groupId>
@@ -254,7 +254,7 @@
 		<dependency>
 			<groupId>edu.stanford.nlp</groupId>
 			<artifactId>stanford-corenlp</artifactId>
-			<version>3.9.2</version>
+			<version>4.5.10</version>
 			<exclusions>
 				<exclusion><!-- exclude here since newer version gets included under org.ejml -->
 					<groupId>com.googlecode.efficient-java-matrix-library</groupId>
