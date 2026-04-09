@@ -6,7 +6,7 @@ package org.voyanttools.trombone.tool.corpus;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.tika.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.input.extract.XmlExtractor;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.model.Corpus;

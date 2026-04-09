@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,14 +35,18 @@ import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.tika.detect.DefaultDetector;
-import org.apache.tika.detect.Detector;
+import org.apache.tika.detect.CompositeEncodingDetector;
+import org.apache.tika.detect.EncodingDetector;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.html.DefaultHtmlMapper;
+import org.apache.tika.parser.html.HtmlEncodingDetector;
 import org.apache.tika.parser.html.HtmlMapper;
+import org.apache.tika.parser.txt.Icu4jEncodingDetector;
+import org.apache.tika.parser.txt.UniversalEncodingDetector;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.model.DocumentFormat;
 import org.voyanttools.trombone.model.DocumentMetadata;
@@ -58,18 +63,24 @@ public class TikaExtractor implements Extractor {
 	
 	private ParseContext context;
 	private Parser parser;
-	private Detector detector;
 	private StoredDocumentSourceStorage storedDocumentSourceStorage;
 	private FlexibleParameters parameters;
 	
 	TikaExtractor(StoredDocumentSourceStorage storedDocumentSourceStorage, FlexibleParameters parameters) {
 		this.storedDocumentSourceStorage = storedDocumentSourceStorage;
 		this.parameters = parameters;
+
 		context = new ParseContext();
-		detector = new DefaultDetector();
-		parser = new AutoDetectParser(detector);
+		parser = new AutoDetectParser();
 		context.set(Parser.class, parser);
 		context.set(HtmlMapper.class, new CustomHtmlMapper());
+
+		EncodingDetector detectorChain = new CompositeEncodingDetector(Arrays.asList(
+			new HtmlEncodingDetector(),
+			new Icu4jEncodingDetector(),
+			new UniversalEncodingDetector()
+		));
+		context.set(EncodingDetector.class, detectorChain);
 	}
 
 	@Override
@@ -121,11 +132,14 @@ public class TikaExtractor implements Extractor {
 		public InputStream getInputStream() throws IOException {
 			Metadata extractedMetadata = new Metadata();
 			
-			String encoding = this.metadata.getEncoding();
+			DocumentFormat format = metadata.getDocumentFormat();
+			// setting the filename format can help with charset detection
+			extractedMetadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, "file."+format.getDefaultExtension());
+
+			String encoding = metadata.getEncoding();
 			extractedMetadata.set(Metadata.CONTENT_ENCODING, encoding);
 			
 			if (encoding.startsWith("UTF-16")) {
-				DocumentFormat format = storedDocumentSource.getMetadata().getDocumentFormat();
 				if (format == DocumentFormat.HTML) {
 					// need to explicitly set content-type for parser, otherwise it will guess text/plain
 					// and tags won't be handled properly
@@ -136,9 +150,7 @@ public class TikaExtractor implements Extractor {
 	        StringWriter sw = new StringWriter();
 	        SAXTransformerFactory factory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
 	        
-	        // Try with a document containing various tables and formattings 
 	        InputStream input = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
-	        
 	        
 	        // do a first pass to convert various formats to simple HTML
 	        try { 
@@ -157,7 +169,7 @@ public class TikaExtractor implements Extractor {
 	        String extractedContent = sw.toString();
 	        
 	        // special handling for PDFs from the xhtml output
-	        if (metadata.getDocumentFormat()==DocumentFormat.PDF) {
+	        if (format==DocumentFormat.PDF) {
 	        	// we get empty paragraphs for some reason
 	        	extractedContent = extractedContent.replaceAll("<p></p>", "")
 	        		// newlines seem to be added superfluously, especially since paragraphs are formed properly
@@ -166,7 +178,7 @@ public class TikaExtractor implements Extractor {
 	        		.replaceAll("\\t[\\s \u00A0]+", " ");
 	        }
 	        
-	        if (metadata.getDocumentFormat()==DocumentFormat.TOUCHER) {
+	        if (format==DocumentFormat.TOUCHER) {
 	        	metadata.setExtra("collection", "Toucher");
 	        }
 
@@ -174,16 +186,15 @@ public class TikaExtractor implements Extractor {
 	        	String value = extractedMetadata.get(name);
 	        	if (value.trim().isEmpty()) {continue;}
 	        	if (name.equals("title") || name.equals("dc:title")) {
-	        		DocumentFormat f = metadata.getDocumentFormat();
 	        		// don't set title if it's already there for text or unknown format
-	        		if (!metadata.getTitle().isEmpty() && f!=DocumentFormat.UNKNOWN && f!=DocumentFormat.TEXT) {
+	        		if (!metadata.getTitle().isEmpty() && format!=DocumentFormat.UNKNOWN && format!=DocumentFormat.TEXT) {
 		            	metadata.setTitle(value);
 	        		}
 	        	}
-	        	else if (name.toLowerCase().equals("meta:author") || name.toLowerCase().equals("author")) {
+	        	else if (name.toLowerCase().equals("meta:author") || name.toLowerCase().equals("author") || name.toLowerCase().equals("dc:creator")) {
 	        		metadata.setAuthor(value);
 	        	}
-	        	else if (name.toLowerCase().equals("keywords")) {
+	        	else if (name.toLowerCase().equals("keywords") || name.toLowerCase().equals("dc:subject") || name.toLowerCase().equals("meta:keyword")) {
 	        		metadata.setKeywords(value);
 	        	}
 	        	else {
@@ -201,7 +212,6 @@ public class TikaExtractor implements Extractor {
 	        	}
 	        }
 	        
-	        DocumentFormat format = storedDocumentSource.getMetadata().getDocumentFormat();
 	        if (format==DocumentFormat.PDF) {
 	        	extractedContent = extractedContent.replaceAll("\\s+\\&\\#xD;\\s+", " ");
 	        	extractedContent = extractedContent.replaceAll("\\s+&nbsp;", " ");

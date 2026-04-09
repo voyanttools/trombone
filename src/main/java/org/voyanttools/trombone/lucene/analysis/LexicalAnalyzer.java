@@ -36,7 +36,7 @@ import org.apache.lucene.analysis.core.LowerCaseTokenizer;
 import org.apache.lucene.analysis.core.UnicodeWhitespaceTokenizer;
 import org.apache.lucene.analysis.icu.segmentation.ICUTokenizer;
 import org.apache.lucene.analysis.miscellaneous.WordDelimiterFilter;
-import org.apache.tika.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.lucene.analysis.el.GreekCustomFilter;
 import org.voyanttools.trombone.lucene.analysis.icu.TromboneICUTokenizerConfig;
 import org.voyanttools.trombone.model.TokenType;

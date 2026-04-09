@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.cxf.helpers.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.input.source.UriInputSource;
 import org.voyanttools.trombone.lucene.CorpusMapper;
@@ -73,7 +73,7 @@ public class Veliza extends AbstractCorpusTool {
 			InputStream is = null;
 			try {
 				is = ElizaApp.class.getResource("script").openStream();
-				script = IOUtils.readStringFromStream(is);
+				script = IOUtils.toString(is, "UTF-8");
 			} catch (IOException e) {
 				throw new IOException("Unable to read default Veliza script file.", e);
 			} finally {
@@ -95,7 +95,7 @@ public class Veliza extends AbstractCorpusTool {
 				InputStream inputStream = null;
 				try {
 					inputStream = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
-					script = IOUtils.readStringFromStream(inputStream);
+					script = IOUtils.toString(inputStream, "UTF-8");
 				}
 				finally {
 					if (inputStream!=null) {
