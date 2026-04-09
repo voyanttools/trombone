@@ -87,12 +87,12 @@ public class DocumentTokensTest {
 		assertEquals(50, tokens.size());
 		assertEquals("universal", tokens.get(0).getLemma());
 		
-//		parameters.setParameter("docIndex", "1");
-//		docTokens = new DocumentTokens(storage, parameters);
-//		docTokens.run();
-//		tokens = docTokens.getDocumentTokens();
-//		assertEquals(50, tokens.size());
-//		assertEquals("todo", tokens.get(2).getLemma());
+		parameters.setParameter("docIndex", "1");
+		docTokens = new DocumentTokens(storage, parameters);
+		docTokens.run();
+		tokens = docTokens.getDocumentTokens();
+		assertEquals(50, tokens.size());
+		assertEquals("todo", tokens.get(2).getLemma());
 		
 		parameters.setParameter("docIndex", "2");
 		docTokens = new DocumentTokens(storage, parameters);
