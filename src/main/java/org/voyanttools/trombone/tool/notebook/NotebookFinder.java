@@ -86,7 +86,7 @@ public class NotebookFinder extends AbstractTool {
 		System.out.println("hits: "+topdocs.scoreDocs.length);
 		
 		for (ScoreDoc sd : topdocs.scoreDocs) {
-			Document doc = indexSearcher.doc(sd.doc);
+			Document doc = indexSearcher.storedFields().document(sd.doc);
 			notebookResults.add(doc);
 		}
 	}

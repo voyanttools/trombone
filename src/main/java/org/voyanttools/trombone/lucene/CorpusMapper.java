@@ -30,9 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.PostingsEnum;
-import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.BooleanClause;
@@ -40,6 +42,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.search.spans.SpanWeight;
 import org.apache.lucene.search.spans.Spans;
@@ -51,7 +54,6 @@ import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.SparseFixedBitSet;
 import org.voyanttools.trombone.lucene.search.DocumentFilter;
 import org.voyanttools.trombone.lucene.search.DocumentFilterSpans;
-import org.voyanttools.trombone.lucene.search.FilteredCorpusReader;
 import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.storage.Storage;
 
@@ -62,7 +64,7 @@ import org.voyanttools.trombone.storage.Storage;
 public class CorpusMapper {
 	
 	Storage storage;
-	LeafReader reader;
+	private DirectoryReader directoryReader;
 	IndexSearcher searcher;
 	Corpus corpus;
 	private List<Integer> luceneIds = null;
@@ -100,16 +102,20 @@ public class CorpusMapper {
 		return bitSet;
 	}
 	
-	public LeafReader getLeafReader() throws IOException {
-		if (reader==null) {
+	public IndexReader getLeafReader() throws IOException {
+		if (directoryReader==null) {
 			build();
 		}
-		return reader;
+		return directoryReader;
 	}
 	
 	public IndexSearcher getSearcher() throws IOException {
 		if (searcher==null) {
-			searcher = new IndexSearcher(getLeafReader());
+			// ensure directoryReader is built
+			if (directoryReader==null) {
+				build();
+			}
+			searcher = new IndexSearcher(directoryReader);
 		}
 		return searcher;
 	}
@@ -147,34 +153,43 @@ public class CorpusMapper {
 	
 	/**
 	 * This should not be called, except from the private build() method.
+	 * Iterates over all leaf segments to support multi-segment indexes.
 	 * @throws IOException
 	 */
 	private void buildFromTermsEnum() throws IOException {
-		LeafReader reader = SlowCompositeReaderWrapper.wrap(storage.getLuceneManager().getDirectoryReader(corpus.getId()));
+		directoryReader = storage.getLuceneManager().getDirectoryReader(corpus.getId());
 		
-		Terms terms = reader.terms("id");
-		TermsEnum termsEnum = terms.iterator();
-		BytesRef bytesRef = termsEnum.next();
-		int doc;
-		String id;
+		int maxDoc = directoryReader.maxDoc();
 		Set<String> ids = new HashSet<String>(getCorpusDocumentIds());
-		bitSet = new SparseFixedBitSet(reader.numDocs());
-		Bits liveBits = reader.getLiveDocs();
-		while (bytesRef!=null) {
-			PostingsEnum postingsEnum = termsEnum.postings(null, PostingsEnum.NONE);
-			doc = postingsEnum.nextDoc();
-			if (doc!=PostingsEnum.NO_MORE_DOCS) {
-				id = bytesRef.utf8ToString();
-				if (ids.contains(id)) {
-					bitSet.set(doc);
-					luceneIds.add(doc);
-					documentIdToLuceneIdMap.put(id, doc);
-					luceneIdToDocumentIdMap.put(doc, id);
+		bitSet = new SparseFixedBitSet(maxDoc);
+		
+		for (LeafReaderContext leafContext : directoryReader.leaves()) {
+			LeafReader leafReader = leafContext.reader();
+			int docBase = leafContext.docBase;
+			
+			Terms terms = leafReader.terms("id");
+			if (terms == null) continue;
+			
+			TermsEnum termsEnum = terms.iterator();
+			BytesRef bytesRef = termsEnum.next();
+			int doc;
+			String id;
+			while (bytesRef!=null) {
+				PostingsEnum postingsEnum = termsEnum.postings(null, PostingsEnum.NONE);
+				doc = postingsEnum.nextDoc();
+				if (doc!=PostingsEnum.NO_MORE_DOCS) {
+					id = bytesRef.utf8ToString();
+					int globalDoc = docBase + doc;
+					if (ids.contains(id)) {
+						bitSet.set(globalDoc);
+						luceneIds.add(globalDoc);
+						documentIdToLuceneIdMap.put(id, globalDoc);
+						luceneIdToDocumentIdMap.put(globalDoc, id);
+					}
 				}
+				bytesRef = termsEnum.next();
 			}
-			bytesRef = termsEnum.next();
 		}
-		this.reader = new FilteredCorpusReader(reader, bitSet);
 	}
 	
 	public String getDocumentIdFromDocumentPosition(int documentPosition) {
@@ -190,6 +205,7 @@ public class CorpusMapper {
 
 	/**
 	 * Get a Spans that filters for this corpus.
+	 * Iterates over all leaf segments to support multi-segment indexes.
 	 * @param spanQuery
 	 * @return
 	 * @throws IOException
@@ -200,15 +216,24 @@ public class CorpusMapper {
 	
 	/**
 	 * Get a Spans that filters for the specified BitSet.
+	 * Iterates over all leaf segments to support multi-segment indexes.
 	 * @param spanQuery
 	 * @param bitSet
 	 * @return
 	 * @throws IOException
 	 */
 	public Spans getFilteredSpans(SpanQuery spanQuery, BitSet bitSet) throws IOException {
-		SpanWeight weight = spanQuery.createWeight(getSearcher(), false);
-		Spans spans = weight.getSpans(getLeafReader().getContext(), SpanWeight.Postings.POSITIONS);
-		return spans != null ? new DocumentFilterSpans(spans, bitSet) : null;
+		SpanWeight weight = (SpanWeight) spanQuery.createWeight(getSearcher(), ScoreMode.COMPLETE_NO_SCORES, 1f);
+		List<Spans> filteredLeafSpans = new ArrayList<Spans>();
+		for (LeafReaderContext leafContext : directoryReader.leaves()) {
+			Spans spans = weight.getSpans(leafContext, SpanWeight.Postings.POSITIONS);
+			if (spans != null) {
+				filteredLeafSpans.add(new DocumentFilterSpans(spans, bitSet, leafContext.docBase));
+			}
+		}
+		if (filteredLeafSpans.isEmpty()) return null;
+		if (filteredLeafSpans.size() == 1) return filteredLeafSpans.get(0);
+		return new MultiLeafSpans(filteredLeafSpans);
 	}
 	
 //	public Filter getFilter() throws IOException {
@@ -223,7 +248,9 @@ public class CorpusMapper {
 //	}
 
 	public BitSet getBitSetFromDocumentIds(Collection<String> documentIds) throws IOException {
-		BitSet subBitSet = new SparseFixedBitSet(getLeafReader().numDocs());
+		// ensure directoryReader is built
+		if (directoryReader==null) {build();}
+		BitSet subBitSet = new SparseFixedBitSet(directoryReader.maxDoc());
 		for (String id : documentIds) {
 			subBitSet.set(getLuceneIdFromDocumentId(id));
 		}

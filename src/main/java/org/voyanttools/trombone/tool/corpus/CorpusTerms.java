@@ -31,13 +31,15 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermContext;
+import org.apache.lucene.index.TermStates;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.Weight;
 import org.apache.lucene.search.spans.SpanOrQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.search.spans.SpanTermQuery;
@@ -122,7 +124,7 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 	private FlexibleQueue<CorpusTerm> runAllTermsWithDistributionsDocumentTermVectors(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
 		FlexibleQueue<CorpusTerm> queue = new FlexibleQueue<CorpusTerm>(comparator, start+limit);
 		
-		LeafReader reader = corpusMapper.getLeafReader();
+		IndexReader reader = corpusMapper.getLeafReader();
 		Map<String, Map<Integer, Integer>> rawFreqsMap = new HashMap<String, Map<Integer, Integer>>();
 		TermsEnum termsEnum = null;
 		for (int doc : corpusMapper.getLuceneIds()) {
@@ -262,7 +264,7 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 	}
 
 	private void runSpanQueries(CorpusMapper corpusMapper, FlexibleQueue<CorpusTerm> queue, Map<String, SpanQuery> queriesMap, Keywords stopwords) throws IOException {
-		Map<Term, TermContext> termContexts = new HashMap<Term, TermContext>();
+		Map<Term, TermStates> termContexts = new HashMap<Term, TermStates>();
 		boolean needDistributions = withDistributions || corpusTermSort.needDistributions();
 		CorpusTermMinimalsDB corpusTermMinimalsDB = null; // only create it if we need it
 		int totalTokens = corpusMapper.getCorpus().getTokensCount(tokenType);
@@ -388,8 +390,10 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 	private void addToQueueFromQueryWithoutDistributions(CorpusMapper corpusMapper, FlexibleQueue<CorpusTerm> queue, String queryString, Query query) throws IOException {
 		totalTokens = corpusMapper.getCorpus().getTokensCount(tokenType);
 
-		LuceneDocIdsCollector collector = new LuceneDocIdsCollector(corpusMapper);
-		corpusMapper.getSearcher().search(query, collector);
+		Query rewritten = corpusMapper.getSearcher().rewrite(query);
+		Weight weight = rewritten.createWeight(corpusMapper.getSearcher(), ScoreMode.COMPLETE, 1f);
+		LuceneDocIdsCollector collector = new LuceneDocIdsCollector(corpusMapper, weight);
+		corpusMapper.getSearcher().search(rewritten, collector);
 		CorpusTerm corpusTerm = new CorpusTerm(queryString, collector.getRawFreq(), totalTokens, collector.getInDocumentsCount(), corpusMapper.getCorpus().size());
 		offer(queue, corpusTerm);
 	}

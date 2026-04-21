@@ -22,6 +22,8 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.QueryVisitor;
+import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.Weight;
 import org.voyanttools.trombone.model.TokenType;
 
@@ -140,8 +142,7 @@ public abstract class AbstractQueryParser {
 			}
 			else { // separate each wildcard term into its own query
 				Set<Term> terms = new HashSet<Term>();
-				Weight weight = query.createWeight(indexSearcher, false);
-				weight.extractTerms(terms);
+				query.visit(QueryVisitor.termCollector(terms));
 				for (Term t : terms) {
 					// we don't need to analyze term here since it's already from the index
 					queriesMap.put(t.text(), getTermQuery(t));

@@ -37,7 +37,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
+
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.voyanttools.trombone.lucene.LuceneManager;

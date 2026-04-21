@@ -12,6 +12,8 @@ import org.apache.lucene.util.BitSet;
 /**
  * A {@link Spans} implementation that filters with a {@link BitSet},
  * adapted from {@link FilterSpans}.
+ * Supports multi-segment indexes by translating leaf-relative doc IDs
+ * to global doc IDs using a docBase offset.
  */
 public class DocumentFilterSpans extends Spans {
  
@@ -20,14 +22,22 @@ public class DocumentFilterSpans extends Spans {
   
   private BitSet bitSet;
   
+  private int docBase;
+  
   private int nextStartPosition = -1;
   
   private boolean atFirstStartPosition = true;
   
-  /** Wrap the given {@link Spans}. */
+  /** Wrap the given {@link Spans} with no docBase offset. */
   public DocumentFilterSpans(Spans in, BitSet bitSet) {
+    this(in, bitSet, 0);
+  }
+  
+  /** Wrap the given {@link Spans} with a docBase offset for multi-segment support. */
+  public DocumentFilterSpans(Spans in, BitSet bitSet, int docBase) {
     this.in = in;
     this.bitSet = bitSet;
+    this.docBase = docBase;
   }
     
   @Override
@@ -43,23 +53,32 @@ public class DocumentFilterSpans extends Spans {
 	  // bail if no more docs
 	  if (nextDoc==DocIdSetIterator.NO_MORE_DOCS) {return nextDoc;}
 	  
-	  // jump to the next valid doc
-	  nextDoc = bitSet.nextSetBit(nextDoc);
+	  // convert to global doc ID for bitSet check
+	  int globalDoc = nextDoc + docBase;
+	  
+	  // jump to the next valid doc in the bitSet (using global IDs)
+	  globalDoc = bitSet.nextSetBit(globalDoc);
 	  
 	  // bail if no more docs
-	  if (nextDoc==DocIdSetIterator.NO_MORE_DOCS) {return nextDoc;}
+	  if (globalDoc==DocIdSetIterator.NO_MORE_DOCS) {return globalDoc;}
+	  
+	  // check if the valid global doc is still within this leaf's range
+	  int localDoc = globalDoc - docBase;
 	  
 	  // recurse if the current doc is beyond the spans
-	  if (nextDoc!=in.docID()) {
+	  if (localDoc!=in.docID()) {
 		  
 		  // skip the inner span to next valid beyond this doc (so we don't read all spans)
-		  nextDoc = in.advance(nextDoc);
+		  nextDoc = in.advance(localDoc);
 		  
 		  // bail if we have no more hits
 		  if (nextDoc==DocIdSetIterator.NO_MORE_DOCS) {return nextDoc;}
 		  
+		  // update global doc
+		  globalDoc = nextDoc + docBase;
+		  
 		  // start over if this document isn't valid
-		  else if (!bitSet.get(nextDoc)) {return nextDoc();}
+		  if (!bitSet.get(globalDoc)) {return nextDoc();}
 
 		  // we've advanced to a valid doc
 	  }
@@ -72,7 +91,8 @@ public class DocumentFilterSpans extends Spans {
 	  } else {
 		  atFirstStartPosition = true;
 	  }
-	  return nextDoc;
+	  // return global doc ID
+	  return globalDoc;
   }
 
   @Override
@@ -86,7 +106,11 @@ public class DocumentFilterSpans extends Spans {
 
   @Override
   public final int docID() {
-    return in.docID();
+    int localDoc = in.docID();
+    if (localDoc < 0 || localDoc == DocIdSetIterator.NO_MORE_DOCS) {
+      return localDoc;
+    }
+    return localDoc + docBase;
   }
 
   @Override

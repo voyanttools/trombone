@@ -36,7 +36,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.lucene.LucenePackage;
+import org.apache.lucene.util.Version;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
@@ -50,8 +50,8 @@ import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.PostingsEnum;
-import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
@@ -59,7 +59,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.LockObtainFailedException;
+
 import org.apache.lucene.util.BytesRef;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.input.source.InputStreamInputSource;
@@ -121,16 +121,27 @@ public class LuceneIndexer implements Indexer {
 		// determine if we need to modify the Lucene index
 		Collection<StoredDocumentSource> storedDocumentSourceForLucene = new ArrayList<StoredDocumentSource>();
 		if (storage.getLuceneManager().directoryExists(corpusId)) {
-			LeafReader reader = SlowCompositeReaderWrapper.wrap(storage.getLuceneManager().getDirectoryReader(corpusId));
-			Terms terms = reader.terms("id");
-			if (terms==null) {
+			DirectoryReader directoryReader = storage.getLuceneManager().getDirectoryReader(corpusId);
+			// Collect all indexed IDs across all leaf segments
+			Set<String> indexedIds = new java.util.HashSet<String>();
+			for (LeafReaderContext leafContext : directoryReader.leaves()) {
+				LeafReader leafReader = leafContext.reader();
+				Terms terms = leafReader.terms("id");
+				if (terms == null) continue;
+				TermsEnum termsEnum = terms.iterator();
+				BytesRef bytesRef = termsEnum.next();
+				while (bytesRef != null) {
+					indexedIds.add(bytesRef.utf8ToString());
+					bytesRef = termsEnum.next();
+				}
+			}
+			if (indexedIds.isEmpty()) {
 				storedDocumentSourceForLucene.addAll(storedDocumentSources);
 			}
 			else {
-				TermsEnum termsEnum = terms.iterator();		
 				for (StoredDocumentSource storedDocumentSource : storedDocumentSources) {
 					String id = storedDocumentSource.getId();
-					if (!termsEnum.seekExact(new BytesRef(id))) {
+					if (!indexedIds.contains(id)) {
 						storedDocumentSourceForLucene.add(storedDocumentSource);
 					}
 				}
@@ -159,7 +170,7 @@ public class LuceneIndexer implements Indexer {
 		return corpusId;
 		
 	}
-	private void indexStream(Collection<StoredDocumentSource> storedDocumentSourceForLucene, String corpusId) throws CorruptIndexException, LockObtainFailedException, IOException {
+	private void indexStream(Collection<StoredDocumentSource> storedDocumentSourceForLucene, String corpusId) throws CorruptIndexException, IOException {
 		// index documents (or at least add corpus to document if not already there), we need to get a new writer
 		IndexWriter indexWriter = storage.getLuceneManager().getIndexWriter(corpusId);
 		DirectoryReader indexReader = DirectoryReader.open(indexWriter);
@@ -217,7 +228,7 @@ public class LuceneIndexer implements Indexer {
 		}
 		
 	}
-	private void indexExecutorService(Collection<StoredDocumentSource> storedDocumentSourceForLucene, String corpusId) throws CorruptIndexException, LockObtainFailedException, IOException {
+	private void indexExecutorService(Collection<StoredDocumentSource> storedDocumentSourceForLucene, String corpusId) throws CorruptIndexException, IOException {
 		// index documents (or at least add corpus to document if not already there), we need to get a new writer
 		IndexWriter indexWriter = storage.getLuceneManager().getIndexWriter(corpusId);
 		DirectoryReader indexReader = DirectoryReader.open(indexWriter);
@@ -426,7 +437,7 @@ public class LuceneIndexer implements Indexer {
 			try {
 				
 				TopDocs topDocs = indexSearcher.search(new TermQuery(new Term("id", id)), 1);
-				if (topDocs.totalHits>0) { // already indexed
+				if (topDocs.totalHits.value>0) { // already indexed
 					return;
 				}
 					
@@ -444,7 +455,7 @@ public class LuceneIndexer implements Indexer {
 				document = new Document();
 				document.add(new StringField("id", id, Field.Store.NO));
 //				document.add(new StringField("corpus", corpusId, Field.Store.NO));
-				document.add(new StringField("version",  LucenePackage.get().getImplementationVersion()+"-"+String.valueOf(LuceneIndexer.VERSION), Field.Store.YES));
+				document.add(new StringField("version",  Version.LATEST.toString()+"-"+String.valueOf(LuceneIndexer.VERSION), Field.Store.YES));
 				
 				FlexibleParameters p = new FlexibleParameters();
 				p.setParameter("language", storedDocumentSource.getMetadata().getLanguageCode());
