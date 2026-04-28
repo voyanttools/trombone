@@ -3,9 +3,9 @@ package org.voyanttools.trombone.lucene.search;
 import java.io.IOException;
 
 import org.apache.lucene.search.DocIdSetIterator;
-import org.apache.lucene.search.spans.FilterSpans;
-import org.apache.lucene.search.spans.SpanCollector;
-import org.apache.lucene.search.spans.Spans;
+import org.apache.lucene.queries.spans.FilterSpans;
+import org.apache.lucene.queries.spans.SpanCollector;
+import org.apache.lucene.queries.spans.Spans;
 import org.apache.lucene.util.BitSet;
 
 

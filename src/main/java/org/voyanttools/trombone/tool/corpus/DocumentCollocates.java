@@ -37,7 +37,7 @@ import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.search.vectorhighlight.FieldTermStack.TermInfo;
+import org.voyanttools.trombone.lucene.search.SimpleTermInfo;
 import org.apache.lucene.util.BytesRef;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.Corpus;
@@ -132,7 +132,7 @@ public class DocumentCollocates extends AbstractContextTerms {
 			List<DocumentSpansData> documentSpansData, Keywords stopwords) throws IOException {
 		
 		
-		Map<Integer, TermInfo> termsOfInterest = getTermsOfInterest(LeafReader, luceneDoc, lastToken, documentSpansData, true);
+		Map<Integer, SimpleTermInfo> termsOfInterest = getTermsOfInterest(LeafReader, luceneDoc, lastToken, documentSpansData, true);
 
 		Map<String, Map<String, AtomicInteger>> mapOfTermsMap = new HashMap<String, Map<String, AtomicInteger>>();
 		

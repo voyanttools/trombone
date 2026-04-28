@@ -83,10 +83,10 @@ public class DocumentsFinder extends AbstractTerms {
 		boolean createNewCorpus = parameters.getParameterBooleanValue("createNewCorpus");
 		
 		Query query = getFacetAwareQuery(corpusMapper, queries);
-		LuceneDocIdsCollector collector = new LuceneDocIdsCollector(corpusMapper);
+		LuceneDocIdsCollector collector = new LuceneDocIdsCollector(corpusMapper, null);
 		indexSearcher.search(query, collector);
 		if (createNewCorpus || includeDocIds || withDistributions) {
-			Set<Integer> docs = collector.getLuceneDocIds();
+			Set<Integer> docs = collector.getLuceneDocIds().keySet();
 			String[] ids = new String[docs.size()];
 			int i =0;
 			for (int doc : docs) {

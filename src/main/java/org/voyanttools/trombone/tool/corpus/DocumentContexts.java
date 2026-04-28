@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.search.vectorhighlight.FieldTermStack.TermInfo;
+import org.voyanttools.trombone.lucene.search.SimpleTermInfo;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.model.Kwic;
@@ -83,7 +83,7 @@ public class DocumentContexts extends AbstractContextTerms implements Consumptiv
 	private FlexibleQueue<Kwic> getKwics(CorpusMapper corpusMapper, int luceneDoc, int corpusDocumentIndex,
 			int lastToken, List<DocumentSpansData> documentSpansData) throws IOException {
 		
-		Map<Integer, TermInfo> termsOfInterest = getTermsOfInterest(corpusMapper.getLeafReader(), luceneDoc, lastToken, documentSpansData, overlapStrategy==Kwic.OverlapStrategy.merge);
+		Map<Integer, SimpleTermInfo> termsOfInterest = getTermsOfInterest(corpusMapper.getLeafReader(), luceneDoc, lastToken, documentSpansData, overlapStrategy==Kwic.OverlapStrategy.merge);
 		
 		Stripper stripper = new Stripper(parameters.getParameterValue("stripTags"));
 

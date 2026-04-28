@@ -35,9 +35,9 @@ import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.search.spans.SpanQuery;
-import org.apache.lucene.search.spans.Spans;
-import org.apache.lucene.search.vectorhighlight.FieldTermStack.TermInfo;
+import org.apache.lucene.queries.spans.SpanQuery;
+import org.apache.lucene.queries.spans.Spans;
+import org.voyanttools.trombone.lucene.search.SimpleTermInfo;
 import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.BytesRef;
 import org.voyanttools.trombone.lucene.CorpusMapper;
@@ -128,15 +128,15 @@ public abstract class AbstractContextTerms extends AbstractTerms {
 		return documentSpansDataMap;
 	}
 
-	protected Map<Integer, TermInfo> getTermsOfInterest(LeafReader LeafReader, int luceneDoc, int lastToken, List<DocumentSpansData> documentSpansData, boolean fill) throws IOException	{
-		Map<Integer, TermInfo> termsOfInterest = getTermsOfInterest(documentSpansData, lastToken, fill);
+	protected Map<Integer, SimpleTermInfo> getTermsOfInterest(IndexReader LeafReader, int luceneDoc, int lastToken, List<DocumentSpansData> documentSpansData, boolean fill) throws IOException	{
+		Map<Integer, SimpleTermInfo> termsOfInterest = getTermsOfInterest(documentSpansData, lastToken, fill);
 		fillTermsOfInterest(LeafReader, luceneDoc, termsOfInterest);
 		return termsOfInterest;
 	}
 	
-	private Map<Integer, TermInfo> getTermsOfInterest(List<DocumentSpansData> documentSpansData, int lastToken, boolean fill)	{
+	private Map<Integer, SimpleTermInfo> getTermsOfInterest(List<DocumentSpansData> documentSpansData, int lastToken, boolean fill)	{
 		// construct a set of terms of interest
-		Map<Integer, TermInfo> termsOfInterest = new HashMap<Integer, TermInfo>();
+		Map<Integer, SimpleTermInfo> termsOfInterest = new HashMap<Integer, SimpleTermInfo>();
 		for (DocumentSpansData dsd : documentSpansData) {
 			for (int[] data : dsd.spansData) {
 				int keywordstart = data[0];
@@ -164,7 +164,7 @@ public abstract class AbstractContextTerms extends AbstractTerms {
 		return termsOfInterest;
 	}
 		
-	private void fillTermsOfInterest(LeafReader LeafReader, int luceneDoc, Map<Integer, TermInfo> termsOfInterest) throws IOException {
+	private void fillTermsOfInterest(IndexReader LeafReader, int luceneDoc, Map<Integer, SimpleTermInfo> termsOfInterest) throws IOException {
 		// fill in terms of interest
 		Terms terms = LeafReader.getTermVector(luceneDoc, tokenType.name());
 		TermsEnum termsEnum = terms.iterator();
@@ -178,7 +178,7 @@ public abstract class AbstractContextTerms extends AbstractTerms {
 					for (int i=0, len = postingsEnum.freq(); i<len; i++) {
 						int pos = postingsEnum.nextPosition();
 						if (termsOfInterest.containsKey(pos)) {
-							termsOfInterest.put(pos, new TermInfo(termString, postingsEnum.startOffset(), postingsEnum.endOffset(), pos, 1));
+							termsOfInterest.put(pos, new SimpleTermInfo(termString, postingsEnum.startOffset(), postingsEnum.endOffset(), pos));
 						}
 					}
 				}

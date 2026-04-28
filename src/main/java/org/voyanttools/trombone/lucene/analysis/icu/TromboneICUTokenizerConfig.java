@@ -38,9 +38,9 @@ public class TromboneICUTokenizerConfig extends DefaultICUTokenizerConfig {
 	}
 
 	  @Override
-	  public BreakIterator getBreakIterator(int script) {
+	  public RuleBasedBreakIterator getBreakIterator(int script) {
 		  if (language.equals(TIBETAN)) {
-			  return (BreakIterator) TROMBONE_WORD_BREAK_ITERATOR.clone();
+			  return (RuleBasedBreakIterator) TROMBONE_WORD_BREAK_ITERATOR.clone();
 		  } else {
 			 return super.getBreakIterator(script);
 		  }

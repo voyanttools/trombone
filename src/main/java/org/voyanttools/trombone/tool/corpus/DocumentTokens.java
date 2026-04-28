@@ -18,7 +18,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.search.vectorhighlight.FieldTermStack.TermInfo;
+import org.voyanttools.trombone.lucene.search.SimpleTermInfo;
 import org.apache.lucene.util.BytesRef;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.lucene.analysis.LemmaAnalyzer;
@@ -103,8 +103,8 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 		total = Integer.MAX_VALUE;
 		Corpus corpus = corpusMapper.getCorpus();
 		ids = this.getCorpusStoredDocumentIdsFromParameters(corpus);
-		List<TermInfo> termInfos = new ArrayList<TermInfo>();
-		TermInfo termInfo;
+		List<SimpleTermInfo> termInfos = new ArrayList<SimpleTermInfo>();
+		SimpleTermInfo termInfo;
 		int documentStart = start;
 		Stripper stripper = new Stripper(parameters.getParameterValue("stripTags"));
 		String skipToDocId = parameters.getParameterValue("skipToDocId", "");
@@ -145,7 +145,7 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 							if (!docFreqs.containsKey(termString)) {
 								docFreqs.put(termString, len);
 							}
-							termInfos.add(new TermInfo(termString, postingsEnum.startOffset(), postingsEnum.endOffset(), pos, 1));
+							termInfos.add(new SimpleTermInfo(termString, postingsEnum.startOffset(), postingsEnum.endOffset(), pos));
 						}
 					}
 				}
