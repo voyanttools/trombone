@@ -108,6 +108,27 @@ public class CorpusMapper {
 		}
 		return directoryReader;
 	}
+
+	/**
+	 * Get the term vector for a field from the correct leaf segment for a given global doc ID.
+	 * In Lucene 9, getTermVector() is only on LeafReader with a segment-local doc ID.
+	 * @param globalDocId the global Lucene document ID
+	 * @param field the field name
+	 * @return the Terms for the field, or null if not present
+	 * @throws IOException
+	 */
+	public Terms getTermVector(int globalDocId, String field) throws IOException {
+		if (directoryReader==null) {
+			build();
+		}
+		for (LeafReaderContext ctx : directoryReader.leaves()) {
+			int localDoc = globalDocId - ctx.docBase;
+			if (localDoc >= 0 && localDoc < ctx.reader().maxDoc()) {
+				return ctx.reader().getTermVector(localDoc, field);
+			}
+		}
+		return null;
+	}
 	
 	public IndexSearcher getSearcher() throws IOException {
 		if (searcher==null) {

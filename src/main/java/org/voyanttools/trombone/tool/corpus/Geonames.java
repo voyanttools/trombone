@@ -270,7 +270,7 @@ public class Geonames extends AbstractContextTerms {
 			String document = corpusMapper.getCorpus().getDocument(corpusDocIndex).getDocumentString();
 			int lastToken = totalTokens[corpusDocIndex];
 			
-			Map<Integer, SimpleTermInfo> termsOfInterest = getTermsOfInterest(corpusMapper.getLeafReader(), luceneDoc, lastToken, dsd.getValue(), true);
+			Map<Integer, SimpleTermInfo> termsOfInterest = getTermsOfInterest(corpusMapper, luceneDoc, lastToken, dsd.getValue(), true);
 			for (DocumentSpansData dsdItem : dsdList) {
 				cityOccurrenceCandidates = new ArrayList<CityOccurrence>();
 				String form = quotePattern.matcher(dsdItem.queryString).replaceAll("");

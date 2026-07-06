@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
@@ -128,9 +127,9 @@ public abstract class AbstractContextTerms extends AbstractTerms {
 		return documentSpansDataMap;
 	}
 
-	protected Map<Integer, SimpleTermInfo> getTermsOfInterest(IndexReader LeafReader, int luceneDoc, int lastToken, List<DocumentSpansData> documentSpansData, boolean fill) throws IOException	{
+	protected Map<Integer, SimpleTermInfo> getTermsOfInterest(CorpusMapper corpusMapper, int luceneDoc, int lastToken, List<DocumentSpansData> documentSpansData, boolean fill) throws IOException	{
 		Map<Integer, SimpleTermInfo> termsOfInterest = getTermsOfInterest(documentSpansData, lastToken, fill);
-		fillTermsOfInterest(LeafReader, luceneDoc, termsOfInterest);
+		fillTermsOfInterest(corpusMapper, luceneDoc, termsOfInterest);
 		return termsOfInterest;
 	}
 	
@@ -164,9 +163,9 @@ public abstract class AbstractContextTerms extends AbstractTerms {
 		return termsOfInterest;
 	}
 		
-	private void fillTermsOfInterest(IndexReader LeafReader, int luceneDoc, Map<Integer, SimpleTermInfo> termsOfInterest) throws IOException {
+	private void fillTermsOfInterest(CorpusMapper corpusMapper, int luceneDoc, Map<Integer, SimpleTermInfo> termsOfInterest) throws IOException {
 		// fill in terms of interest
-		Terms terms = LeafReader.getTermVector(luceneDoc, tokenType.name());
+		Terms terms = corpusMapper.getTermVector(luceneDoc, tokenType.name());
 		TermsEnum termsEnum = terms.iterator();
 		while(true) {
 			BytesRef term = termsEnum.next();

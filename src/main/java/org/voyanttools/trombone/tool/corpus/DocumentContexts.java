@@ -83,7 +83,7 @@ public class DocumentContexts extends AbstractContextTerms implements Consumptiv
 	private FlexibleQueue<Kwic> getKwics(CorpusMapper corpusMapper, int luceneDoc, int corpusDocumentIndex,
 			int lastToken, List<DocumentSpansData> documentSpansData) throws IOException {
 		
-		Map<Integer, SimpleTermInfo> termsOfInterest = getTermsOfInterest(corpusMapper.getLeafReader(), luceneDoc, lastToken, documentSpansData, overlapStrategy==Kwic.OverlapStrategy.merge);
+		Map<Integer, SimpleTermInfo> termsOfInterest = getTermsOfInterest(corpusMapper, luceneDoc, lastToken, documentSpansData, overlapStrategy==Kwic.OverlapStrategy.merge);
 		
 		Stripper stripper = new Stripper(parameters.getParameterValue("stripTags"));
 

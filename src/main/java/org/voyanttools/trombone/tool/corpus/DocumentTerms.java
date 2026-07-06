@@ -30,14 +30,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.queries.spans.SpanQuery;
 import org.apache.lucene.queries.spans.Spans;
 import org.apache.lucene.util.BitSet;
-import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.Corpus;
@@ -199,12 +197,10 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 	private void runAllTermsFromDocumentTermVectors(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
 		int size = start+limit;
 		FlexibleQueue<DocumentTerm> queue = new FlexibleQueue<DocumentTerm>(comparator, size);
-		LeafReader reader = corpusMapper.getLeafReader();
 		Corpus corpus = corpusMapper.getCorpus();
 		CorpusTermMinimalsDB corpusTermMinimalsDB = CorpusTermMinimalsDB.getInstance(corpusMapper, tokenType);
 		TermsEnum termsEnum = null;
 		Bits docIdBitSet =  corpusMapper.getBitSetFromDocumentIds(this.getCorpusStoredDocumentIdsFromParameters(corpus));
-		Bits allBits = new Bits.MatchAllBits(reader.numDocs());
 		int[] tokenCounts = corpus.getTokensCounts(tokenType);
 		float[] typesCountMeans = corpus.getTypesCountMeans(tokenType);
 		float[] typesCountStdDev = corpus.getTypesCountStdDevs(tokenType);
@@ -216,7 +212,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 			float mean = typesCountMeans[documentPosition];
 			float stdDev = typesCountStdDev[documentPosition];
 			int totalTokensCount = tokenCounts[documentPosition];
-			Terms terms = reader.getTermVector(doc, tokenType.name());
+			Terms terms = corpusMapper.getTermVector(doc, tokenType.name());
 			if (terms!=null) {
 				termsEnum = terms.iterator();
 				if (termsEnum!=null) {
