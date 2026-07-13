@@ -166,6 +166,7 @@ public abstract class AbstractContextTerms extends AbstractTerms {
 	private void fillTermsOfInterest(CorpusMapper corpusMapper, int luceneDoc, Map<Integer, SimpleTermInfo> termsOfInterest) throws IOException {
 		// fill in terms of interest
 		Terms terms = corpusMapper.getTermVector(luceneDoc, tokenType.name());
+		if (terms == null) {return;}
 		TermsEnum termsEnum = terms.iterator();
 		while(true) {
 			BytesRef term = termsEnum.next();

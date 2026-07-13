@@ -200,7 +200,7 @@ public class DocumentTerms extends AbstractTerms implements Iterable<DocumentTer
 		Corpus corpus = corpusMapper.getCorpus();
 		CorpusTermMinimalsDB corpusTermMinimalsDB = CorpusTermMinimalsDB.getInstance(corpusMapper, tokenType);
 		TermsEnum termsEnum = null;
-		Bits docIdBitSet =  corpusMapper.getBitSetFromDocumentIds(this.getCorpusStoredDocumentIdsFromParameters(corpus));
+		BitSet docIdBitSet =  corpusMapper.getBitSetFromDocumentIds(this.getCorpusStoredDocumentIdsFromParameters(corpus));
 		int[] tokenCounts = corpus.getTokensCounts(tokenType);
 		float[] typesCountMeans = corpus.getTypesCountMeans(tokenType);
 		float[] typesCountStdDev = corpus.getTypesCountStdDevs(tokenType);
