@@ -41,7 +41,7 @@ import org.apache.lucene.store.Directory;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.voyanttools.trombone.lucene.LuceneManager;
-import org.voyanttools.trombone.lucene.SingleIndexLuceneManager;
+import org.voyanttools.trombone.lucene.PerCorpusIndexLuceneManager;
 import org.voyanttools.trombone.nlp.NlpFactory;
 import org.voyanttools.trombone.storage.CorpusStorage;
 import org.voyanttools.trombone.storage.Storage;
@@ -94,7 +94,7 @@ public class MemoryStorage implements Storage {
 	@Override
 	public LuceneManager getLuceneManager() throws CorruptIndexException, IOException {
 		if (luceneManager==null) {
-			luceneManager = new SingleIndexLuceneManager(this, new MemoryDirectoryFactory());
+			luceneManager = new PerCorpusIndexLuceneManager(this, new MemoryDirectoryFactory());
 		}
 		return luceneManager;
 	}
@@ -102,7 +102,7 @@ public class MemoryStorage implements Storage {
 	@Override
 	public LuceneManager getNotebookLuceneManager() throws IOException {
 		if (notebookLuceneManager==null) {
-			notebookLuceneManager = new SingleIndexLuceneManager(this, new MemoryDirectoryFactory());
+			notebookLuceneManager = new PerCorpusIndexLuceneManager(this, new MemoryDirectoryFactory());
 		}
 		return notebookLuceneManager;
 	}

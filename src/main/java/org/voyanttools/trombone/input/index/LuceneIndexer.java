@@ -340,6 +340,7 @@ public class LuceneIndexer implements Indexer {
 			
 			try {
 				topDocs = indexSearcher.search(query, 1); // there may be multiple documents in the index but they should have the same text
+				if (topDocs.scoreDocs.length == 0) { return; } // document not found (e.g. indexing failed due to schema conflict)
 				int docId = topDocs.scoreDocs[0].doc;
 				Terms terms = indexReader.getTermVector(docId, "lexical");
 				int totalTokens = 0;
@@ -445,7 +446,7 @@ public class LuceneIndexer implements Indexer {
 
 				// this is used by lexical and the metadata (expecting term vectors to be present)
 				FieldType ft = new FieldType(TextField.TYPE_NOT_STORED);
-				ft.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
+				ft.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
 				ft.setStoreTermVectors(true);
 				ft.setStoreTermVectorOffsets(true);
 				ft.setStoreTermVectorPositions(true);
@@ -520,6 +521,9 @@ public class LuceneIndexer implements Indexer {
 			}
 			catch (IOException e) {
 				throw new RuntimeException("Unable to index stored document: "+storedDocumentSource, e);
+			}
+			catch (RuntimeException e) {
+				throw new RuntimeException("Unable to index stored document (schema conflict?): "+storedDocumentSource, e);
 			}
 		}
 		
