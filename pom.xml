@@ -6,7 +6,7 @@
 	
 	<groupId>org.voyant-tools</groupId>
 	<artifactId>trombone</artifactId>
-	<version>5.3.0-SNAPSHOT</version>
+	<version>6.0.0-SNAPSHOT</version>
 	
 	<name>Voyant Tools</name>
 	<url>https://github.com/voyanttools/trombone</url>
@@ -132,22 +132,22 @@
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parsers-standard-package</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parser-apple-module</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parser-miscoffice-module</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
@@ -336,7 +336,7 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.22.1</version>
+			<version>1.22.2</version>
 		</dependency>
 
 		<dependency>
