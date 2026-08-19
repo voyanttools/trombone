@@ -18,6 +18,8 @@ import org.voyanttools.trombone.nlp.PosLemmas;
 import com.shef.ac.uk.util.Util;
 
 import opennlp.tools.cmdline.postag.POSModelLoader;
+import opennlp.tools.lemmatizer.LemmatizerME;
+import opennlp.tools.lemmatizer.LemmatizerModel;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.sentdetect.SentenceDetectorME;
@@ -38,6 +40,7 @@ public class POSTaggersALanguage {
     private POSModel itsPOSModel = null;
     private SentenceModel itsSentenceModel = null;
     private TokenizerModel itsTokenizerModel = null;
+    private LemmatizerModel itsLemmatizerModel = null;
     private Map<String, String> nounDic;
     private Map<String, String> adjDic;
     private Map<String, String> advDic;
@@ -60,9 +63,9 @@ public class POSTaggersALanguage {
 
     public Span[] tokenizePos(String aSentence) throws InvalidFormatException, IOException {
         if (itsTokenizerModel == null) {
-            InputStream is = Util.class.getResourceAsStream("/postaggersalanguage/five/tokenizerModels/" + lang + "-token.bin");
-            itsTokenizerModel = new TokenizerModel(is);
-            is.close();
+            try (InputStream is = Util.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-tokens-1.3-2.5.4.bin")) {
+                itsTokenizerModel = new TokenizerModel(is);
+            }
         }
         Tokenizer tokenizer = new TokenizerME(itsTokenizerModel);
         Span[] tokens = tokenizer.tokenizePos(aSentence);
@@ -107,9 +110,9 @@ public class POSTaggersALanguage {
 
     public Span[] sentenceDetectPos(String aText) throws InvalidFormatException, IOException {
     	if (itsSentenceModel == null) {
-            InputStream is = Util.class.getResourceAsStream("/postaggersalanguage/five/setenceDetectionModels/" + lang + "-sent.bin");
-            itsSentenceModel = new SentenceModel(is);
-            is.close();
+            try (InputStream is = Util.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-sentence-1.3-2.5.4.bin")) {
+                itsSentenceModel = new SentenceModel(is);
+            }
         }
         SentenceDetectorME sdetector = new SentenceDetectorME(itsSentenceModel);
 
@@ -120,15 +123,25 @@ public class POSTaggersALanguage {
     public String[] posTag(String aSentence[]) throws IOException {
         String posTaggedVersion[] = null;
         if (itsPOSModel == null) {
-        	InputStream is = Util.class.getResourceAsStream("/postaggersalanguage/five/posModels/" + lang + "-pos-maxent.bin");
-            itsPOSModel = new POSModel(is);
-            is.close();
+        	try (InputStream is = Util.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-pos-1.3-2.5.4.bin")) {
+                itsPOSModel = new POSModel(is);
+            }
         }
         //PerformanceMonitor perfMon = new PerformanceMonitor(System.err, "sent");
         POSTaggerME tagger = new POSTaggerME(itsPOSModel);
 
         posTaggedVersion = tagger.tag(aSentence);
         return posTaggedVersion;
+    }
+
+    public String[] lemmaTag(String[] tokens, String[] tags) throws IOException {
+        if (itsLemmatizerModel == null) {
+            try (InputStream is = Util.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-lemmas-1.3-2.5.4.bin")) {
+                itsLemmatizerModel = new LemmatizerModel(is);
+            }
+        }
+        LemmatizerME lemmatizerME = new LemmatizerME(itsLemmatizerModel);
+        return lemmatizerME.lemmatize(tokens, tags);
     }
     
     public PosLemmas getLemmatized(String text) throws IOException {
@@ -140,10 +153,13 @@ public class POSTaggersALanguage {
     		Span[] tokens = tokenizePos(sentenceString);
     		String[] strings = Span.spansToStrings(tokens, sentenceString);
     		String[] pos = posTag(strings);
+            String[] lemmas = lemmaTag(strings, pos);
+
     		for (int i=0; i<tokens.length; i++) {
                 String token = strings[i];
-                String lemma = null;
+                String lemma = lemmas[i];
                 String posType = pos[i];
+                
                 if ("it".equalsIgnoreCase(lang)) {
                     posType = posType.substring(0, 1);
                 }
@@ -151,6 +167,7 @@ public class POSTaggersALanguage {
                 
                 if (Heuristics.isNumber(token)==false && Heuristics.isPunctuation(token)==false) {
                     
+                    /*
                     if (generalType != null) {
                         if ("NOUN".equalsIgnoreCase(generalType)) {
                             lemma = nounDic.get(token.toLowerCase());
@@ -175,6 +192,8 @@ public class POSTaggersALanguage {
                             }
                         }
                     }
+                    */
+
                 	posLemmas.add(token, generalType, lemma, sentenceStart+tokens[i].getStart(), sentenceStart+tokens[i].getEnd());
                 }
 //                if (lemma!=null) {
