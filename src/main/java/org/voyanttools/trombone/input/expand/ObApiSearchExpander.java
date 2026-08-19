@@ -14,10 +14,10 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.voyanttools.trombone.input.source.FileInputSource;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.input.source.UriInputSource;
@@ -26,7 +26,6 @@ import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.StoredDocumentSourceStorage;
 import org.voyanttools.trombone.storage.file.FileStoredDocumentSourceStorage;
 import org.voyanttools.trombone.util.FlexibleParameters;
-
 
 /**
  * @author sgs
@@ -75,17 +74,18 @@ public class ObApiSearchExpander implements Expander {
 			if (is!=null) {is.close();}
 		}
 		
-		JSONParser parser = new JSONParser();
-		JSONObject obj;
+		JsonObject obj;
 		try {
-			obj = (JSONObject) parser.parse(jsonString);
-		} catch (ParseException e) {
-			throw new IOException("Unable to parse JSON results: "+storedDocumentSource);
+			obj = JsonParser.parseString(jsonString).getAsJsonObject();
+		} catch (JsonSyntaxException | IllegalStateException e) {
+			throw new IOException("Unable to parse JSON results: " + storedDocumentSource);
 		}
-		JSONArray hits = (JSONArray) obj.get("hits");
+		JsonArray hits = obj.getAsJsonArray("hits");
 		List<String> ids = new ArrayList<String>();
-		for (int i=0; i<hits.size(); i++) {
-			ids.add((String) hits.get(i));
+		if (hits != null) {
+			for (int i = 0; i < hits.size(); i++) {
+				ids.add(hits.get(i).getAsString());
+			}
 		}
 		
 		for (String id : ids) {

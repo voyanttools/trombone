@@ -26,7 +26,7 @@ import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.StoredDocumentSourceStorage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
 /**
@@ -67,8 +67,8 @@ class BagItExpander implements Expander {
 		
 		// extract the zip into a directory and the traverse the directory to find data
 		File extractedFile = new File(base, "extracted");
-		try {
-			new ZipFile(zipFile).extractAll(extractedFile.getPath());
+		try (ZipFile zipFileObj = new ZipFile(zipFile)) {
+			zipFileObj.extractAll(extractedFile.getPath());
 			List<StoredDocumentSource> expandedStoredDocumentSources = new ArrayList<StoredDocumentSource>();
 			addFromDirectory(base, extractedFile, storedDocumentSource, expandedStoredDocumentSources);
 			return expandedStoredDocumentSources;

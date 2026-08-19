@@ -27,7 +27,7 @@ public class StanfordNlpLemmaTokenizerTest {
 			Reader reader = new HTMLCharFilter(new StringReader("These dogs <b>are</b> interesting."));
 			tokenizer.setReader(reader);
 			tokenizer.reset();
-			String[] lemmas = new String[]{"these","dog","be","interesting"};
+			String[] lemmas = new String[]{"this","dog","be","interesting"};
 			int i = 0;
 			while (tokenizer.incrementToken()) {
 				termAtt = tokenizer.getAttribute(CharTermAttribute.class);

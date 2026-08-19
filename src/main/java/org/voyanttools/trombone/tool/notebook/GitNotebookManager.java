@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.voyanttools.trombone.tool.notebook;
 
 import java.io.File;
@@ -53,8 +50,6 @@ import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.notes.Note;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.storage.git.RepositoryManager;
@@ -269,8 +264,8 @@ public class GitNotebookManager extends AbstractTool {
 			return;
 		}
 		
-		JSONObject obj = (JSONObject) JSONValue.parse(notebookMetadata);
-		String metadataUserId = (String) obj.get("userId");
+		com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(notebookMetadata).getAsJsonObject();
+		String metadataUserId = obj.get("userId").getAsString();
 		if (metadataUserId.equals(userId) == false) {
 			setError("Notebook author does not match Spyral account.");
 			return;
@@ -504,7 +499,7 @@ public class GitNotebookManager extends AbstractTool {
 	
 	private void setError(String errorString) {
 		success = false;
-		error = JSONValue.escape(errorString);
+		error = errorString != null ? errorString.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r") : null;
 	}
 	
 	public String getData() {

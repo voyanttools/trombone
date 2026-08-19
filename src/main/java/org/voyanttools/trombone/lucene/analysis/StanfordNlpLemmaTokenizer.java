@@ -9,7 +9,7 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
-import org.apache.tika.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.nlp.StanfordNlpAnnotator;
 
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
