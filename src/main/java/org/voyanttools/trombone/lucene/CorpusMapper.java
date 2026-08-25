@@ -63,10 +63,10 @@ import org.voyanttools.trombone.storage.Storage;
  */
 public class CorpusMapper {
 	
-	Storage storage;
+	private Storage storage;
 	private DirectoryReader directoryReader;
-	IndexSearcher searcher;
-	Corpus corpus;
+	private IndexSearcher searcher;
+	private Corpus corpus;
 	private List<Integer> luceneIds = null;
 	private BitSet bitSet = null;
 	private Map<String, Integer> documentIdToLuceneIdMap = null;
