@@ -4,20 +4,19 @@
  */
 package postaggersalanguage.five;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.nlp.PosLemmas;
 
-import com.shef.ac.uk.util.Util;
-
-import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.lemmatizer.LemmatizerME;
 import opennlp.tools.lemmatizer.LemmatizerModel;
 import opennlp.tools.postag.POSModel;
@@ -41,29 +40,29 @@ public class POSTaggersALanguage {
     private SentenceModel itsSentenceModel = null;
     private TokenizerModel itsTokenizerModel = null;
     private LemmatizerModel itsLemmatizerModel = null;
-    private Map<String, String> nounDic;
-    private Map<String, String> adjDic;
-    private Map<String, String> advDic;
-    private Map<String, String> verbDic;
-    private Map<String, String> detDic;
-    private Map<String, String> pronDic;
+    // private Map<String, String> nounDic;
+    // private Map<String, String> adjDic;
+    // private Map<String, String> advDic;
+    // private Map<String, String> verbDic;
+    // private Map<String, String> detDic;
+    // private Map<String, String> pronDic;
     private Map<String, String> posMap;
 
 
     public POSTaggersALanguage(String lang) throws IOException {
     	this.lang = lang;
-        nounDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/nounDic.txt");
-        adjDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/adjDic.txt");
-        advDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/advDic.txt");
-        verbDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/verbDic.txt");
-        detDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/detDic.txt");
-        pronDic = Util.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/pronounDic.txt");
-        posMap = Util.getFileContentAsMap("/postaggersalanguage/five/universal-pos-tags/" + lang + "POSMapping.txt", "######", true);
+        // nounDic = POSTaggersALanguage.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/nounDic.txt");
+        // adjDic = POSTaggersALanguage.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/adjDic.txt");
+        // advDic = POSTaggersALanguage.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/advDic.txt");
+        // verbDic = POSTaggersALanguage.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/verbDic.txt");
+        // detDic = POSTaggersALanguage.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/detDic.txt");
+        // pronDic = POSTaggersALanguage.loadDictionary("/postaggersalanguage/five/dictionaries/" + lang + "/pronounDic.txt");
+        posMap = POSTaggersALanguage.getFileContentAsMap("/postaggersalanguage/five/universal-pos-tags/" + lang + "POSMapping.txt", "######", true);
 	}
 
     public Span[] tokenizePos(String aSentence) throws InvalidFormatException, IOException {
         if (itsTokenizerModel == null) {
-            try (InputStream is = Util.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-tokens-1.3-2.5.4.bin")) {
+            try (InputStream is = POSTaggersALanguage.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-tokens-1.3-2.5.4.bin")) {
                 itsTokenizerModel = new TokenizerModel(is);
             }
         }
@@ -110,7 +109,7 @@ public class POSTaggersALanguage {
 
     public Span[] sentenceDetectPos(String aText) throws InvalidFormatException, IOException {
     	if (itsSentenceModel == null) {
-            try (InputStream is = Util.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-sentence-1.3-2.5.4.bin")) {
+            try (InputStream is = POSTaggersALanguage.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-sentence-1.3-2.5.4.bin")) {
                 itsSentenceModel = new SentenceModel(is);
             }
         }
@@ -123,7 +122,7 @@ public class POSTaggersALanguage {
     public String[] posTag(String aSentence[]) throws IOException {
         String posTaggedVersion[] = null;
         if (itsPOSModel == null) {
-        	try (InputStream is = Util.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-pos-1.3-2.5.4.bin")) {
+        	try (InputStream is = POSTaggersALanguage.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-pos-1.3-2.5.4.bin")) {
                 itsPOSModel = new POSModel(is);
             }
         }
@@ -136,7 +135,7 @@ public class POSTaggersALanguage {
 
     public String[] lemmaTag(String[] tokens, String[] tags) throws IOException {
         if (itsLemmatizerModel == null) {
-            try (InputStream is = Util.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-lemmas-1.3-2.5.4.bin")) {
+            try (InputStream is = POSTaggersALanguage.class.getResourceAsStream("/org/apache/opennlp/models/opennlp-"+lang+"-ud-lemmas-1.3-2.5.4.bin")) {
                 itsLemmatizerModel = new LemmatizerModel(is);
             }
         }
@@ -204,6 +203,49 @@ public class POSTaggersALanguage {
     		}
     	}
     	return posLemmas;
+    }
+
+    private static Map<String, String> getFileContentAsMap(String aFileName, String aDivider, boolean inLowerCased) throws IOException {
+        Map<String, String> map = new HashMap<String, String>();
+        try (InputStream is = POSTaggersALanguage.class.getResourceAsStream(aFileName)) {
+        	List<String> lines = IOUtils.readLines(is, StandardCharsets.UTF_8);
+        	for (String str : lines) {
+        		if (!"".equals(str.trim())) {
+                    String values[] = str.split(aDivider);
+                    if (values.length == 2) {
+                        if (inLowerCased) {
+                        map.put(values[0].trim().toLowerCase(), values[1].trim());
+                            
+                        } else {
+                        map.put(values[0].trim(), values[1].trim());
+                            
+                        }
+                    }
+                }
+        	}
+        }
+        return map;
+    }
+
+    private static Map<String, String> loadDictionary(String aFileName) throws IOException {
+        Map<String, String> map = new HashMap<String, String>();
+        try (InputStream is = POSTaggersALanguage.class.getResourceAsStream(aFileName)) {
+        	List<String> lines = IOUtils.readLines(is, StandardCharsets.UTF_8);
+        	for (String str : lines) {
+        		if (!"".equals(str.trim())) {
+                    String values[] = str.split("===");
+                    if (values.length == 2) {
+                        String vals[] = values[1].split(";");
+                        for (int i = 0; i < vals.length; i++) {
+                            String val = vals[i];
+                            map.put(val.toLowerCase(), values[0].trim());
+
+                        }
+                    }
+                }
+        	}
+        }
+        return map;
     }
 
     public static void main(String args[]) throws InvalidFormatException, IOException {
