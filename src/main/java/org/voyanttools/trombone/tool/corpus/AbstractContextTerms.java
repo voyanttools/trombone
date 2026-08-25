@@ -25,23 +25,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.queries.spans.SpanQuery;
 import org.apache.lucene.queries.spans.Spans;
-import org.voyanttools.trombone.lucene.search.SimpleTermInfo;
 import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.BytesRef;
+
+import org.voyanttools.trombone.lucene.search.SimpleTermInfo;
 import org.voyanttools.trombone.lucene.CorpusMapper;
-import org.voyanttools.trombone.lucene.search.FieldPrefixAwareSimpleSpanQueryParser;
-import org.voyanttools.trombone.model.TokenType;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 

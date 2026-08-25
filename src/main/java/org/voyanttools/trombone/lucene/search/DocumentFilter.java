@@ -5,10 +5,8 @@ package org.voyanttools.trombone.lucene.search;
 
 import java.io.IOException;
 
-import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.util.BitDocIdSet;
-import org.apache.lucene.util.Bits;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 
 /**

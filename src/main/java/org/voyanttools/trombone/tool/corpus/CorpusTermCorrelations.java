@@ -8,9 +8,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.CorpusTerm;
@@ -22,7 +21,6 @@ import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.tool.util.Message.Type;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.FlexibleQueue;
-import org.voyanttools.trombone.util.NumberUtils;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;

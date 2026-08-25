@@ -24,7 +24,6 @@ package org.voyanttools.trombone.model;
 import java.text.Normalizer;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.voyanttools.trombone.tool.util.ToolSerializer;

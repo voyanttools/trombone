@@ -24,15 +24,12 @@ package org.voyanttools.trombone.document;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.net.URI;
-
 import org.junit.Test;
+
 import org.voyanttools.trombone.input.source.FileInputSource;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.input.source.StringInputSource;
-import org.voyanttools.trombone.input.source.UriInputSource;
 import org.voyanttools.trombone.model.DocumentFormat;
-import org.voyanttools.trombone.util.EmbeddedWebServer;
 
 /**
  * @author sgs

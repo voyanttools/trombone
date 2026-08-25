@@ -2,10 +2,8 @@ package org.voyanttools.trombone.tool.analysis;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Scanner;
-
 import org.apache.commons.lang3.ArrayUtils;
-import org.voyanttools.trombone.model.RawCATerm;
+
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.tool.util.AbstractTool;
 import org.voyanttools.trombone.tool.util.ToolSerializer;

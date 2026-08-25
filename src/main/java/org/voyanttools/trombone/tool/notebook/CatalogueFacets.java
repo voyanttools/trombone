@@ -16,8 +16,8 @@ import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetCounts;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesReaderState;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
+
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.tool.util.AbstractTool;
 import org.voyanttools.trombone.tool.util.ToolSerializer;

@@ -13,13 +13,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
-import org.voyanttools.trombone.lucene.search.SimpleTermInfo;
 import org.apache.lucene.util.BytesRef;
+
+import org.voyanttools.trombone.lucene.search.SimpleTermInfo;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.lucene.analysis.LemmaAnalyzer;
 import org.voyanttools.trombone.model.Corpus;

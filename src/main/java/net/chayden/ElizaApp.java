@@ -1,7 +1,6 @@
 package net.chayden;
 
 import java.awt.*;
-import java.net.URISyntaxException;
 
 /**
  *  Eliza Application.

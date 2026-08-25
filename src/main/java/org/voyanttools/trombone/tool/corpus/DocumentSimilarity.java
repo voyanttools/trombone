@@ -2,28 +2,18 @@ package org.voyanttools.trombone.tool.corpus;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
-import org.voyanttools.trombone.lucene.CorpusMapper;
+
 import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.model.IndexedDocument;
 import org.voyanttools.trombone.model.RawCATerm;
 import org.voyanttools.trombone.model.RawCATerm.CategoryType;
-import org.voyanttools.trombone.model.RawPCATerm;
 import org.voyanttools.trombone.model.TokenType;
 import org.voyanttools.trombone.storage.Storage;
-import org.voyanttools.trombone.tool.analysis.AnalysisUtils;
 import org.voyanttools.trombone.tool.analysis.CorrespondenceAnalysis;
-import org.voyanttools.trombone.tool.corpus.CorpusAnalysisTool.MatrixType;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamConverter;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 @XStreamAlias("documentSimilarity")
 public class DocumentSimilarity extends CA {

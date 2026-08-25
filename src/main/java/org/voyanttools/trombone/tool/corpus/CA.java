@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.model.IndexedDocument;
-import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.model.RawCATerm;
 import org.voyanttools.trombone.model.RawCATerm.CategoryType;
 import org.voyanttools.trombone.model.TokenType;

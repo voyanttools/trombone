@@ -23,18 +23,14 @@ package org.voyanttools.trombone.input.expand;
 
 import it.svario.xpathapi.jaxp.XPathAPI;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -53,7 +49,6 @@ import javax.xml.xpath.XPathException;
 import net.sf.saxon.lib.NamespaceConstant;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.detect.XmlRootExtractor;
 import org.voyanttools.trombone.input.source.InputSource;

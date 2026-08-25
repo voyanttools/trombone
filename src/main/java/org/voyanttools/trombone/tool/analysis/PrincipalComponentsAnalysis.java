@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.voyanttools.trombone.model.CorpusTerm;
 import org.voyanttools.trombone.tool.util.ToolSerializer;
 
 import com.thoughtworks.xstream.annotations.XStreamConverter;

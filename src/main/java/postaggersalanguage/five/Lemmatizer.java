@@ -4,14 +4,10 @@
  */
 package postaggersalanguage.five;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.Collection;
-import static net.sf.hfst.HfstOptimizedLookup.runTransducer;
 
 import net.sf.hfst.FormatException;
 import net.sf.hfst.NoTokenizationException;

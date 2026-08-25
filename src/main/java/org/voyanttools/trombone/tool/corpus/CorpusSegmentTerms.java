@@ -13,11 +13,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 import org.apache.commons.collections4.ListUtils;
 import org.voyanttools.trombone.lucene.CorpusMapper;
-import org.voyanttools.trombone.model.CorpusTerm;
 import org.voyanttools.trombone.model.DocumentToken;
 import org.voyanttools.trombone.model.TokenType;
 import org.voyanttools.trombone.storage.Storage;

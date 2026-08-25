@@ -10,8 +10,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import cc.mallet.util.ArrayUtils;
-
 /**
  * @author sgs
  *

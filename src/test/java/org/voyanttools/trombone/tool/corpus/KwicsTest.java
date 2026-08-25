@@ -9,8 +9,6 @@ import org.apache.lucene.document.TextField;
 import org.junit.Test;
 import org.voyanttools.trombone.lucene.LuceneManager;
 import org.voyanttools.trombone.storage.Storage;
-import org.voyanttools.trombone.tool.corpus.CorpusCreator;
-import org.voyanttools.trombone.tool.corpus.DocumentContexts;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
 
