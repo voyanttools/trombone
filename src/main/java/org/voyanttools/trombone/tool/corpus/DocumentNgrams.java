@@ -150,14 +150,14 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 				Map<Integer, List<int[]>> documentAndPositionsMap = new HashMap<Integer, List<int[]>>();
 
 				int doc = spans.nextDoc();
-				while(doc!=spans.NO_MORE_DOCS) {
+				while(doc!=Spans.NO_MORE_DOCS) {
 					String docId = corpusMapper.getDocumentIdFromLuceneId(doc);
 					if (validIds.contains(docId)) {
 						docIndexInCorpus = corpus.getDocumentPosition(docId);
 						documentAndPositionsMap.put(docIndexInCorpus, new ArrayList<int[]>());
 						
 						int pos = spans.nextStartPosition();
-						while(pos!=spans.NO_MORE_POSITIONS) {
+						while(pos!=Spans.NO_MORE_POSITIONS) {
 							documentAndPositionsMap.get(docIndexInCorpus).add(new int[]{spans.startPosition(), spans.endPosition()});
 							pos = spans.nextStartPosition();
 						}
