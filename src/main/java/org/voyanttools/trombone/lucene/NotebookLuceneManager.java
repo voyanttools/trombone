@@ -118,6 +118,6 @@ public class NotebookLuceneManager extends AbstractLuceneManager {
 
 	@Override
 	public void closeAll() throws IOException {
-		close(RandomStringUtils.randomAlphabetic(10));
+		close(RandomStringUtils.secure().nextAlphabetic(10));
 	}
 }

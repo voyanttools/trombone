@@ -62,7 +62,7 @@ public class NotebookManager extends AbstractTool {
 				}
 			} else {
 				while(true) {
-					id = RandomStringUtils.randomAlphanumeric(6);
+					id = RandomStringUtils.secure().nextAlphabetic(6);
 					if (storage.isStored(id+".html", Location.notebook)==false) {
 						break;
 					}

@@ -15,7 +15,7 @@ public class FieldPrefixAwareSimpleQueryParserTest {
 	@Test
 	public void test() throws IOException {
 		Storage storage = TestHelper.getDefaultTestStorage();
-		FieldPrefixAwareSimpleQueryParser parser = new FieldPrefixAwareSimpleQueryParser(null, storage.getLuceneManager().getAnalyzer(RandomStringUtils.randomAlphabetic(10)));
+		FieldPrefixAwareSimpleQueryParser parser = new FieldPrefixAwareSimpleQueryParser(null, storage.getLuceneManager().getAnalyzer(RandomStringUtils.secure().nextAlphabetic(10)));
 		Query query;
 		
 		// simple default TokenType

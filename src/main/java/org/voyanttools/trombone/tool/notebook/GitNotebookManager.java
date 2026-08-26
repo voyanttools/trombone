@@ -280,7 +280,7 @@ public class GitNotebookManager extends AbstractTool {
 			id = userId + NOTEBOOK_ID_SEPARATOR + name;
 		} else {
 			while(true) {
-				id = userId + NOTEBOOK_ID_SEPARATOR + RandomStringUtils.randomAlphanumeric(6);
+				id = userId + NOTEBOOK_ID_SEPARATOR + RandomStringUtils.secure().nextAlphabetic(6);
 				if (doesNotebookFileExist(rm, id+".json") == false) {
 					break;
 				}

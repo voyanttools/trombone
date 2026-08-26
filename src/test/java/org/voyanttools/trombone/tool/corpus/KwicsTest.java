@@ -29,7 +29,7 @@ public class KwicsTest {
 		LuceneManager luceneManager = storage.getLuceneManager();
 		document = new Document();
 		document.add(new TextField("lexical", "dark and stormy night in document one", Field.Store.YES));
-		luceneManager.addDocument(RandomStringUtils.randomAlphabetic(10), document);
+		luceneManager.addDocument(RandomStringUtils.secure().nextAlphabetic(10), document);
 		
 		FlexibleParameters parameters;
 		
