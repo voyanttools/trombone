@@ -95,7 +95,6 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 		NONE, LENGTHFIRST, RAWFREQFIRST, POSITIONFIRST;
 		private static Filter getForgivingly(FlexibleParameters parameters) {
 			String filter = parameters.getParameterValue("overlapFilter", "").toUpperCase();
-			String sortPrefix = "NONE"; // default
 			if (filter.startsWith("LENGTH")) {return LENGTHFIRST;}
 			else if (filter.startsWith("RAWFREQ")) {return RAWFREQFIRST;}
 			else {return NONE;}

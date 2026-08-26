@@ -46,7 +46,6 @@ public class LuceneHelper {
 		Map<Integer, int[]> positionToOffsets = getPositionToOffsetsMap(corpusMapper, doc, tokenType, allPositions);
 		String string = doc.getDocumentString();
 		List<Kwic> kwics = new ArrayList<Kwic>();
-		Stripper stripper = new Stripper(Stripper.TYPE.ALL);
 		int docIndex = corpusMapper.getLuceneIdFromDocumentId(doc.getId());
 		for (int position : positions) {
 			String left = string.substring(positionToOffsets.get(Math.max(0, position-context))[0], positionToOffsets.get(position)[0]-1);

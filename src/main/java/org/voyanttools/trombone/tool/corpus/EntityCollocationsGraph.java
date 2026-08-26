@@ -67,7 +67,6 @@ public class EntityCollocationsGraph extends AbstractTerms {
 		List<DocumentEntity> documentEntities;
 		try {
 			documentEntities = (List<DocumentEntity>) documentEntitiesTool.getFuture().get(120, TimeUnit.SECONDS);
-			Map<String, String> status = documentEntitiesTool.getStatus();
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			e.printStackTrace();
 			throw new IOException("DocumentEntities failed!");

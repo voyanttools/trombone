@@ -37,8 +37,6 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @XStreamAlias("documentsMetadata")
 public class DocumentsMetadata extends AbstractCorpusTool {
 	
-	private int total = 0;
-	
 	private List<IndexedDocument> documents = new ArrayList<IndexedDocument>();
 
 	/**
@@ -94,7 +92,6 @@ public class DocumentsMetadata extends AbstractCorpusTool {
 		else {
 			ids.addAll(validIds);
 		}
-		total = ids.size();
 		
 		int start = parameters.getParameterIntValue("start", 0);
 		int limit = parameters.getParameterIntValue("limit", Integer.MAX_VALUE);
