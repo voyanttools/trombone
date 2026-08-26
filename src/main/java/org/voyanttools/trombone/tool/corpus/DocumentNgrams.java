@@ -495,9 +495,6 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 			this.endOffset = endOffset;
 			
 		}
-		public SimplifiedTermInfo(String string) {
-			this(string, 0, 0, 0, 0, 0);
-		}
 	}
 
 
