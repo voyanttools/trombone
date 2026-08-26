@@ -188,7 +188,7 @@ public class Veliza extends AbstractCorpusTool {
 			
 	    	// add to previous
 	    	if (!response.equals("I'm not sure I understand you fully.") && !ArrayUtils.contains(previous, response)) {
-	    		previous = ArrayUtils.add(previous, 0, response);
+				previous = ArrayUtils.insert(0, previous, response);
 	    	}
 			
 		}
