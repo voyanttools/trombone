@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.facet.Facets;
 import org.apache.lucene.facet.FacetsCollector;
+import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.facet.LabelAndValue;
 import org.apache.lucene.facet.sortedset.DefaultSortedSetDocValuesReaderState;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetCounts;
@@ -75,7 +76,7 @@ public class CorpusFacets extends AbstractTerms {
 		FieldPrefixAwareSimpleQueryParser parser = new FieldPrefixAwareSimpleQueryParser(corpusMapper.getLeafReader(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()), defaultPrefix);
 		FieldPrefixAwareSimpleQueryParser nonFacetedParser = new FieldPrefixAwareSimpleQueryParser(corpusMapper.getLeafReader(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()), defaultNonFacetedPrefix);
 		
-		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(corpusMapper.getLeafReader());
+		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(corpusMapper.getLeafReader(), new FacetsConfig());
 		
 		String[] queryStrings = getQueries(queries);
 		

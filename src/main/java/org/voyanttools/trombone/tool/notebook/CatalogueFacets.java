@@ -55,7 +55,7 @@ public class CatalogueFacets extends AbstractTool {
 		IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 		
 		// TODO store this because apparently init is costly?
-		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader);
+		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader, new FacetsConfig());
 		
 		String[] facetQuery = parameters.getParameterValues("query");
 		

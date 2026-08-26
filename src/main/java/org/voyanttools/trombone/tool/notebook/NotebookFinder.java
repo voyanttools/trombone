@@ -70,7 +70,7 @@ public class NotebookFinder extends AbstractTool {
 		DirectoryReader indexReader = DirectoryReader.open(storage.getNotebookLuceneManager().getIndexWriter(""));
 		IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 		Analyzer analyzer = storage.getNotebookLuceneManager().getAnalyzer("");
-		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader);
+		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader, new FacetsConfig());
 		
 		Query query = getFacetAwareQuery(queries, indexReader, analyzer);
 		FacetsCollector fc = new FacetsCollector();
