@@ -61,7 +61,7 @@ public class LuceneHelper {
 		IndexReader reader = corpusMapper.getLeafReader();
 		int luceneDoc = corpusMapper.getLuceneIdFromDocumentId(doc.getId());
 		Map<Integer, int[]> map = new HashMap<Integer, int[]>();
-		Terms terms = reader.getTermVector(luceneDoc, tokenType.name());
+		Terms terms = reader.termVectors().get(luceneDoc, tokenType.name());
 		TermsEnum termsEnum = null;
 		if (terms!=null) {
 			termsEnum = terms.iterator();

@@ -63,7 +63,7 @@ public class CorpusTermMinimalsDB extends AbstractDB {
 		Map<String, AtomicInteger> rawFreqsMap = new HashMap<String, AtomicInteger>();
 		TermsEnum termsEnum = null;
 		for (int doc : corpusMapper.getLuceneIds()) {
-			Terms terms = reader.getTermVector(doc, field);
+			Terms terms = reader.termVectors().get(doc, field);
 			if (terms!=null) {
 				termsEnum = terms.iterator();
 				if (termsEnum!=null) {

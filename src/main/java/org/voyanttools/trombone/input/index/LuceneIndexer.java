@@ -342,7 +342,7 @@ public class LuceneIndexer implements Indexer {
 				topDocs = indexSearcher.search(query, 1); // there may be multiple documents in the index but they should have the same text
 				if (topDocs.scoreDocs.length == 0) { return; } // document not found (e.g. indexing failed due to schema conflict)
 				int docId = topDocs.scoreDocs[0].doc;
-				Terms terms = indexReader.getTermVector(docId, "lexical");
+				Terms terms = indexReader.termVectors().get(docId, "lexical");
 				int totalTokens = 0;
 				int totalTypes =  0;
 				int lastOffset = 0;

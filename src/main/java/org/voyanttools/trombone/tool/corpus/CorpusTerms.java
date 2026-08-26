@@ -128,7 +128,7 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 		Map<String, Map<Integer, Integer>> rawFreqsMap = new HashMap<String, Map<Integer, Integer>>();
 		TermsEnum termsEnum = null;
 		for (int doc : corpusMapper.getLuceneIds()) {
-			Terms terms = reader.getTermVector(doc, tokenType.name());
+			Terms terms = reader.termVectors().get(doc, tokenType.name());
 			if (terms!=null) {
 				termsEnum = terms.iterator();
 				if (termsEnum!=null) {

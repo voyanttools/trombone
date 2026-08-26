@@ -119,7 +119,7 @@ public class CorpusMapper {
 		for (LeafReaderContext ctx : directoryReader.leaves()) {
 			int localDoc = globalDocId - ctx.docBase;
 			if (localDoc >= 0 && localDoc < ctx.reader().maxDoc()) {
-				return ctx.reader().getTermVector(localDoc, field);
+				return ctx.reader().termVectors().get(localDoc, field);
 			}
 		}
 		return null;
