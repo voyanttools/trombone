@@ -182,7 +182,7 @@ class ArchiveExpander implements Expander {
 						childMetadata.setDocumentFormat(childDocumentFormat);
 					}
 					String id = DigestUtils.md5Hex(parentId+filename);
-					InputSource inputSource = new InputStreamInputSource(id, childMetadata, new CloseShieldInputStream(archiveInputStream));
+					InputSource inputSource = new InputStreamInputSource(id, childMetadata, CloseShieldInputStream.wrap(archiveInputStream));
 					StoredDocumentSource storedDocumentSource = storedDocumentSourceStorage.getStoredDocumentSource(inputSource);
 					if (parentDocumentFormat==DocumentFormat.PBLIT) { // use cloned expander without parameters
 						if (!clonedExpanders.containsKey(childDocumentFormat.name())) {

@@ -108,7 +108,7 @@ public class BagItExtractor implements Extractor {
 
 	private InputSource getExtractableInputSource(ArchiveInputStream archiveInputStream, String inputFormat) throws IOException {
 		FlexibleParameters params = new FlexibleParameters(new String[]{"inputFormat="+inputFormat});
-		InputSource is = new InputStreamInputSource(DigestUtils.md5Hex(UUID.randomUUID().toString()), new DocumentMetadata(), new CloseShieldInputStream(archiveInputStream));
+		InputSource is = new InputStreamInputSource(DigestUtils.md5Hex(UUID.randomUUID().toString()), new DocumentMetadata(), CloseShieldInputStream.wrap(archiveInputStream));
 		StoredDocumentSource storedDocSource = storedDocumentSourceStorage.getStoredDocumentSource(is);
 		XmlExtractor extractor = new XmlExtractor(storedDocumentSourceStorage, params);
 		return extractor.getExtractableInputSource(storedDocSource);
