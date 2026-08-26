@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -170,7 +171,7 @@ public class FileStoredDocumentSourceStorage implements StoredDocumentSourceStor
 		File file = getMultipleExpandedStoredDocumentSourcesFile(id, prefix);
 		if (file.exists()==false) {return multipleExpandedStoredDocumentSources;}
 		
-		List<String> lines = FileUtils.readLines(file);
+		List<String> lines = FileUtils.readLines(file, StandardCharsets.UTF_8);
 		for (String line : lines) {
 			DocumentMetadata metadata = getStoredDocumentSourceMetadata(line.trim());
 			multipleExpandedStoredDocumentSources.add(new StoredDocumentSource(line, metadata));

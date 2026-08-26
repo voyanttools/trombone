@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -116,12 +117,10 @@ public class LuceneIndexerTest {
 	public void testTibetan() throws IOException {
 		Storage storage = TestHelper.getDefaultTestStorage();
 		
-		Map<String, Integer> docsToTokensMap = new HashMap<String, Integer>();
-		
 		// extract and index with no parameters
 		FlexibleParameters parameters = new FlexibleParameters();
 		File file = TestHelper.getResource("i18n/bo_tibetan_utf8.txt");
-		String text = FileUtils.readFileToString(file);
+		String text = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 		parameters.setParameter("string", text);
 		parameters.setParameter("language", "en");
 		
@@ -306,7 +305,7 @@ public class LuceneIndexerTest {
 			for (Map.Entry<String, Integer> entry : corpusMapEntry.getValue().entrySet()) {
 				TopDocs topDocs = searcher.search(new TermQuery(new Term("id", entry.getKey())), 1);
 				int doc = topDocs.scoreDocs[0].doc;
-				assertEquals((int) entry.getValue(), (int) reader.getTermVector(doc, TokenType.lexical.name()).size());		
+				assertEquals((int) entry.getValue(), (int) reader.termVectors().get(doc, TokenType.lexical.name()).size());		
 			}
 		}
 		

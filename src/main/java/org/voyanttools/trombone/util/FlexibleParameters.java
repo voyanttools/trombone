@@ -32,7 +32,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -160,7 +160,7 @@ public class FlexibleParameters implements Cloneable, Serializable {
 		// synchronize to avoid two threads writing to same file
 		OutputStream outputStream = null;
 		outputStream = new FileOutputStream(file);
-		Writer writer = new OutputStreamWriter(outputStream, Charset.forName("UTF-8"));
+		Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
 		XStream xStream = ToolSerializer.getXMLXStream();
 		xStream.toXML(this, writer);
 		if (outputStream!=null) {

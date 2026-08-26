@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.input.source.InputSourcesBuilder;
@@ -96,7 +97,7 @@ public class RawDocumentExporter extends AbstractTool implements RawSerializable
 			}
 			BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 			// FIXME: copy this without closing writer buffer
-			IOUtils.copy(bufferedInputStream, writer);
+			IOUtils.copy(bufferedInputStream, writer, Charset.forName(corpus.getDocument(id).getMetadata().getEncoding()));
 			inputStream.close();
 		}
 		finally {
