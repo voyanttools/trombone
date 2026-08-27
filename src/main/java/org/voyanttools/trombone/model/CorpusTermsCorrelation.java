@@ -149,6 +149,7 @@ public class CorpusTermsCorrelation {
 	
 	public static class CorpusTermsCorrelationConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CorpusTermsCorrelation.class.isAssignableFrom(type);

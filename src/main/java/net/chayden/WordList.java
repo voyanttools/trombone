@@ -5,7 +5,7 @@ import java.util.Vector;
 /**
  *  Eliza word list.
  */
-public class WordList extends Vector {
+public class WordList extends Vector<Object> {
 
     /**
      *  Add another word to the list.

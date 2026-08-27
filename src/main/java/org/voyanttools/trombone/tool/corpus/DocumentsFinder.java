@@ -209,6 +209,7 @@ public class DocumentsFinder extends AbstractTerms {
 
 	public static class DocumentsFinderConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return DocumentsFinder.class.isAssignableFrom(type);

@@ -36,7 +36,7 @@ public class FlexibleQueue<T> {
 	public FlexibleQueue(Comparator<T> comparator, int size) {
 		this.comparator = comparator;
 		if (size>0 && size<100000) { // a bit arbitrary, a queue is faster, but all values need to be initialized, so a memory hog
-			luceneQueue = new LuceneQueue(comparator, size);
+			luceneQueue = new LuceneQueue<T>(comparator, size);
 		}
 		else {
 			list = new ArrayList<T>();
@@ -88,7 +88,7 @@ public class FlexibleQueue<T> {
 		return list;
 	}
 	
-	private class LuceneQueue<T> extends PriorityQueue<T> {
+	private static class LuceneQueue<T> extends PriorityQueue<T> {
 		
 		Comparator<T> comparator;
 

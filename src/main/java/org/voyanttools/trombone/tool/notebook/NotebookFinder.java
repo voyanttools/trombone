@@ -162,6 +162,7 @@ public class NotebookFinder extends AbstractTool {
 	
 	public static class CatalogueFacetsConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return NotebookFinder.class.isAssignableFrom(type);

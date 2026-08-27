@@ -412,6 +412,7 @@ public class DocumentTerm {
 	
 	public static class DocumentTermConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return DocumentTerm.class.isAssignableFrom(type);

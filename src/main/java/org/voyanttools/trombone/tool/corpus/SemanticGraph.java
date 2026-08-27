@@ -231,6 +231,7 @@ public class SemanticGraph extends AbstractCorpusTool {
     
 	public static class SemanticGraphConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return SemanticGraph.class.isAssignableFrom(type);

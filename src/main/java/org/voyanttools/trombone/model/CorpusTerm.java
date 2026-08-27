@@ -375,6 +375,7 @@ public class CorpusTerm implements Serializable {
 	
 	public static class CorpusTermConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CorpusTerm.class.isAssignableFrom(type);

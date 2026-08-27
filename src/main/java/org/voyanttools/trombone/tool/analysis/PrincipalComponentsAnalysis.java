@@ -212,6 +212,7 @@ public class PrincipalComponentsAnalysis {
 		
 		public static class PrincipleComponentConverter implements Converter {
 
+			@SuppressWarnings("rawtypes")
 			@Override
 			public boolean canConvert(Class type) {
 				return PrincipleComponent.class.isAssignableFrom(type);

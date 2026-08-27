@@ -363,7 +363,7 @@ public class TopicModeling extends AbstractCorpusTool {
 		if (parameters.containsKey("corpus")) {
 			sb.append(parameters.getParameterValue("corpus")).append("-");
 		}
-		List<String> names = new ArrayList(parameters.getKeys());
+		List<String> names = new ArrayList<String>(parameters.getKeys());
 		Collections.sort(names);
 		StringBuilder paramsBuilder = new StringBuilder();
 		for (String name : names) {
@@ -390,6 +390,7 @@ public class TopicModeling extends AbstractCorpusTool {
 	
 	public static class TopicModelingConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return TopicModeling.class.isAssignableFrom(type);

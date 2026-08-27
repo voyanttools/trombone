@@ -177,6 +177,7 @@ public class CorpusMetadata implements Serializable {
 	
 	public static class CorpusMetadataConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CorpusMetadata.class == type;

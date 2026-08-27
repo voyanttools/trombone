@@ -7,7 +7,7 @@ import java.util.Vector;
  *  This list of pre-post entries is used to perform word transformations
  *  prior to or after other processing.
  */
-public class PrePostList extends Vector {
+public class PrePostList extends Vector<Object> {
 
     /**
      *  Add another entry to the list.

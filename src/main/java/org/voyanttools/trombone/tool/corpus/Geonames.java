@@ -647,6 +647,7 @@ public class Geonames extends AbstractContextTerms {
 	
 	public static class CityOccurrenceConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class arg0) {
 			return CityOccurrence.class.isAssignableFrom(arg0);
@@ -717,6 +718,7 @@ public class Geonames extends AbstractContextTerms {
 		/* (non-Javadoc)
 		 * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
 		 */
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return Geonames.class.isAssignableFrom(type);

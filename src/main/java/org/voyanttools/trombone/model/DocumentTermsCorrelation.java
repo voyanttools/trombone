@@ -136,6 +136,7 @@ public class DocumentTermsCorrelation {
 	
 	public static class DocumentTermsCorrelationConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return DocumentTermsCorrelation.class.isAssignableFrom(type);

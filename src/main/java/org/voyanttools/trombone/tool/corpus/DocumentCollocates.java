@@ -207,7 +207,7 @@ public class DocumentCollocates extends AbstractContextTerms {
 			else {break;}
 		}
 
-		FlexibleQueue<DocumentCollocate> documentCollocatesQueue = new FlexibleQueue(comparator, limit);
+		FlexibleQueue<DocumentCollocate> documentCollocatesQueue = new FlexibleQueue<DocumentCollocate>(comparator, limit);
 		
 		for (Map.Entry<String, Map<String, AtomicInteger>> keywordMapEntry : mapOfTermsMap.entrySet()) {
 			String keyword = keywordMapEntry.getKey();

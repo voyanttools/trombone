@@ -155,6 +155,7 @@ public class CorpusCollocates extends AbstractContextTerms {
 	
 	public static class CorpusCollocatesConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CorpusCollocates.class.isAssignableFrom(type);

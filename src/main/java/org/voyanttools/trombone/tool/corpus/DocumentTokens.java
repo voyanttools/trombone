@@ -281,6 +281,7 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 		/* (non-Javadoc)
 		 * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
 		 */
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return DocumentTokens.class.isAssignableFrom(type);

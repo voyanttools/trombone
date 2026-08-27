@@ -98,6 +98,7 @@ public class CatalogueFacets extends AbstractTool {
 
 	public static class CatalogueFacetsConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CatalogueFacets.class.isAssignableFrom(type);

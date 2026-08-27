@@ -49,7 +49,7 @@ public class BagItExtractor implements Extractor {
 		ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
 		InputStream inputStream = storedDocumentSourceStorage.getStoredDocumentSourceInputStream(storedDocumentSource.getId());
 		BufferedInputStream bis = new BufferedInputStream(inputStream);
-		ArchiveInputStream archiveInputStream = null;
+		ArchiveInputStream<ArchiveEntry> archiveInputStream = null;
 		
 		String id = DigestUtils.md5Hex(storedDocumentSource.getId()+"-bagit");
 		DocumentMetadata metadata = storedDocumentSource.getMetadata().asParent(id, ParentType.EXTRACTION);
@@ -106,7 +106,7 @@ public class BagItExtractor implements Extractor {
 
 	}
 
-	private InputSource getExtractableInputSource(ArchiveInputStream archiveInputStream, String inputFormat) throws IOException {
+	private InputSource getExtractableInputSource(ArchiveInputStream<ArchiveEntry> archiveInputStream, String inputFormat) throws IOException {
 		FlexibleParameters params = new FlexibleParameters(new String[]{"inputFormat="+inputFormat});
 		InputSource is = new InputStreamInputSource(DigestUtils.md5Hex(UUID.randomUUID().toString()), new DocumentMetadata(), CloseShieldInputStream.wrap(archiveInputStream));
 		StoredDocumentSource storedDocSource = storedDocumentSourceStorage.getStoredDocumentSource(is);
@@ -114,7 +114,7 @@ public class BagItExtractor implements Extractor {
 		return extractor.getExtractableInputSource(storedDocSource);
 	}
 
-	private DocumentMetadata getMetadata(ArchiveInputStream archiveInputStream, String inputFormat) throws IOException {
+	private DocumentMetadata getMetadata(ArchiveInputStream<ArchiveEntry> archiveInputStream, String inputFormat) throws IOException {
 		InputSource inputSource = getExtractableInputSource(archiveInputStream, inputFormat);
 		inputSource.getInputStream().close(); // make sure it's read
 		return inputSource.getMetadata();

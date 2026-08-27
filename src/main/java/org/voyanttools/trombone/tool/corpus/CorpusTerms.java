@@ -467,6 +467,7 @@ public class CorpusTerms extends AbstractTerms implements Iterable<CorpusTerm> {
 		/* (non-Javadoc)
 		 * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
 		 */
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CorpusTerms.class.isAssignableFrom(type);

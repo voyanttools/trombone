@@ -503,6 +503,8 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 	}
 	
 	public static class DocumentNgramsConverter implements Converter {
+		
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return DocumentNgrams.class.isAssignableFrom(type);

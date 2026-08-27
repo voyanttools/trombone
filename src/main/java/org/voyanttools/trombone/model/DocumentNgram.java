@@ -190,6 +190,7 @@ public class DocumentNgram implements Comparable<DocumentNgram> {
 
 	public static class DocumentNgramConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return DocumentNgram.class.isAssignableFrom(type);

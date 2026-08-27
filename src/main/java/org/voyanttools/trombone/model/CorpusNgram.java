@@ -191,6 +191,7 @@ public class CorpusNgram {
 
 	public static class CorpusNgramConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CorpusNgram.class.isAssignableFrom(type);

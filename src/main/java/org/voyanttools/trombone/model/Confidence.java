@@ -105,6 +105,7 @@ public class Confidence implements Serializable {
 		/* (non-Javadoc)
 		 * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
 		 */
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return Confidence.class.isAssignableFrom(type);
