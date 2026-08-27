@@ -111,7 +111,7 @@ public class Geonames extends AbstractContextTerms {
 		// build a set of valid cities
 		Map<String, City> cities = getAllCorpusCities(corpusMapper).stream()
 				.filter(city -> city.population>minPopulation)
-				.collect(Collectors.toMap(City::getId, c->c));
+				.collect(Collectors.toMap(c -> c.getId(), c -> c));
 		
 		CityOccurrenceIterator<CityOccurrence> cityOccurrenceIterator = getCityOccurrenceIterator(corpusMapper);
 		CityOccurrence cityOccurrence;
@@ -162,14 +162,14 @@ public class Geonames extends AbstractContextTerms {
 							.mapToDouble(c -> c.getWeight())
 							.sum();
 						Map<Confidence.Type, List<Confidence>> confidencesByType = confidences.stream()
-							.collect(Collectors.groupingBy(Confidence::getType));
+							.collect(Collectors.groupingBy(c -> c.getType()));
 						for (Map.Entry<Confidence.Type, List<Confidence>> entry : confidencesByType.entrySet()) {
 							double weights = entry.getValue().stream()
-								.mapToDouble(Confidence::getWeight)
+								.mapToDouble(c -> c.getWeight())
 								.sum();
 							float weight = (float) (weights / allWeights);
 							float average = (float) entry.getValue().stream()
-									.mapToDouble(Confidence::getValue)
+									.mapToDouble(c -> c.getValue())
 									.average()
 									.getAsDouble();
 							city.addConfidence(new Confidence(entry.getKey(), average, weight));
@@ -561,7 +561,7 @@ public class Geonames extends AbstractContextTerms {
 			confidences.add(confidence);
 		}
 		public String toString() { // make sure this corresponds with how StoredCityOccurrenceIterator reads values
-			String confidence = confidences.stream().map(Confidence::toString).collect(Collectors.joining(";"));
+			String confidence = confidences.stream().map(c -> c.toString()).collect(Collectors.joining(";"));
 			return StringUtils.joinWith("\t", docIndex, position, id, form, left, middle, right, confidence);
 		}
 		public CityOccurrence clone() throws CloneNotSupportedException {

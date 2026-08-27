@@ -91,7 +91,7 @@ public class Confidence implements Serializable {
 	}
 	public static float getConfidence(Collection<Confidence> confidences) {
 		double weightsSum = confidences.stream()
-			.mapToDouble(Confidence::getWeight)
+			.mapToDouble(c -> c.getWeight())
 			.sum();
 		float val = 0f;
 		for (Confidence confidence : confidences) {

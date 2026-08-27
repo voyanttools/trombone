@@ -69,7 +69,7 @@ public class OpenNlpAnnotator implements NlpAnnotator {
 		
 		List<DocumentToken> tokens = documentTokens.getDocumentTokens();
 		String[] strings = tokens.stream()
-			.map(DocumentToken::getTerm)
+			.map(d -> d.getTerm())
 			.toArray(String[]::new);
 		Span[] spans = getLocations(strings);
 		Map<String, List<Span>> stringSpans = new HashMap<String, List<Span>>();

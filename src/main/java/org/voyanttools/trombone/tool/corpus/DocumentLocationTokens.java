@@ -173,7 +173,7 @@ public class DocumentLocationTokens extends AbstractTerms implements Progressabl
 	
 	private void cacheForDocuments(CorpusMapper corpusMapper, List<DocumentLocationToken> tokens) throws IOException {
 		Map<Integer, List<DocumentLocationToken>> mappedTokens = tokens.stream()
-			.collect(Collectors.groupingBy(DocumentLocationToken::getDocIndex));
+			.collect(Collectors.groupingBy(d -> d.getDocIndex()));
 		for (Map.Entry<Integer, List<DocumentLocationToken>> entry : mappedTokens.entrySet()) {
 			String docId = getDocumentTokensCacheId(corpusMapper.getDocumentIdFromDocumentPosition(entry.getKey()));
 			try {

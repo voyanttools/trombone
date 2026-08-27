@@ -155,11 +155,11 @@ public class GeonamesAnnotator {
 		
 		// determine the very simple mean latitude and longitude (this doesn't take into consideration the shape of the globe)
 		double latMean = preferredCoordinates.length==2 ? Double.valueOf(preferredCoordinates[0]) : locationsForAveraging.stream()
-			.mapToDouble(Location::getLat)
+			.mapToDouble(l -> l.getLat())
 			.average().getAsDouble();
 		// determine the very simple mean latitude and longitude (this doesn't take into consideration the shape of the globe)
 		double lngMean = preferredCoordinates.length==2 ? Double.valueOf(preferredCoordinates[1]) : locationsForAveraging.stream()
-			.mapToDouble(Location::getLng)
+			.mapToDouble(l -> l.getLng())
 			.average().getAsDouble();
 		double maxDistance = locationsForAveraging.stream()
 				.mapToDouble(l -> Math.hypot(latMean-l.getLat(), lngMean-l.getLng()))
@@ -167,7 +167,7 @@ public class GeonamesAnnotator {
 		
 		// get max population (should be highest already since that's how we sorted locationsForAveraging)
 		int maxPopulation = locationsForAveraging.stream()
-				.mapToInt(Location::getPopulation)
+				.mapToInt(l -> l.getPopulation())
 				.max().getAsInt();
 		
 		String[] queries = formsToGeonameIds.keySet().stream()

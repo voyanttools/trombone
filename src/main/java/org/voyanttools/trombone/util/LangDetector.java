@@ -73,7 +73,7 @@ public class LangDetector {
 		List<String> chunkLangs = Splitter.fixedLength(chunkLength).splitToStream(text).limit(3)
 			.map(t -> { return detector.detectLanguageOf(t).getIsoCode639_1().toString(); }).collect(Collectors.toList());
 		String modeLang = chunkLangs.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-			.entrySet().stream().max(Comparator.comparing(Entry::getValue)).get().getKey();
+			.entrySet().stream().max(Comparator.comparing(e -> e.getValue())).get().getKey();
 		
 		if (modeLang.equals("none")) {
 			// check if it's Tibetan
