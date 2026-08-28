@@ -312,13 +312,8 @@
 		<!-- used by t-SNE -->
 		<dependency>
 			<groupId>org.ejml</groupId>
-			<artifactId>core</artifactId>
-			<version>0.30</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ejml</groupId>
-			<artifactId>equation</artifactId>
-			<version>0.30</version>
+			<artifactId>ejml-core</artifactId>
+			<version>0.39</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.fommil.netlib</groupId>
