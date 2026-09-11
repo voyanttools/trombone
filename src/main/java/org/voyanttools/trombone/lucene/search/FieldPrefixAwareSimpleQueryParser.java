@@ -159,7 +159,7 @@ public class FieldPrefixAwareSimpleQueryParser extends SimpleQueryParser {
 	@Override
 	protected Query newPrefixQuery(String text) {
 		// we got here but actually need a regex
-		if (this.REGEX_PATTERN.matcher(text).find() && text.endsWith(":")==false) {
+		if (FieldPrefixAwareSimpleQueryParser.REGEX_PATTERN.matcher(text).find() && text.endsWith(":")==false) {
 			try {
 				return newRegexQuery(text+".*");
 			} catch (IOException e) {
