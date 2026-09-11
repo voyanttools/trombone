@@ -144,7 +144,7 @@ public class VoyantNssiClient {
 			try {
 				Thread.sleep(pollingInterval);
 				status = getJobStatus(jobId);
-				System.out.println("jobId: "+jobId+", status: "+status+", thread: "+Thread.currentThread().getId());
+				System.out.println("jobId: "+jobId+", status: "+status+", thread: "+Thread.currentThread().threadId());
 			} catch (InterruptedException e) {
 				System.out.println("INTERRUPTED, jobId: "+jobId+", status: "+status);
 			}
