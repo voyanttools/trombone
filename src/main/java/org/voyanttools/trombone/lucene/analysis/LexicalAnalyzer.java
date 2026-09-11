@@ -32,10 +32,11 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.cn.smart.HMMChineseTokenizer;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.FlattenGraphFilter;
 import org.apache.lucene.analysis.core.LetterTokenizer;
 import org.apache.lucene.analysis.core.UnicodeWhitespaceTokenizer;
 import org.apache.lucene.analysis.icu.segmentation.ICUTokenizer;
-import org.apache.lucene.analysis.miscellaneous.WordDelimiterFilter;
+import org.apache.lucene.analysis.miscellaneous.WordDelimiterGraphFilter;
 import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.lucene.analysis.el.GreekCustomFilter;
 import org.voyanttools.trombone.lucene.analysis.icu.TromboneICUTokenizerConfig;
@@ -115,11 +116,9 @@ public class LexicalAnalyzer extends Analyzer {
 			return new TokenStreamComponents(tokenizer);
 		}
 		else if (lang.startsWith("zh") && fieldName.equals(TokenType.lexical.name())) { // Chinese
-			// https://lucene.apache.org/core/6_2_1/analyzers-smartcn/org/apache/lucene/analysis/cn/smart/HMMChineseTokenizerFactory.html
-			// From the docs: this class will currently emit tokens for punctuation. So you should either add a WordDelimiterFilter after to remove these (with concatenate off), or use the SmartChinese stoplist with a StopFilterFactory
 			Tokenizer tokenizer = new HMMChineseTokenizer();
-			// https://lucene.apache.org/core/6_2_1/analyzers-common/org/apache/lucene/analysis/miscellaneous/WordDelimiterFilter.html
-			TokenStream stream = new WordDelimiterFilter(tokenizer, 0, null);
+			TokenStream stream = new WordDelimiterGraphFilter(tokenizer, 0, null);
+			stream = new FlattenGraphFilter(stream);
 			return new TokenStreamComponents(tokenizer, stream);
 		}
 		else if (lang.equals("bo") && fieldName.equals(TokenType.lexical.name())) { // Tibetan
