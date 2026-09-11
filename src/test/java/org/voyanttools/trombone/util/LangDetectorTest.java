@@ -33,20 +33,20 @@ public class LangDetectorTest {
 		String zhText2 = IOUtils.toString(new FileInputStream(TestHelper.getResource("i18n/zh_utf8.txt")), StandardCharsets.UTF_8);
 		String enXml = IOUtils.toString(new FileInputStream(TestHelper.getResource("xml/fictionbook.xml")), StandardCharsets.UTF_8);
 		
-		assertEquals(new Locale("en").getLanguage(), LangDetector.detect(enText));
-		assertEquals(new Locale("es").getLanguage(), LangDetector.detect(esText));
-		assertEquals(new Locale("fr").getLanguage(), LangDetector.detect(frText));
+		assertEquals(Locale.of("en").getLanguage(), LangDetector.detect(enText));
+		assertEquals(Locale.of("es").getLanguage(), LangDetector.detect(esText));
+		assertEquals(Locale.of("fr").getLanguage(), LangDetector.detect(frText));
 		
-		assertEquals(new Locale("bo").getLanguage(), LangDetector.detect(bo1Text));
-		assertEquals(new Locale("bo").getLanguage(), LangDetector.detect(bo2Text));
+		assertEquals(Locale.of("bo").getLanguage(), LangDetector.detect(bo1Text));
+		assertEquals(Locale.of("bo").getLanguage(), LangDetector.detect(bo2Text));
 		
-		assertEquals(new Locale("el").getLanguage(), LangDetector.detect(grText1));
-		assertEquals(new Locale("el").getLanguage(), LangDetector.detect(grText2));
-		assertEquals(new Locale("el").getLanguage(), LangDetector.detect(grText3));
+		assertEquals(Locale.of("el").getLanguage(), LangDetector.detect(grText1));
+		assertEquals(Locale.of("el").getLanguage(), LangDetector.detect(grText2));
+		assertEquals(Locale.of("el").getLanguage(), LangDetector.detect(grText3));
 		
-		assertEquals(new Locale("zh").getLanguage(), LangDetector.detect(zhText1));
-		assertEquals(new Locale("zh").getLanguage(), LangDetector.detect(zhText2));
+		assertEquals(Locale.of("zh").getLanguage(), LangDetector.detect(zhText1));
+		assertEquals(Locale.of("zh").getLanguage(), LangDetector.detect(zhText2));
 		
-		assertEquals(new Locale("en").getLanguage(), LangDetector.detect(enXml));
+		assertEquals(Locale.of("en").getLanguage(), LangDetector.detect(enXml));
 	}
 }

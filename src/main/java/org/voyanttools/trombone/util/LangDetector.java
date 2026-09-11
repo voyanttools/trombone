@@ -38,7 +38,7 @@ public class LangDetector {
 	private static Pattern tagStripper = Pattern.compile("<.+?>", Pattern.DOTALL);
 	
 	public static String detect(String text, FlexibleParameters parameters) {
-		return parameters.containsKey("language") ? new Locale(parameters.getParameterValue("language")).getLanguage() : detect(text);
+		return parameters.containsKey("language") ? Locale.of(parameters.getParameterValue("language")).getLanguage() : detect(text);
 	}
 	public static String detect(String text) {
 
@@ -78,7 +78,7 @@ public class LangDetector {
 		if (modeLang.equals("none")) {
 			// check if it's Tibetan
 			if (text.contains("\u0F0B")) { // TIBETAN MARK INTERSYLLABIC TSHEG
-				modeLang = new Locale("bo").getLanguage();
+				modeLang = Locale.of("bo").getLanguage();
 			} else {
 				modeLang = "";
 			}
