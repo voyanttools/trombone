@@ -108,7 +108,7 @@ public abstract class AbstractCorpusTool extends AbstractTool {
 	public abstract void run(CorpusMapper corpusMapper) throws IOException;
 	
 	protected Map<String, SpanQuery> getCategoriesAwareSpanQueryMap(CorpusMapper corpusMapper, String[] queries) throws IOException {
-		FieldPrefixAwareSimpleSpanQueryParser parser = new FieldPrefixAwareSimpleSpanQueryParser(corpusMapper.getLeafReader(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()), parameters.getParameterValue("tokenType", "lexical"));
+		FieldPrefixAwareSimpleSpanQueryParser parser = new FieldPrefixAwareSimpleSpanQueryParser(corpusMapper.getSearcher(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()), parameters.getParameterValue("tokenType", "lexical"));
 		Map<String, SpanQuery> queriesMap;
 		try {
 			queriesMap = parser.getSpanQueriesMap(queries, false);
@@ -195,7 +195,7 @@ public abstract class AbstractCorpusTool extends AbstractTool {
 	
 	protected Map<String, Query> getCategoriesAwareQueryMap(CorpusMapper corpusMapper, String[] queries) throws IOException {
 		
-		FieldPrefixAwareSimpleQueryParser parser = new FieldPrefixAwareSimpleQueryParser(corpusMapper.getLeafReader(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()), parameters.getParameterValue("tokenType", "lexical"));
+		FieldPrefixAwareSimpleQueryParser parser = new FieldPrefixAwareSimpleQueryParser(corpusMapper.getSearcher(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()), parameters.getParameterValue("tokenType", "lexical"));
 		Map<String, Query> queriesMap;
 		try {
 			queriesMap = parser.getQueriesMap(queries, false);

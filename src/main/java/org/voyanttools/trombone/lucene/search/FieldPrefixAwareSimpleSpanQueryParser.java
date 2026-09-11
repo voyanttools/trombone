@@ -35,23 +35,22 @@ import org.apache.lucene.queries.spans.SpanTermQuery;
  * @author sgs
  *
  */
-public class FieldPrefixAwareSimpleSpanQueryParser extends
-		FieldPrefixAwareSimpleQueryParser {
+public class FieldPrefixAwareSimpleSpanQueryParser extends FieldPrefixAwareSimpleQueryParser {
 	
 	/**
 	 * @param analyzer
 	 * @param weights
 	 */
-	public FieldPrefixAwareSimpleSpanQueryParser(IndexReader indexReader, Analyzer analyzer) {
-		super(indexReader, analyzer);
+	public FieldPrefixAwareSimpleSpanQueryParser(IndexSearcher indexSearcher, Analyzer analyzer) {
+		super(indexSearcher, analyzer);
 	}
 	
 	/**
 	 * @param analyzer
 	 * @param weights
 	 */
-	public FieldPrefixAwareSimpleSpanQueryParser(IndexReader indexReader, Analyzer analyzer, String defaultPrefix) {
-		super(indexReader, analyzer, defaultPrefix);
+	public FieldPrefixAwareSimpleSpanQueryParser(IndexSearcher indexSearcher, Analyzer analyzer, String defaultPrefix) {
+		super(indexSearcher, analyzer, defaultPrefix);
 	}
 	
 	@Override
@@ -139,7 +138,6 @@ public class FieldPrefixAwareSimpleSpanQueryParser extends
 			Query q = parse(query);
 			if (isReallyQueryExpand && q instanceof SpanTermQuery == false) {
 				if (q instanceof SpanOrQuery) {
-					IndexSearcher searcher = new IndexSearcher(reader);
 					int count = 0;
 					for (SpanQuery spanQuery : ((SpanOrQuery) q).getClauses()) {
 						// we need to double-check that this term is in the corpus (the query rewrite method includes all terms)
@@ -266,7 +264,7 @@ public class FieldPrefixAwareSimpleSpanQueryParser extends
 	
 	private SpanQuery getQuery(PrefixQuery query) {
 		try {
-			return (SpanQuery) new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) query).rewrite(reader);
+			return (SpanQuery) new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) query).rewrite(searcher);
 		} catch (IOException e) {
 			throw new IllegalStateException("Unable to expand queries from Lucene index for query: "+query.toString());
 		}
@@ -284,7 +282,7 @@ public class FieldPrefixAwareSimpleSpanQueryParser extends
 		}
 		else {
 			Query spanRegexQuery = new SpanMultiTermQueryWrapper<RegexpQuery>((RegexpQuery) query);
-			return spanRegexQuery.rewrite(reader);
+			return spanRegexQuery.rewrite(searcher);
 		}
 	}
 	
@@ -294,14 +292,14 @@ public class FieldPrefixAwareSimpleSpanQueryParser extends
 			List<SpanQuery> spanQueries = new ArrayList<SpanQuery>();
 			for (BooleanClause bq : ((BooleanQuery) query).clauses()) {
 				SpanQuery spanQuery = new SpanMultiTermQueryWrapper<TermRangeQuery>((TermRangeQuery) bq.getQuery());
-				Query q = spanQuery.rewrite(reader);
+				Query q = spanQuery.rewrite(searcher);
 				spanQueries.add((SpanQuery) q);
 			}
 			return new SpanOrQuery(spanQueries.toArray(new SpanQuery[spanQueries.size()]));
 		}
 		else {
 			Query rangeQuery = new SpanMultiTermQueryWrapper<TermRangeQuery>((TermRangeQuery) query);
-			return rangeQuery.rewrite(reader);
+			return rangeQuery.rewrite(searcher);
 		}
 	}
 }

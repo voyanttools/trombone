@@ -12,13 +12,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.simple.SimpleQueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
@@ -42,23 +42,23 @@ public class FieldPrefixAwareSimpleQueryParser extends SimpleQueryParser {
 	private static Pattern REGEX_PATTERN = Pattern.compile("[\\[\\]\\?.]");
 	private static Pattern LETTER_NUMBER = Pattern.compile("[\\p{L}\\p{N}]");
 	protected static TokenType DEFAULT_TOKENTYPE = TokenType.lexical;
-	protected IndexReader reader;
+	protected IndexSearcher searcher;
 	protected String defaultPrefix;
 
 	
 //	private TokenType tokenType = null;
 
-	public FieldPrefixAwareSimpleQueryParser(IndexReader reader, Analyzer analyzer) {
-		this(reader, analyzer, DEFAULT_TOKENTYPE.name());
+	public FieldPrefixAwareSimpleQueryParser(IndexSearcher searcher, Analyzer analyzer) {
+		this(searcher, analyzer, DEFAULT_TOKENTYPE.name());
 	}
 	
-	public FieldPrefixAwareSimpleQueryParser(IndexReader reader, Analyzer analyzer, String defaultPrefix) {
+	public FieldPrefixAwareSimpleQueryParser(IndexSearcher searcher, Analyzer analyzer, String defaultPrefix) {
 		super(analyzer,  Collections.singletonMap(defaultPrefix, 1.0F));
 		this.defaultPrefix = defaultPrefix;
-		this.reader = reader;
+		this.searcher = searcher;
 	}
 	
-	public FieldPrefixAwareSimpleQueryParser(IndexReader reader, Analyzer analyzer, Map<String, Float> weights) {
+	public FieldPrefixAwareSimpleQueryParser(IndexSearcher searcher, Analyzer analyzer, Map<String, Float> weights) {
 		super(analyzer, weights);
 	}
 	
@@ -90,7 +90,7 @@ public class FieldPrefixAwareSimpleQueryParser extends SimpleQueryParser {
 				}
 				if (query instanceof PrefixQuery) {
 					// SpanMultiTermQueryWrapper's rewrite method extracts terms properly (PrefixQuery no longer does) 
-					SpanOrQuery spanOrQuery = (SpanOrQuery) new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) query).rewrite(reader);
+					SpanOrQuery spanOrQuery = (SpanOrQuery) new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) query).rewrite(searcher);
 					for (SpanQuery sq : spanOrQuery.getClauses()) {
 						if (isPrefixNotQuery) {
 							BooleanQuery.Builder builder = new BooleanQuery.Builder();

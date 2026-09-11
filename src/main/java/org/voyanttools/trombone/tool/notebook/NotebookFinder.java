@@ -18,7 +18,6 @@ import org.apache.lucene.facet.sortedset.DefaultSortedSetDocValuesReaderState;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetCounts;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesReaderState;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.simple.SimpleQueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -72,7 +71,7 @@ public class NotebookFinder extends AbstractTool {
 		Analyzer analyzer = storage.getNotebookLuceneManager().getAnalyzer("");
 		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader, new FacetsConfig());
 		
-		Query query = getFacetAwareQuery(queries, indexReader, analyzer);
+		Query query = getFacetAwareQuery(queries, indexSearcher, analyzer);
 		FacetsCollector fc = new FacetsCollector();
 		TopDocs topdocs = FacetsCollector.search(indexSearcher, query, indexReader.maxDoc(), fc);
 		
@@ -91,10 +90,10 @@ public class NotebookFinder extends AbstractTool {
 		}
 	}
 	
-	private Query getFacetAwareQuery(String[] queryStrings, IndexReader indexReader, Analyzer analyzer) throws IOException {
+	private Query getFacetAwareQuery(String[] queryStrings, IndexSearcher indexSearcher, Analyzer analyzer) throws IOException {
 		
 		FacetsConfig config = new FacetsConfig();
-		SimpleQueryParser queryParser = new FieldPrefixAwareSimpleQueryParser(indexReader, analyzer);
+		SimpleQueryParser queryParser = new FieldPrefixAwareSimpleQueryParser(indexSearcher, analyzer);
 		
 		Map<String, List<Query>> fieldedQueries = new HashMap<String, List<Query>>();
 		for (String queryString : queryStrings) {
