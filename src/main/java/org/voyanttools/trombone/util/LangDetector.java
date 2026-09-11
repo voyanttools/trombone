@@ -5,12 +5,12 @@ package org.voyanttools.trombone.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -93,7 +93,7 @@ public class LangDetector {
 		URLConnection c;
 		InputStream is = null;
 		try {
-			url = new URL("https://www.gutenberg.org/cache/epub/158/pg158.txt"); // Emma by Jane Austen
+			url = URI.create("https://www.gutenberg.org/cache/epub/158/pg158.txt").toURL(); // Emma by Jane Austen
 			c = url.openConnection();
 			is = c.getInputStream();
 			text = IOUtils.toString(is, "UTF-8");
