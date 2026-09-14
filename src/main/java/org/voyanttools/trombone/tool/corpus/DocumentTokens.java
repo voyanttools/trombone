@@ -141,11 +141,14 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 					postingsEnum.nextDoc();
 					for (int i=0, len = postingsEnum.freq(); i<len; i++) {
 						int pos = postingsEnum.nextPosition();
+						int startOffset = postingsEnum.startOffset();
+						int endOffset = postingsEnum.endOffset();
+
 						if (pos >= documentStart && pos<maxPos) { // out of range
 							if (!docFreqs.containsKey(termString)) {
 								docFreqs.put(termString, len);
 							}
-							termInfos.add(new SimpleTermInfo(termString, postingsEnum.startOffset(), postingsEnum.endOffset(), pos));
+							termInfos.add(new SimpleTermInfo(termString, startOffset, endOffset, pos));
 						}
 					}
 				}
