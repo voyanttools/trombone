@@ -187,7 +187,7 @@ public class LuceneIndexerTest {
 		documentMetadata = defaultCorpus.getDocument(1).getMetadata();
 		assertEquals(files[1], documentMetadata.getLocation());
 		assertEquals(156, documentMetadata.getTokensCount(TokenType.lexical));
-		assertEquals(107, documentMetadata.getTypesCount(TokenType.lexical));
+		assertEquals(109, documentMetadata.getTypesCount(TokenType.lexical));
 		documentMetadata = englishCorpus.getDocument(1).getMetadata();
 		assertEquals(files[1], documentMetadata.getLocation());
 		assertEquals(156, documentMetadata.getTokensCount(TokenType.lexical));
@@ -197,7 +197,7 @@ public class LuceneIndexerTest {
 		documentMetadata = defaultCorpus.getDocument(2).getMetadata();
 		assertEquals(files[2], documentMetadata.getLocation());
 		assertEquals(156, documentMetadata.getTokensCount(TokenType.lexical));
-		assertEquals(107, documentMetadata.getTypesCount(TokenType.lexical));
+		assertEquals(109, documentMetadata.getTypesCount(TokenType.lexical));
 		documentMetadata = englishCorpus.getDocument(2).getMetadata();
 		assertEquals(files[2], documentMetadata.getLocation());
 		assertEquals(156, documentMetadata.getTokensCount(TokenType.lexical));
@@ -219,25 +219,25 @@ public class LuceneIndexerTest {
 		parameters.setParameter("docIndex", 1);		
 		documentTermsTool = new DocumentTerms(storage, parameters);
 		documentTermsTool.run();
-		assertEquals(104, documentTermsTool.getTotal());
+		assertEquals(106, documentTermsTool.getTotal());
 		String doc = defaultCorpus.getDocument(1).getDocumentString();
 		assertEquals(17, doc.indexOf('\u1F71')); // oxia
 		assertEquals(-1, doc.indexOf('\u03AC')); // tonos
 		String term = documentTermsTool.getDocumentTerms().get(6).getTerm();
-		assertEquals(-1, term.indexOf('\u1F71')); // oxia
+		assertEquals(1, term.indexOf('\u1F71')); // oxia
 		assertEquals(-1, term.indexOf('\u03AC')); // tonos
 
 		// voyant_test_grc_tonos_nfc.txt
 		parameters.setParameter("docIndex", 2);		
 		documentTermsTool = new DocumentTerms(storage, parameters);
 		documentTermsTool.run();
-		assertEquals(104, documentTermsTool.getTotal());
+		assertEquals(106, documentTermsTool.getTotal());
 		doc = defaultCorpus.getDocument(2).getDocumentString();
 		assertEquals(-1, doc.indexOf('\u1F71')); // oxia
 		assertEquals(17, doc.indexOf('\u03AC')); // tonos
 		term = documentTermsTool.getDocumentTerms().get(6).getTerm();
 		assertEquals(-1, term.indexOf('\u1F71')); // oxia
-		assertEquals(-1, term.indexOf('\u03AC')); // tonos
+		assertEquals(1, term.indexOf('\u03AC')); // tonos
 		
 		storage.destroy();		
 	}
@@ -278,8 +278,8 @@ public class LuceneIndexerTest {
 		String id = luceneIndexer.index(extractedDocumentSources);
 		List<String> ids = storage.retrieveStrings(id, Storage.Location.object);
 		docsToTokensMap = new HashMap<String, Integer>();
-		docsToTokensMap.put(ids.get(0), 8);
-		docsToTokensMap.put(ids.get(1), 8);
+		docsToTokensMap.put(ids.get(0), 9);
+		docsToTokensMap.put(ids.get(1), 10);
 		corpusDocsToTokensMap.put(id, docsToTokensMap);
 		
 		// now re-extract and index with tokenization parameter

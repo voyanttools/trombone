@@ -115,20 +115,9 @@ public class LexicalAnalyzer extends Analyzer {
 			Tokenizer tokenizer = new UnicodeWhitespaceTokenizer();
 			return new TokenStreamComponents(tokenizer);
 		}
-		else if (lang.startsWith("zh") && fieldName.equals(TokenType.lexical.name())) { // Chinese
-			Tokenizer tokenizer = new HMMChineseTokenizer();
-			TokenStream stream = new WordDelimiterGraphFilter(tokenizer, 0, null);
-			stream = new FlattenGraphFilter(stream);
-			return new TokenStreamComponents(tokenizer, stream);
-		}
 		else if (lang.equals("bo") && fieldName.equals(TokenType.lexical.name())) { // Tibetan
 			Tokenizer tokenizer = new ICUTokenizer(new TromboneICUTokenizerConfig(true, true, lang));
 			TokenStream stream = new LowerCaseFilter(tokenizer);
-			return new TokenStreamComponents(tokenizer, stream);
-		}
-		else if (lang.equals("grc") /* Ancient Greek */ || lang.equals("el") /* Modern Greek */) {
-			Tokenizer tokenizer = new ICUTokenizer();
-			TokenStream stream = new GreekCustomFilter(tokenizer);
 			return new TokenStreamComponents(tokenizer, stream);
 		}
 		else { // default case
