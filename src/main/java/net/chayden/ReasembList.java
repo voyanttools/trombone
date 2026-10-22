@@ -5,7 +5,7 @@ import java.util.Vector;
 /**
  *  Eliza reassembly list.
  */
-public class ReasembList extends Vector {
+public class ReasembList extends Vector<Object> {
 
     /**
      *  Add an element to the reassembly list.

@@ -17,5 +17,15 @@ public class FilteredCorpusReader extends FilterLeafReader {
 	public Bits getLiveDocs() {
 		return bits;
 	}
+
+	@Override
+	public CacheHelper getReaderCacheHelper() {
+		return null;
+	}
+
+	@Override
+	public CacheHelper getCoreCacheHelper() {
+		return null;
+	}
 	
 }

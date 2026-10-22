@@ -60,6 +60,7 @@ public class KeywordsManager extends AbstractTool {
 		/* (non-Javadoc)
 		 * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
 		 */
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return KeywordsManager.class.isAssignableFrom(type);

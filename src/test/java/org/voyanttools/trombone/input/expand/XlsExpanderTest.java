@@ -119,7 +119,6 @@ public class XlsExpanderTest {
 		parameters.setParameter("tableDocuments", "columns");
 		parameters.setParameter("tableContent", "a; 2, 3");
 		storedDocumentSourceExpander = new StoredDocumentSourceExpander(storedDocumentSourceStorage, parameters);
-		boolean caught = false;
 		try {
 			expandedSourceDocumentSources = storedDocumentSourceExpander.expandXls(storedDocumentSource);
 			fail("We should have had an illegal argument exception.");

@@ -22,7 +22,6 @@ import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.FlexibleQueue;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * @author sgs

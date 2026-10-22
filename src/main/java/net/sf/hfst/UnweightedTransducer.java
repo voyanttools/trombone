@@ -1,12 +1,7 @@
 package net.sf.hfst;
 
-import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.*;
-
-import net.sf.hfst.Transducer;
-import net.sf.hfst.NoTokenizationException;
 
 /**
  * Reads the header, alphabet, index table and transition table and provides

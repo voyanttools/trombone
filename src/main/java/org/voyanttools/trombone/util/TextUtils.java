@@ -45,7 +45,7 @@ public class TextUtils {
 	}
 
 	public static List<String> getSentences(String text, String language) {
-		return getSentences(text, new Locale(language));
+		return getSentences(text, Locale.of(language));
 	}
 
 	public static List<String> getSentences(String text) {
@@ -57,6 +57,6 @@ public class TextUtils {
 	}
 
 	public static void main(String[] args) {
-		System.out.println(Locale.ENGLISH.equals(new Locale("en")));
+		System.out.println(Locale.ENGLISH.equals(Locale.of("en")));
 	}
 }

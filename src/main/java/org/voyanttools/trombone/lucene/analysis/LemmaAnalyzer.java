@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.Reader;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.voyanttools.trombone.model.TokenType;
 import org.voyanttools.trombone.nlp.NlpFactory;

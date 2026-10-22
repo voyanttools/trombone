@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +48,7 @@ public class Categories {
 			for (String lang : corpus.getLanguageCodes()) {
 				try(InputStream inputStream = Categories.class.getResourceAsStream("/org/voyanttools/trombone/categories/categories."+lang+".txt")) {
 					StringWriter writer = new StringWriter();
-					IOUtils.copy(inputStream, writer, Charset.forName("UTF-8"));
+					IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8);
 					return getCategories(writer.toString());
 				} catch (Exception e) {
 				}
@@ -64,7 +64,7 @@ public class Categories {
 		if (id.matches("categories\\.\\w+")) { // looks like local resource
 			try(InputStream inputStream = Categories.class.getResourceAsStream("/org/voyanttools/trombone/categories/"+id+".txt")) {
 				StringWriter writer = new StringWriter();
-				IOUtils.copy(inputStream, writer, Charset.forName("UTF-8"));
+				IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8);
 				return getCategories(writer.toString());
 			} catch (Exception e) {
 			}

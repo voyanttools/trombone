@@ -43,8 +43,6 @@ import java.util.UUID;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.voyanttools.trombone.lucene.LuceneManager;

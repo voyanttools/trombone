@@ -42,8 +42,6 @@ public class DtocIndex extends AbstractTool {
 	public void run() throws IOException {
 		
 		Corpus corpus = CorpusManager.getCorpus(storage, parameters);
-
-		String dtocIndexStringId = corpus.getId()+"-dtoc-index"+getVersion();
 		
 		// let's not bother cacheing since we have tool cacheing
 		index = getIndex(corpus);

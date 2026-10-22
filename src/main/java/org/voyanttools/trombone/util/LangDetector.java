@@ -5,12 +5,12 @@ package org.voyanttools.trombone.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -38,7 +38,7 @@ public class LangDetector {
 	private static Pattern tagStripper = Pattern.compile("<.+?>", Pattern.DOTALL);
 	
 	public static String detect(String text, FlexibleParameters parameters) {
-		return parameters.containsKey("language") ? new Locale(parameters.getParameterValue("language")).getLanguage() : detect(text);
+		return parameters.containsKey("language") ? Locale.of(parameters.getParameterValue("language")).getLanguage() : detect(text);
 	}
 	public static String detect(String text) {
 
@@ -73,12 +73,12 @@ public class LangDetector {
 		List<String> chunkLangs = Splitter.fixedLength(chunkLength).splitToStream(text).limit(3)
 			.map(t -> { return detector.detectLanguageOf(t).getIsoCode639_1().toString(); }).collect(Collectors.toList());
 		String modeLang = chunkLangs.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-			.entrySet().stream().max(Comparator.comparing(Entry::getValue)).get().getKey();
+			.entrySet().stream().max(Comparator.comparing(e -> e.getValue())).get().getKey();
 		
 		if (modeLang.equals("none")) {
 			// check if it's Tibetan
 			if (text.contains("\u0F0B")) { // TIBETAN MARK INTERSYLLABIC TSHEG
-				modeLang = new Locale("bo").getLanguage();
+				modeLang = Locale.of("bo").getLanguage();
 			} else {
 				modeLang = "";
 			}
@@ -93,7 +93,7 @@ public class LangDetector {
 		URLConnection c;
 		InputStream is = null;
 		try {
-			url = new URL("https://www.gutenberg.org/cache/epub/158/pg158.txt"); // Emma by Jane Austen
+			url = URI.create("https://www.gutenberg.org/cache/epub/158/pg158.txt").toURL(); // Emma by Jane Austen
 			c = url.openConnection();
 			is = c.getInputStream();
 			text = IOUtils.toString(is, "UTF-8");

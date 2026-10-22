@@ -3,7 +3,7 @@ package org.voyanttools.trombone.tool.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.voyanttools.trombone.model.Categories;
@@ -46,7 +46,7 @@ public class StoredCategories extends StoredResource {
 			if (localId!=null) {
 				try(InputStream inputStream = Categories.class.getResourceAsStream("/org/voyanttools/trombone/categories/"+localId)) {
 					StringWriter writer = new StringWriter();
-					IOUtils.copy(inputStream, writer, Charset.forName("UTF-8"));
+					IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8);
 					resource = writer.toString();
 					this.id = id;
 					return;

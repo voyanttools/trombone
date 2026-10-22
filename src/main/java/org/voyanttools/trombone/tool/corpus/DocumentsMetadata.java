@@ -37,8 +37,6 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @XStreamAlias("documentsMetadata")
 public class DocumentsMetadata extends AbstractCorpusTool {
 	
-	private int total = 0;
-	
 	private List<IndexedDocument> documents = new ArrayList<IndexedDocument>();
 
 	/**
@@ -65,14 +63,14 @@ public class DocumentsMetadata extends AbstractCorpusTool {
 			weights.put("author", 1f);
 			weights.put(TokenType.lexical.name(), 1f);
 			IndexSearcher indexSearcher = corpusMapper.getSearcher();
-			SimpleQueryParser queryParser = new FieldPrefixAwareSimpleQueryParser(indexSearcher.getIndexReader(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()), weights);
+			SimpleQueryParser queryParser = new FieldPrefixAwareSimpleQueryParser(indexSearcher, storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()), weights);
 			
 			Set<String> idsSet = new HashSet<String>();
 			for (String queryString : queries) {
 				Query query = queryParser.parse(queryString);
-				LuceneDocIdsCollector collector = new LuceneDocIdsCollector(corpusMapper);
+				LuceneDocIdsCollector collector = new LuceneDocIdsCollector(corpusMapper, null);
 				indexSearcher.search(query, collector);
-				for (int doc : collector.getLuceneDocIds()) {
+				for (int doc : collector.getLuceneDocIds().keySet()) {
 					idsSet.add(corpusMapper.getDocumentIdFromLuceneId(doc));
 				}
 			}
@@ -94,7 +92,6 @@ public class DocumentsMetadata extends AbstractCorpusTool {
 		else {
 			ids.addAll(validIds);
 		}
-		total = ids.size();
 		
 		int start = parameters.getParameterIntValue("start", 0);
 		int limit = parameters.getParameterIntValue("limit", Integer.MAX_VALUE);

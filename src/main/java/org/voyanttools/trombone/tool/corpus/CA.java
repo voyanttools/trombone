@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.model.IndexedDocument;
-import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.model.RawCATerm;
 import org.voyanttools.trombone.model.RawCATerm.CategoryType;
 import org.voyanttools.trombone.model.TokenType;
@@ -115,6 +114,7 @@ public class CA extends CorpusAnalysisTool {
 		/* (non-Javadoc)
 		 * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
 		 */
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CA.class.isAssignableFrom(type);

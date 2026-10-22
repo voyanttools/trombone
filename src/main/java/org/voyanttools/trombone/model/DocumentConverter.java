@@ -18,6 +18,7 @@ public class DocumentConverter implements Converter {
 		// TODO Auto-generated constructor stub
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean canConvert(Class type) {
 		return DocumentContainer.class.isAssignableFrom(type);

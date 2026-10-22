@@ -53,9 +53,8 @@ class FileTrombone3_0Migrator extends AbstractFileMigrator {
 						InputStream fis = null;
 						try {
 							fis = new FileInputStream(stoplistFile);
-							ObjectInputStream ois = new ObjectInputStream(fis);
 							StopList stoplist;
-							try {
+							try (ObjectInputStream ois = new ObjectInputStream(fis)) {
 								stoplist = (StopList) ois.readObject();
 							} catch (ClassNotFoundException e) {
 								throw new IOException("Unable to read stoplist file: "+stoplistFile.getAbsolutePath(), e);

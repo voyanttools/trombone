@@ -24,7 +24,6 @@ package org.voyanttools.trombone.tool.corpus;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,11 +32,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.search.vectorhighlight.FieldTermStack.TermInfo;
+import org.voyanttools.trombone.lucene.search.SimpleTermInfo;
 import org.apache.lucene.util.BytesRef;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.Corpus;
@@ -89,7 +87,7 @@ public class DocumentCollocates extends AbstractContextTerms {
 	@Override
 	protected void runQueries(CorpusMapper corpusMapper, Keywords stopwords, String[] queries) throws IOException {
 		Map<Integer, List<DocumentSpansData>> documentSpansDataMap = getDocumentSpansData(corpusMapper, queries);
-		this.collocates = getCollocates(corpusMapper.getLeafReader(), corpusMapper, corpusMapper.getCorpus(), documentSpansDataMap);
+		this.collocates = getCollocates(corpusMapper, corpusMapper.getCorpus(), documentSpansDataMap);
 	}
 
 	/* (non-Javadoc)
@@ -101,8 +99,7 @@ public class DocumentCollocates extends AbstractContextTerms {
 	}
 
 
-	public List<DocumentCollocate> getCollocates(LeafReader reader,
-			CorpusMapper corpusMapper, Corpus corpus,
+	public List<DocumentCollocate> getCollocates(CorpusMapper corpusMapper, Corpus corpus,
 			Map<Integer, List<DocumentSpansData>> documentSpansDataMap) throws IOException {
 
 		Keywords stopwords = getStopwords(corpus);
@@ -118,7 +115,7 @@ public class DocumentCollocates extends AbstractContextTerms {
 			String id = corpusMapper.getDocumentIdFromDocumentPosition(corpusDocIndex);
 			if (idsHash.contains(id)==false) {continue;}
 			int lastToken = totalTokens[corpusDocIndex];
-			FlexibleQueue<DocumentCollocate> q = getCollocates(reader, luceneDoc, corpusDocIndex, lastToken, dsd.getValue(), stopwords);
+			FlexibleQueue<DocumentCollocate> q = getCollocates(corpusMapper, luceneDoc, corpusDocIndex, lastToken, dsd.getValue(), stopwords);
 			for (DocumentCollocate c : q.getUnorderedList()) {
 				queue.offer(c);
 			}
@@ -127,12 +124,12 @@ public class DocumentCollocates extends AbstractContextTerms {
 		return queue.getOrderedList();
 	}
 
-	private FlexibleQueue<DocumentCollocate> getCollocates(LeafReader LeafReader,
+	private FlexibleQueue<DocumentCollocate> getCollocates(CorpusMapper corpusMapper,
 			int luceneDoc, int corpusDocIndex, int lastToken,
 			List<DocumentSpansData> documentSpansData, Keywords stopwords) throws IOException {
 		
 		
-		Map<Integer, TermInfo> termsOfInterest = getTermsOfInterest(LeafReader, luceneDoc, lastToken, documentSpansData, true);
+		Map<Integer, SimpleTermInfo> termsOfInterest = getTermsOfInterest(corpusMapper, luceneDoc, lastToken, documentSpansData, true);
 
 		Map<String, Map<String, AtomicInteger>> mapOfTermsMap = new HashMap<String, Map<String, AtomicInteger>>();
 		
@@ -193,7 +190,7 @@ public class DocumentCollocates extends AbstractContextTerms {
 		// gather document frequency for strings of interest
 		int documentTotalTokens = 0;
 		
-		Terms terms = LeafReader.getTermVector(luceneDoc, tokenType.name());
+		Terms terms = corpusMapper.getTermVector(luceneDoc, tokenType.name());
 		TermsEnum termsEnum = terms.iterator();
 		while(true) {
 			BytesRef term = termsEnum.next();
@@ -210,7 +207,7 @@ public class DocumentCollocates extends AbstractContextTerms {
 			else {break;}
 		}
 
-		FlexibleQueue<DocumentCollocate> documentCollocatesQueue = new FlexibleQueue(comparator, limit);
+		FlexibleQueue<DocumentCollocate> documentCollocatesQueue = new FlexibleQueue<DocumentCollocate>(comparator, limit);
 		
 		for (Map.Entry<String, Map<String, AtomicInteger>> keywordMapEntry : mapOfTermsMap.entrySet()) {
 			String keyword = keywordMapEntry.getKey();

@@ -100,7 +100,7 @@ class ArchiveExpander implements Expander {
 			BufferedInputStream bis = new BufferedInputStream(inputStream);
 			
 			String filename = storedDocumentSource.getMetadata().getLocation();
-			ArchiveInputStream archiveInputStream;
+			ArchiveInputStream<ArchiveEntry> archiveInputStream;
 			
 			if (filename.toLowerCase().endsWith("tgz") || filename.toLowerCase().endsWith("tar.gz")) { // decompress and then untar
 				archiveInputStream = archiveStreamFactory.createArchiveInputStream(ArchiveStreamFactory.TAR, new GZIPInputStream(bis));
@@ -134,7 +134,7 @@ class ArchiveExpander implements Expander {
 	 * @throws IOException thrown when an IO exception occurs during unarchiving
 	 */
 	private List<StoredDocumentSource> getExpandedDocumentSources(
-			ArchiveInputStream archiveInputStream, StoredDocumentSource parentStoredDocumentSource) throws IOException {
+			ArchiveInputStream<ArchiveEntry> archiveInputStream, StoredDocumentSource parentStoredDocumentSource) throws IOException {
 		
 		List<StoredDocumentSource> expandedDocumentSources = new ArrayList<StoredDocumentSource>();
 		
@@ -182,7 +182,7 @@ class ArchiveExpander implements Expander {
 						childMetadata.setDocumentFormat(childDocumentFormat);
 					}
 					String id = DigestUtils.md5Hex(parentId+filename);
-					InputSource inputSource = new InputStreamInputSource(id, childMetadata, new CloseShieldInputStream(archiveInputStream));
+					InputSource inputSource = new InputStreamInputSource(id, childMetadata, CloseShieldInputStream.wrap(archiveInputStream));
 					StoredDocumentSource storedDocumentSource = storedDocumentSourceStorage.getStoredDocumentSource(inputSource);
 					if (parentDocumentFormat==DocumentFormat.PBLIT) { // use cloned expander without parameters
 						if (!clonedExpanders.containsKey(childDocumentFormat.name())) {

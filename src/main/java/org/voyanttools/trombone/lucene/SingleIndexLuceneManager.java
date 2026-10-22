@@ -98,7 +98,7 @@ public class SingleIndexLuceneManager extends AbstractLuceneManager {
 	}
 	
 	public void closeAll() throws IOException {
-		close(RandomStringUtils.randomAlphabetic(10));
+		close(RandomStringUtils.secure().nextAlphabetic(10));
 	}
 	
 }

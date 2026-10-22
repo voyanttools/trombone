@@ -91,7 +91,7 @@ public class Confidence implements Serializable {
 	}
 	public static float getConfidence(Collection<Confidence> confidences) {
 		double weightsSum = confidences.stream()
-			.mapToDouble(Confidence::getWeight)
+			.mapToDouble(c -> c.getWeight())
 			.sum();
 		float val = 0f;
 		for (Confidence confidence : confidences) {
@@ -105,6 +105,7 @@ public class Confidence implements Serializable {
 		/* (non-Javadoc)
 		 * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
 		 */
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return Confidence.class.isAssignableFrom(type);

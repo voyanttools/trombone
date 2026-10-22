@@ -316,6 +316,7 @@ public class Dreamscape extends AbstractCorpusTool implements Progressable {
 
 	public static class DreamscapeConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return Dreamscape.class.isAssignableFrom(type);

@@ -5,11 +5,8 @@ package org.voyanttools.trombone.input.expand;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.json.Json;
@@ -21,7 +18,6 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.voyanttools.trombone.input.source.InputSource;
 import org.voyanttools.trombone.input.source.Source;
 import org.voyanttools.trombone.input.source.StringInputSource;

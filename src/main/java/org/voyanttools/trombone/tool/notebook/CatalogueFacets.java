@@ -16,8 +16,8 @@ import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetCounts;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesReaderState;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
+
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.tool.util.AbstractTool;
 import org.voyanttools.trombone.tool.util.ToolSerializer;
@@ -55,7 +55,7 @@ public class CatalogueFacets extends AbstractTool {
 		IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 		
 		// TODO store this because apparently init is costly?
-		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader);
+		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader, new FacetsConfig());
 		
 		String[] facetQuery = parameters.getParameterValues("query");
 		
@@ -98,6 +98,7 @@ public class CatalogueFacets extends AbstractTool {
 
 	public static class CatalogueFacetsConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CatalogueFacets.class.isAssignableFrom(type);

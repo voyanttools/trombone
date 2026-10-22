@@ -40,7 +40,7 @@ import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.store.ByteBuffersDirectory;
 
 /** Shows simple usage of faceted indexing and search,
  *  using {@link SortedSetDocValuesFacetField} and {@link
@@ -48,7 +48,7 @@ import org.apache.lucene.store.RAMDirectory;
 
 public class SimpleSortedSetFacetsExample {
 
-  private final Directory indexDir = new RAMDirectory();
+  private final Directory indexDir = new ByteBuffersDirectory();
   private final FacetsConfig config = new FacetsConfig();
 
   /** Empty constructor */
@@ -93,7 +93,7 @@ public class SimpleSortedSetFacetsExample {
   private List<FacetResult> search() throws IOException {
     DirectoryReader indexReader = DirectoryReader.open(indexDir);
     IndexSearcher searcher = new IndexSearcher(indexReader);
-    SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader);
+    SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader, new FacetsConfig());
 
     // Aggregatses the facet counts
     FacetsCollector fc = new FacetsCollector();
@@ -118,7 +118,7 @@ public class SimpleSortedSetFacetsExample {
   private FacetResult drillDown() throws IOException {
     DirectoryReader indexReader = DirectoryReader.open(indexDir);
     IndexSearcher searcher = new IndexSearcher(indexReader);
-    SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader);
+    SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader, new FacetsConfig());
 
     // Now user drills down on Publish Year/2010:
     DrillDownQuery q = new DrillDownQuery(config);

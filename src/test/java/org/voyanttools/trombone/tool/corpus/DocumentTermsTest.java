@@ -9,7 +9,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.CorruptIndexException;
 import org.junit.Test;
 import org.voyanttools.trombone.lucene.LuceneManager;
 import org.voyanttools.trombone.model.DocumentTerm;
@@ -33,7 +32,7 @@ public class DocumentTermsTest {
 		// add an additional document to the corpus
 		Document document = new Document();
 		document.add(new TextField("lexical", "dark and stormy night in document one", Field.Store.YES));
-		storage.getLuceneManager().addDocument(RandomStringUtils.randomAlphabetic(10), document);
+		storage.getLuceneManager().addDocument(RandomStringUtils.secure().nextAlphabetic(10), document);
 		
 		FlexibleParameters parameters;
 		
@@ -91,7 +90,7 @@ public class DocumentTermsTest {
 		LuceneManager luceneManager = storage.getLuceneManager();
 		document = new Document();
 		document.add(new TextField("lexical", "dark and stormy night in document one", Field.Store.YES));
-		luceneManager.addDocument(RandomStringUtils.randomAlphabetic(10), document);
+		luceneManager.addDocument(RandomStringUtils.secure().nextAlphabetic(10), document);
 		DocumentTerm documentTerm;
 		
 		FlexibleParameters parameters;

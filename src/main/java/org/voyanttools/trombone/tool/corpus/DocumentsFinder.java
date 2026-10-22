@@ -83,10 +83,10 @@ public class DocumentsFinder extends AbstractTerms {
 		boolean createNewCorpus = parameters.getParameterBooleanValue("createNewCorpus");
 		
 		Query query = getFacetAwareQuery(corpusMapper, queries);
-		LuceneDocIdsCollector collector = new LuceneDocIdsCollector(corpusMapper);
+		LuceneDocIdsCollector collector = new LuceneDocIdsCollector(corpusMapper, null);
 		indexSearcher.search(query, collector);
 		if (createNewCorpus || includeDocIds || withDistributions) {
-			Set<Integer> docs = collector.getLuceneDocIds();
+			Set<Integer> docs = collector.getLuceneDocIds().keySet();
 			String[] ids = new String[docs.size()];
 			int i =0;
 			for (int doc : docs) {
@@ -153,7 +153,7 @@ public class DocumentsFinder extends AbstractTerms {
 	private Query getFacetAwareQuery(CorpusMapper corpusMapper, String[] queryStrings) throws IOException {
 		
 		FacetsConfig config = new FacetsConfig();
-		SimpleQueryParser queryParser = new FieldPrefixAwareSimpleQueryParser(corpusMapper.getLeafReader(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()));
+		SimpleQueryParser queryParser = new FieldPrefixAwareSimpleQueryParser(corpusMapper.getSearcher(), storage.getLuceneManager().getAnalyzer(corpusMapper.getCorpus().getId()));
 		
 
 		Map<String, List<Query>> fieldedQueries = new HashMap<String, List<Query>>();
@@ -209,6 +209,7 @@ public class DocumentsFinder extends AbstractTerms {
 
 	public static class DocumentsFinderConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return DocumentsFinder.class.isAssignableFrom(type);

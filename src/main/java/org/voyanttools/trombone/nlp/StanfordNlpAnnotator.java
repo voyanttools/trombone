@@ -5,23 +5,14 @@ package org.voyanttools.trombone.nlp;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.lucene.index.PostingsEnum;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.util.BytesRef;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.DocumentEntity;
 import org.voyanttools.trombone.model.IndexedDocument;
-import org.voyanttools.trombone.model.TokenType;
 import org.voyanttools.trombone.model.EntityType;
 import org.voyanttools.trombone.util.FlexibleParameters;
 

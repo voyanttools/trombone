@@ -2,7 +2,7 @@ package org.voyanttools.trombone.storage.git;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -231,7 +231,7 @@ public class RepositoryManager {
 	public static String getStringFromObjectLoader(ObjectLoader loader) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		loader.copyTo(baos);
-		return baos.toString(Charset.forName("UTF-8"));
+		return baos.toString(StandardCharsets.UTF_8);
 	}
 	
 	public static Set<String> getUntrackedFiles(Repository repository) throws GitAPIException {

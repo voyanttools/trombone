@@ -18,7 +18,6 @@ import org.apache.lucene.facet.sortedset.DefaultSortedSetDocValuesReaderState;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetCounts;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesReaderState;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.simple.SimpleQueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -70,9 +69,9 @@ public class NotebookFinder extends AbstractTool {
 		DirectoryReader indexReader = DirectoryReader.open(storage.getNotebookLuceneManager().getIndexWriter(""));
 		IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 		Analyzer analyzer = storage.getNotebookLuceneManager().getAnalyzer("");
-		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader);
+		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexReader, new FacetsConfig());
 		
-		Query query = getFacetAwareQuery(queries, indexReader, analyzer);
+		Query query = getFacetAwareQuery(queries, indexSearcher, analyzer);
 		FacetsCollector fc = new FacetsCollector();
 		TopDocs topdocs = FacetsCollector.search(indexSearcher, query, indexReader.maxDoc(), fc);
 		
@@ -86,15 +85,15 @@ public class NotebookFinder extends AbstractTool {
 		System.out.println("hits: "+topdocs.scoreDocs.length);
 		
 		for (ScoreDoc sd : topdocs.scoreDocs) {
-			Document doc = indexSearcher.doc(sd.doc);
+			Document doc = indexSearcher.storedFields().document(sd.doc);
 			notebookResults.add(doc);
 		}
 	}
 	
-	private Query getFacetAwareQuery(String[] queryStrings, IndexReader indexReader, Analyzer analyzer) throws IOException {
+	private Query getFacetAwareQuery(String[] queryStrings, IndexSearcher indexSearcher, Analyzer analyzer) throws IOException {
 		
 		FacetsConfig config = new FacetsConfig();
-		SimpleQueryParser queryParser = new FieldPrefixAwareSimpleQueryParser(indexReader, analyzer);
+		SimpleQueryParser queryParser = new FieldPrefixAwareSimpleQueryParser(indexSearcher, analyzer);
 		
 		Map<String, List<Query>> fieldedQueries = new HashMap<String, List<Query>>();
 		for (String queryString : queryStrings) {
@@ -162,6 +161,7 @@ public class NotebookFinder extends AbstractTool {
 	
 	public static class CatalogueFacetsConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return NotebookFinder.class.isAssignableFrom(type);

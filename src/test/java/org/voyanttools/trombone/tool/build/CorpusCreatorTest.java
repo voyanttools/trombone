@@ -5,13 +5,9 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.voyanttools.trombone.model.Corpus;
 import org.voyanttools.trombone.storage.Storage;
-import org.voyanttools.trombone.tool.build.RealCorpusCreator;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
-
-import com.thoughtworks.xstream.XStream;
 
 public class CorpusCreatorTest {
 

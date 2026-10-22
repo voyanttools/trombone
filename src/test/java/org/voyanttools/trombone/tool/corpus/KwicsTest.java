@@ -9,8 +9,6 @@ import org.apache.lucene.document.TextField;
 import org.junit.Test;
 import org.voyanttools.trombone.lucene.LuceneManager;
 import org.voyanttools.trombone.storage.Storage;
-import org.voyanttools.trombone.tool.corpus.CorpusCreator;
-import org.voyanttools.trombone.tool.corpus.DocumentContexts;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
 
@@ -31,7 +29,7 @@ public class KwicsTest {
 		LuceneManager luceneManager = storage.getLuceneManager();
 		document = new Document();
 		document.add(new TextField("lexical", "dark and stormy night in document one", Field.Store.YES));
-		luceneManager.addDocument(RandomStringUtils.randomAlphabetic(10), document);
+		luceneManager.addDocument(RandomStringUtils.secure().nextAlphabetic(10), document);
 		
 		FlexibleParameters parameters;
 		

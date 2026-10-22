@@ -5,8 +5,6 @@ package org.voyanttools.trombone.model;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
-
 import org.junit.Test;
 import org.voyanttools.trombone.model.table.Table;
 

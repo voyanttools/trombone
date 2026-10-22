@@ -17,7 +17,7 @@ public class TopicsImportExample {
     }
 
     public Pipe buildPipe() {
-        ArrayList pipeList = new ArrayList();
+        ArrayList<Pipe> pipeList = new ArrayList<>();
 
         // Read data from File objects
         pipeList.add(new Input2CharSequence("UTF-8"));

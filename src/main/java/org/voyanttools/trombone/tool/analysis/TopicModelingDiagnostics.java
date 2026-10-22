@@ -606,30 +606,31 @@ public class TopicModelingDiagnostics {
 	public String toString() {
 
 		StringBuilder out = new StringBuilder();
-		Formatter formatter = new Formatter(out, Locale.US);
 
-		for (int topic = 0; topic < numTopics; topic++) {
-			
-			formatter.format("Topic %d", topic);
-
-			for (TopicScores scores: diagnostics) {
-				formatter.format("\t%s=%.4f", scores.name, scores.scores[topic]);
-			}
-			formatter.format("\n");
-
-			for (int position = 0; position < topicTopWords[topic].length; position++) {
-				if (topicTopWords[topic][position] == null) { break; }
+		try (Formatter formatter = new Formatter(out, Locale.US)) {
+			for (int topic = 0; topic < numTopics; topic++) {
 				
-				formatter.format("  %s", topicTopWords[topic][position]);
-				for(TopicScores scores: diagnostics) {
-					if (scores.wordScoresDefined) {
-						formatter.format("\t%s=%.4f", scores.name, scores.topicWordScores[topic][position]);
-					}
+				formatter.format("Topic %d", topic);
+
+				for (TopicScores scores: diagnostics) {
+					formatter.format("\t%s=%.4f", scores.name, scores.scores[topic]);
 				}
-				out.append("\n");
+				formatter.format("\n");
+
+				for (int position = 0; position < topicTopWords[topic].length; position++) {
+					if (topicTopWords[topic][position] == null) { break; }
+					
+					formatter.format("  %s", topicTopWords[topic][position]);
+					for(TopicScores scores: diagnostics) {
+						if (scores.wordScoresDefined) {
+							formatter.format("\t%s=%.4f", scores.name, scores.topicWordScores[topic][position]);
+						}
+					}
+					out.append("\n");
+				}
 			}
 		}
-	
+
 		return out.toString();
 	}
 
@@ -638,51 +639,51 @@ public class TopicModelingDiagnostics {
 		int[] tokensPerTopic = model.tokensPerTopic;
 
 		StringBuilder out = new StringBuilder();
-		Formatter formatter = new Formatter(out, Locale.US);
 		
+		try (Formatter formatter = new Formatter(out, Locale.US)) {
+			out.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+			out.append("<model>\n");
 
-		out.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		out.append("<model>\n");
-
-		for (int topic = 0; topic < numTopics; topic++) {
-			
-			int[][] matrix = topicCodocumentMatrices[topic];
-
-			formatter.format("<topic id='%d'", topic);
-
-			for (TopicScores scores: diagnostics) {
-				formatter.format(" %s='%.4f'", scores.name, scores.scores[topic]);
-			}
-			out.append(">\n");
-
-			TreeSet<IDSorter> sortedWords = topicSortedWords.get(topic);
-
-			// How many words should we report? Some topics may have fewer than
-			//  the default number of words with non-zero weight.
-			int limit = numTopWords;
-			if (sortedWords.size() < numTopWords) { limit = sortedWords.size(); }
-
-			double cumulativeProbability = 0.0;
-
-			Iterator<IDSorter> iterator = sortedWords.iterator();
-			for (int position=0; position < limit; position++) {
-				IDSorter info = iterator.next();
-				double probability = info.getWeight() / tokensPerTopic[topic];
-				cumulativeProbability += probability;
+			for (int topic = 0; topic < numTopics; topic++) {
 				
-				formatter.format("<word rank='%d' count='%.0f' prob='%.5f' cumulative='%.5f' docs='%d'", position+1, info.getWeight(), probability, cumulativeProbability, matrix[position][position]);
+				int[][] matrix = topicCodocumentMatrices[topic];
 
-				for(TopicScores scores: diagnostics) {
-					if (scores.wordScoresDefined) {
-						formatter.format(" %s='%.4f'", scores.name, scores.topicWordScores[topic][position]);
-					}
+				formatter.format("<topic id='%d'", topic);
+
+				for (TopicScores scores: diagnostics) {
+					formatter.format(" %s='%.4f'", scores.name, scores.scores[topic]);
 				}
-				formatter.format(">%s</word>\n", topicTopWords[topic][position].replaceAll("&", "&amp;").replaceAll("<", "&gt;"));
-			}
+				out.append(">\n");
 
-			out.append("</topic>\n");
+				TreeSet<IDSorter> sortedWords = topicSortedWords.get(topic);
+
+				// How many words should we report? Some topics may have fewer than
+				//  the default number of words with non-zero weight.
+				int limit = numTopWords;
+				if (sortedWords.size() < numTopWords) { limit = sortedWords.size(); }
+
+				double cumulativeProbability = 0.0;
+
+				Iterator<IDSorter> iterator = sortedWords.iterator();
+				for (int position=0; position < limit; position++) {
+					IDSorter info = iterator.next();
+					double probability = info.getWeight() / tokensPerTopic[topic];
+					cumulativeProbability += probability;
+					
+					formatter.format("<word rank='%d' count='%.0f' prob='%.5f' cumulative='%.5f' docs='%d'", position+1, info.getWeight(), probability, cumulativeProbability, matrix[position][position]);
+
+					for(TopicScores scores: diagnostics) {
+						if (scores.wordScoresDefined) {
+							formatter.format(" %s='%.4f'", scores.name, scores.topicWordScores[topic][position]);
+						}
+					}
+					formatter.format(">%s</word>\n", topicTopWords[topic][position].replaceAll("&", "&amp;").replaceAll("<", "&gt;"));
+				}
+
+				out.append("</topic>\n");
+			}
+			out.append("</model>\n");
 		}
-		out.append("</model>\n");
 	
 		return out.toString();
 	}

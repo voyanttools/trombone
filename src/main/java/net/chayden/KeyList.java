@@ -6,7 +6,7 @@ import java.util.Vector;
  *  Eliza key list.
  *  This stores all the keys.
  */
-public class KeyList extends Vector {
+public class KeyList extends Vector<Object> {
 
     /**
      *  Add a new key.

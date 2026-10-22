@@ -65,6 +65,7 @@ public class Geonames extends AbstractTool {
 	
 	public static class GeonamesConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return Geonames.class.isAssignableFrom(type);

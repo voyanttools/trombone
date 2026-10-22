@@ -35,8 +35,8 @@ import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.DocIdSetIterator;
-import org.apache.lucene.search.spans.SpanQuery;
-import org.apache.lucene.search.spans.Spans;
+import org.apache.lucene.queries.spans.SpanQuery;
+import org.apache.lucene.queries.spans.Spans;
 import org.apache.lucene.util.BytesRef;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.Corpus;
@@ -95,7 +95,6 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 		NONE, LENGTHFIRST, RAWFREQFIRST, POSITIONFIRST;
 		private static Filter getForgivingly(FlexibleParameters parameters) {
 			String filter = parameters.getParameterValue("overlapFilter", "").toUpperCase();
-			String sortPrefix = "NONE"; // default
 			if (filter.startsWith("LENGTH")) {return LENGTHFIRST;}
 			else if (filter.startsWith("RAWFREQ")) {return RAWFREQFIRST;}
 			else {return NONE;}
@@ -151,14 +150,14 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 				Map<Integer, List<int[]>> documentAndPositionsMap = new HashMap<Integer, List<int[]>>();
 
 				int doc = spans.nextDoc();
-				while(doc!=spans.NO_MORE_DOCS) {
+				while(doc!=Spans.NO_MORE_DOCS) {
 					String docId = corpusMapper.getDocumentIdFromLuceneId(doc);
 					if (validIds.contains(docId)) {
 						docIndexInCorpus = corpus.getDocumentPosition(docId);
 						documentAndPositionsMap.put(docIndexInCorpus, new ArrayList<int[]>());
 						
 						int pos = spans.nextStartPosition();
-						while(pos!=spans.NO_MORE_POSITIONS) {
+						while(pos!=Spans.NO_MORE_POSITIONS) {
 							documentAndPositionsMap.get(docIndexInCorpus).add(new int[]{spans.startPosition(), spans.endPosition()});
 							pos = spans.nextStartPosition();
 						}
@@ -395,7 +394,7 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 	private SimplifiedTermInfo[] getSparseSimplifiedTermInfoArray(CorpusMapper corpusMapper, int luceneDoc, int lastTokenOffset) throws IOException {
 		
 		Keywords stopwords = this.getStopwords(corpusMapper.getCorpus());
-		Terms terms = corpusMapper.getLeafReader().getTermVector(luceneDoc, tokenType.name());
+		Terms terms = corpusMapper.getTermVector(luceneDoc, tokenType.name());
 		TermsEnum termsEnum = terms.iterator();
 		SimplifiedTermInfo[] simplifiedTermInfoArray = new SimplifiedTermInfo[lastTokenOffset+1];
 		while(true) {
@@ -496,9 +495,6 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 			this.endOffset = endOffset;
 			
 		}
-		public SimplifiedTermInfo(String string) {
-			this(string, 0, 0, 0, 0, 0);
-		}
 	}
 
 
@@ -507,6 +503,8 @@ public class DocumentNgrams extends AbstractTerms implements ConsumptiveTool {
 	}
 	
 	public static class DocumentNgramsConverter implements Converter {
+		
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return DocumentNgrams.class.isAssignableFrom(type);

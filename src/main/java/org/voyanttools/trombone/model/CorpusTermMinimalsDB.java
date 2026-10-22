@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.util.BytesRef;
@@ -58,12 +58,12 @@ public class CorpusTermMinimalsDB extends AbstractDB {
 		return new CorpusTermMinimalsDB(corpusMapper, field, true);
 	}
 	private static void buildFromDocumentTermVectors(CorpusMapper corpusMapper, String field) throws IOException {
-		LeafReader reader = corpusMapper.getLeafReader();
+		IndexReader reader = corpusMapper.getLeafReader();
 		Map<String, AtomicInteger> inDocumentsCountMap = new HashMap<String, AtomicInteger>();
 		Map<String, AtomicInteger> rawFreqsMap = new HashMap<String, AtomicInteger>();
 		TermsEnum termsEnum = null;
 		for (int doc : corpusMapper.getLuceneIds()) {
-			Terms terms = reader.getTermVector(doc, field);
+			Terms terms = reader.termVectors().get(doc, field);
 			if (terms!=null) {
 				termsEnum = terms.iterator();
 				if (termsEnum!=null) {

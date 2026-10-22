@@ -6,7 +6,7 @@ import java.util.Vector;
  *  Eliza synonym list.
  *  Collection of all the synonym elements.
  */
-public class SynList extends Vector {
+public class SynList extends Vector<Object> {
 
     /**
      *  Add another word list the the synonym list.

@@ -6,7 +6,7 @@
 	
 	<groupId>org.voyant-tools</groupId>
 	<artifactId>trombone</artifactId>
-	<version>5.2.27</version>
+	<version>6.0.0-SNAPSHOT</version>
 	
 	<name>Voyant Tools</name>
 	<url>https://github.com/voyanttools/trombone</url>
@@ -39,8 +39,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 	</properties>
 
 	<build>
@@ -48,10 +48,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.15.0</version>
 				<configuration>
-					<source>11</source>
-					<target>11</target>
+					<source>21</source>
+					<target>21</target>
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
@@ -93,11 +93,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>1.1.4</version>
-		</dependency>
-		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
 			<version>9.4.48.v20220622</version>
@@ -132,53 +127,75 @@
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parsers-standard-package</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parser-apple-module</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parser-miscoffice-module</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>9.12.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-facet</artifactId>
-			<version>6.2.1</version>
+			<version>9.12.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-icu</artifactId>
-			<version>6.2.1</version>
+			<artifactId>lucene-analysis-icu</artifactId>
+			<version>9.12.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-queryparser</artifactId>
-			<version>6.2.1</version>
+			<version>9.12.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-smartcn</artifactId>
-			<version>6.2.1</version>
+			<artifactId>lucene-queries</artifactId>
+			<version>9.12.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analysis-smartcn</artifactId>
+			<version>9.12.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-test-framework</artifactId>
-			<version>6.2.1</version>
+			<version>9.12.3</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-misc</artifactId>
-			<version>6.2.1</version>
+			<version>9.12.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.pemistahl</groupId>
@@ -208,7 +225,7 @@
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-highlighter</artifactId>
-			<version>6.2.1</version>
+			<version>9.12.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -229,6 +246,12 @@
 			<groupId>cc.mallet</groupId>
 			<artifactId>mallet</artifactId>
 			<version>2.0.8</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -254,7 +277,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>33.5.0-jre</version>
+			<version>33.7.1-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>org.checkerframework</groupId>
@@ -302,13 +325,8 @@
 		<!-- used by t-SNE -->
 		<dependency>
 			<groupId>org.ejml</groupId>
-			<artifactId>core</artifactId>
-			<version>0.30</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ejml</groupId>
-			<artifactId>equation</artifactId>
-			<version>0.30</version>
+			<artifactId>ejml-core</artifactId>
+			<version>0.39</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.fommil.netlib</groupId>
@@ -326,7 +344,7 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.22.1</version>
+			<version>1.22.2</version>
 		</dependency>
 
 		<dependency>
@@ -338,7 +356,7 @@
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
 			<artifactId>org.eclipse.jgit</artifactId>
-			<version>5.7.0.202003110725-r</version>
+			<version>5.13.5.202508271544-r</version>
 		</dependency>
 
 
@@ -382,11 +400,6 @@
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
 				<version>1.21.0</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-logging</groupId>
-				<artifactId>commons-logging</artifactId>
-				<version>1.3.6</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.istack</groupId>

@@ -2,8 +2,6 @@ package org.voyanttools.trombone.tool.corpus;
 
 import static org.junit.Assert.*;
 
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.junit.Test;
 

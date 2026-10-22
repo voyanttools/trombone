@@ -192,6 +192,7 @@ public class CorpusCollocate implements Comparable<CorpusCollocate> {
 
 	public static class CorpusCollocateConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CorpusCollocate.class.isAssignableFrom(type);

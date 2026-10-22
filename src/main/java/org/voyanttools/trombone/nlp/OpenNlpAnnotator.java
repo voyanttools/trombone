@@ -3,7 +3,6 @@ package org.voyanttools.trombone.nlp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +69,7 @@ public class OpenNlpAnnotator implements NlpAnnotator {
 		
 		List<DocumentToken> tokens = documentTokens.getDocumentTokens();
 		String[] strings = tokens.stream()
-			.map(DocumentToken::getTerm)
+			.map(d -> d.getTerm())
 			.toArray(String[]::new);
 		Span[] spans = getLocations(strings);
 		Map<String, List<Span>> stringSpans = new HashMap<String, List<Span>>();

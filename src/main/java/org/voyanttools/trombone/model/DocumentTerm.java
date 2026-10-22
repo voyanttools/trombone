@@ -24,7 +24,6 @@ package org.voyanttools.trombone.model;
 import java.text.Normalizer;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.voyanttools.trombone.tool.util.ToolSerializer;
@@ -413,6 +412,7 @@ public class DocumentTerm {
 	
 	public static class DocumentTermConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return DocumentTerm.class.isAssignableFrom(type);

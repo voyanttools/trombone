@@ -7,12 +7,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Collection;
 
-import net.sf.hfst.Transducer;
-import net.sf.hfst.UnweightedTransducer;
-import net.sf.hfst.WeightedTransducer;
-import net.sf.hfst.NoTokenizationException;
-import net.sf.hfst.FormatException;
-
 /**
  * HfstRuntimeReader takes a transducer (the name of which should
  * be the first argument) of its own format (these can be generated with

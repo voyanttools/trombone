@@ -280,7 +280,7 @@ public class GitNotebookManager extends AbstractTool {
 			id = userId + NOTEBOOK_ID_SEPARATOR + name;
 		} else {
 			while(true) {
-				id = userId + NOTEBOOK_ID_SEPARATOR + RandomStringUtils.randomAlphanumeric(6);
+				id = userId + NOTEBOOK_ID_SEPARATOR + RandomStringUtils.secure().nextAlphabetic(6);
 				if (doesNotebookFileExist(rm, id+".json") == false) {
 					break;
 				}
@@ -405,13 +405,13 @@ public class GitNotebookManager extends AbstractTool {
 	private static List<String> listFilesNewestFirst(File directory) throws IOException {
 		try (final Stream<Path> fileStream = Files.list(directory.toPath())) {
 			return fileStream
-				.map(Path::toFile)
-				.collect(Collectors.toMap(Function.identity(), File::lastModified))
+				.map(path -> path.toFile())
+				.collect(Collectors.toMap(file -> file, file -> file.lastModified()))
 				.entrySet()
 				.stream()
 				.sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-				.map(Map.Entry::getKey)
-				.map(File::getName)
+				.map(entry -> entry.getKey())
+				.map(file -> file.getName())
 				.collect(Collectors.toList());
 		}
 	}
@@ -554,7 +554,7 @@ public class GitNotebookManager extends AbstractTool {
 			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 			Term notebookIdTerm = new Term("id", notebookId);
 			TopDocs topDocs = indexSearcher.search(new TermQuery(notebookIdTerm), 1);
-			if (topDocs.totalHits>0) {
+			if (topDocs.totalHits.value>0) {
 				indexWriter.deleteDocuments(notebookIdTerm);
 			} else {
 				throw new IOException("Unable to remove notebook from index. Notebook not found: "+notebookId);
@@ -610,7 +610,7 @@ public class GitNotebookManager extends AbstractTool {
 				boolean alreadyIndexed = false;
 				Term notebookIdTerm = new Term("id", notebookId);
 				TopDocs topDocs = indexSearcher.search(new TermQuery(notebookIdTerm), 1);
-				if (topDocs.totalHits>0) {
+				if (topDocs.totalHits.value>0) {
 					alreadyIndexed = true;
 					System.out.println("Re-Indexing: "+notebookId);
 				} else {

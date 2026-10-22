@@ -137,6 +137,7 @@ public class CorpusNgrams extends AbstractTerms implements ConsumptiveTool {
 	
 	public static class CorpusNgramsConverter implements Converter {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return CorpusNgrams.class.isAssignableFrom(type);

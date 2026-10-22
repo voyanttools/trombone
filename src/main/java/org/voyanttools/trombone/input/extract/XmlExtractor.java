@@ -24,13 +24,10 @@ package org.voyanttools.trombone.input.extract;
 //import it.svario.xpathapi.jaxp.XPathAPI;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;

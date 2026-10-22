@@ -2,7 +2,6 @@ package net.sf.hfst;
 
 //import java.io.DataInputStream;
 import java.io.FileInputStream;
-import net.sf.hfst.FormatException;
 
 /**
  * On instantiation reads the transducer's header and provides an interface

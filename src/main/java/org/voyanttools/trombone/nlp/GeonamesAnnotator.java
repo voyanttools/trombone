@@ -2,42 +2,36 @@ package org.voyanttools.trombone.nlp;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
-import org.apache.lucene.analysis.tokenattributes.OffsetAttributeImpl;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
+
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.lucene.analysis.LexicalAnalyzer;
 import org.voyanttools.trombone.model.Confidence;
 import org.voyanttools.trombone.model.Confidence.Type;
 import org.voyanttools.trombone.model.CorpusTermMinimalsDB;
 import org.voyanttools.trombone.model.DocumentLocationToken;
-import org.voyanttools.trombone.model.DocumentNgram;
 import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.model.Kwic;
 import org.voyanttools.trombone.model.Location;
 import org.voyanttools.trombone.model.TokenType;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.tool.corpus.DocumentContexts;
-import org.voyanttools.trombone.tool.corpus.DocumentNgrams;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.GeonamesIterator;
 
@@ -122,7 +116,7 @@ public class GeonamesAnnotator {
 				        			 }
 				        			 Query query = builder.build();
 				        			TopDocs topDocs = searcher.search(query, 1);
-				        			if (topDocs.totalHits>0) {
+				        			if (topDocs.totalHits.value>0) {
 				        				form = StringUtils.join(words, ' ');
 				        			}   			
 				        		}
@@ -161,11 +155,11 @@ public class GeonamesAnnotator {
 		
 		// determine the very simple mean latitude and longitude (this doesn't take into consideration the shape of the globe)
 		double latMean = preferredCoordinates.length==2 ? Double.valueOf(preferredCoordinates[0]) : locationsForAveraging.stream()
-			.mapToDouble(Location::getLat)
+			.mapToDouble(l -> l.getLat())
 			.average().getAsDouble();
 		// determine the very simple mean latitude and longitude (this doesn't take into consideration the shape of the globe)
 		double lngMean = preferredCoordinates.length==2 ? Double.valueOf(preferredCoordinates[1]) : locationsForAveraging.stream()
-			.mapToDouble(Location::getLng)
+			.mapToDouble(l -> l.getLng())
 			.average().getAsDouble();
 		double maxDistance = locationsForAveraging.stream()
 				.mapToDouble(l -> Math.hypot(latMean-l.getLat(), lngMean-l.getLng()))
@@ -173,7 +167,7 @@ public class GeonamesAnnotator {
 		
 		// get max population (should be highest already since that's how we sorted locationsForAveraging)
 		int maxPopulation = locationsForAveraging.stream()
-				.mapToInt(Location::getPopulation)
+				.mapToInt(l -> l.getPopulation())
 				.max().getAsInt();
 		
 		String[] queries = formsToGeonameIds.keySet().stream()

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.voyanttools.trombone.model.CorpusTerm;
 import org.voyanttools.trombone.tool.util.ToolSerializer;
 
 import com.thoughtworks.xstream.annotations.XStreamConverter;
@@ -213,6 +212,7 @@ public class PrincipalComponentsAnalysis {
 		
 		public static class PrincipleComponentConverter implements Converter {
 
+			@SuppressWarnings("rawtypes")
 			@Override
 			public boolean canConvert(Class type) {
 				return PrincipleComponent.class.isAssignableFrom(type);

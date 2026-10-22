@@ -22,7 +22,6 @@
 package org.voyanttools.trombone.storage.memory;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 

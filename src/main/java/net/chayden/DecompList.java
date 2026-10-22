@@ -6,7 +6,7 @@ import java.util.Vector;
  *  Eliza decomp list.
  *  This stores all the decompositions of a single key.
  */
-public class DecompList extends Vector {
+public class DecompList extends Vector<Object> {
 
     /**
      *  Add another decomp rule to the list.

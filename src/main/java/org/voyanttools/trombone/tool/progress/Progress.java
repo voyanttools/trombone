@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.storage.Storage.Location;

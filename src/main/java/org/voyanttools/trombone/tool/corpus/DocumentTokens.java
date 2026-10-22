@@ -13,13 +13,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.search.vectorhighlight.FieldTermStack.TermInfo;
 import org.apache.lucene.util.BytesRef;
+
+import org.voyanttools.trombone.lucene.search.SimpleTermInfo;
 import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.lucene.analysis.LemmaAnalyzer;
 import org.voyanttools.trombone.model.Corpus;
@@ -103,8 +103,8 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 		total = Integer.MAX_VALUE;
 		Corpus corpus = corpusMapper.getCorpus();
 		ids = this.getCorpusStoredDocumentIdsFromParameters(corpus);
-		List<TermInfo> termInfos = new ArrayList<TermInfo>();
-		TermInfo termInfo;
+		List<SimpleTermInfo> termInfos = new ArrayList<SimpleTermInfo>();
+		SimpleTermInfo termInfo;
 		int documentStart = start;
 		Stripper stripper = new Stripper(parameters.getParameterValue("stripTags"));
 		String skipToDocId = parameters.getParameterValue("skipToDocId", "");
@@ -126,7 +126,7 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 			int currentDocTokensCount = 0;
 
 			int luceneDoc = corpusMapper.getLuceneIdFromDocumentId(id);
-			Terms terms = corpusMapper.getLeafReader().getTermVector(luceneDoc, tokenType.name());
+			Terms terms = corpusMapper.getTermVector(luceneDoc, tokenType.name());
 			if (terms==null) {continue;}
 			TermsEnum termsEnum = terms.iterator();
 			Map<String, Integer> docFreqs = new HashMap<String, Integer>();
@@ -141,11 +141,14 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 					postingsEnum.nextDoc();
 					for (int i=0, len = postingsEnum.freq(); i<len; i++) {
 						int pos = postingsEnum.nextPosition();
+						int startOffset = postingsEnum.startOffset();
+						int endOffset = postingsEnum.endOffset();
+
 						if (pos >= documentStart && pos<maxPos) { // out of range
 							if (!docFreqs.containsKey(termString)) {
 								docFreqs.put(termString, len);
 							}
-							termInfos.add(new TermInfo(termString, postingsEnum.startOffset(), postingsEnum.endOffset(), pos, 1));
+							termInfos.add(new SimpleTermInfo(termString, startOffset, endOffset, pos));
 						}
 					}
 				}
@@ -281,6 +284,7 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 		/* (non-Javadoc)
 		 * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
 		 */
+		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean canConvert(Class type) {
 			return DocumentTokens.class.isAssignableFrom(type);

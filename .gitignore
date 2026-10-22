@@ -6,3 +6,4 @@ target
 .DS_Store
 /lib
 src/main/java/ca/lincsproject/nssi/config.properties
+.m2

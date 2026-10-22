@@ -93,7 +93,7 @@ class BagItExpander implements Expander {
 		}
 		if (hasKeyFileNames) {
 				File zipFile = new File(base, currentDirectory.getName() +".zip");
-				ArchiveOutputStream output = new ZipArchiveOutputStream(zipFile);
+				ArchiveOutputStream<ZipArchiveEntry> output = new ZipArchiveOutputStream(zipFile);
 				for (String filename : keyFileNames) {
 					File childFile = new File(currentDirectory, filename);
 					ZipArchiveEntry entry = new ZipArchiveEntry(childFile, childFile.getName());

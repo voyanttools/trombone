@@ -9,7 +9,7 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.voyanttools.trombone.input.expand.StoredDocumentSourceExpander;
+
 import org.voyanttools.trombone.input.source.FileInputSource;
 import org.voyanttools.trombone.model.StoredDocumentSource;
 import org.voyanttools.trombone.storage.Storage;

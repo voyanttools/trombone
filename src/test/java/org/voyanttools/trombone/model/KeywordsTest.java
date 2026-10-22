@@ -4,13 +4,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.nio.file.Files;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.storage.file.FileStorage;
-import org.voyanttools.trombone.util.EmbeddedWebServer;
 import org.voyanttools.trombone.util.TestHelper;
 
 public class KeywordsTest {

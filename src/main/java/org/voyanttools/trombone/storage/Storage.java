@@ -27,11 +27,9 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.lucene.store.Directory;
 import org.mapdb.DB;
 import org.voyanttools.trombone.lucene.LuceneManager;
 import org.voyanttools.trombone.nlp.NlpFactory;
-import org.voyanttools.trombone.storage.Storage.Location;
 import org.voyanttools.trombone.storage.file.FileMigrator;
 
 /**
