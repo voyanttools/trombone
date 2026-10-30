@@ -35,6 +35,8 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonWriter;
+import com.thoughtworks.xstream.io.naming.NoNameCoder;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 import com.thoughtworks.xstream.security.NoTypePermission;
 import com.thoughtworks.xstream.security.NullPermission;
 import com.thoughtworks.xstream.security.PrimitiveTypePermission;
@@ -55,7 +57,7 @@ public class ToolSerializer implements RunnableTool {
 	private static final XStream JSON_XSTREAM;
 
 	static {
-		XML_XSTREAM = new XStream();
+		XML_XSTREAM = new XStream(new StaxDriver(new NoNameCoder()));
 		XML_XSTREAM.setClassLoader(ToolSerializer.class.getClassLoader());
 		secureXStream(XML_XSTREAM);
 		processAnnotations(XML_XSTREAM);
@@ -63,7 +65,10 @@ public class ToolSerializer implements RunnableTool {
 		JSON_XSTREAM = new XStream(new JsonHierarchicalStreamDriver() {
 			@Override
 			public HierarchicalStreamWriter createWriter(Writer writer) {
-				return new JsonWriter(writer, JsonWriter.DROP_ROOT_MODE);
+				return new JsonWriter(
+					writer, JsonWriter.DROP_ROOT_MODE,
+					new JsonWriter.Format(new char[]{' ', ' '}, new char[]{'\n'}, JsonWriter.Format.SPACE_AFTER_LABEL, new NoNameCoder())
+				);
 			}
 		});
 		JSON_XSTREAM.setClassLoader(ToolSerializer.class.getClassLoader());

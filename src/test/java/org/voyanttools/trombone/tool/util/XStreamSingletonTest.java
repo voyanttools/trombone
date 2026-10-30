@@ -15,7 +15,7 @@ public class XStreamSingletonTest {
     public void testConcurrentMarshalling() throws InterruptedException {
         final int threadCount = 100;
         final XStream xstream = ToolSerializer.getXMLXStream();
-        final String expectedXml = "<string>test</string>";
+        final String expectedXml = "<?xml version=\"1.0\" ?><string>test</string>";
         
         ExecutorService service = Executors.newFixedThreadPool(threadCount);
         CountDownLatch startLatch = new CountDownLatch(1);
