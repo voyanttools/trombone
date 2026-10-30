@@ -32,6 +32,7 @@ import java.util.Map;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonWriter;
@@ -61,6 +62,23 @@ public class ToolSerializer implements RunnableTool {
 		XML_XSTREAM.setClassLoader(ToolSerializer.class.getClassLoader());
 		secureXStream(XML_XSTREAM);
 		processAnnotations(XML_XSTREAM);
+		// Replaces the core String serialization behaviour for ReflectionConverter fields to avoid escaping characters like emojis
+		XML_XSTREAM.registerConverter(new com.thoughtworks.xstream.converters.Converter() {
+			@Override
+			public boolean canConvert(Class type) {
+				return type.equals(String.class);
+			}
+
+			@Override
+			public void marshal(Object source, HierarchicalStreamWriter writer, com.thoughtworks.xstream.converters.MarshallingContext context) {
+				writer.setValue((String) source);
+			}
+
+			@Override
+			public Object unmarshal(HierarchicalStreamReader reader, com.thoughtworks.xstream.converters.UnmarshallingContext context) {
+				return reader.getValue();
+			}
+		}, XStream.PRIORITY_VERY_HIGH);
 		
 		JSON_XSTREAM = new XStream(new JsonHierarchicalStreamDriver() {
 			@Override
@@ -74,6 +92,22 @@ public class ToolSerializer implements RunnableTool {
 		JSON_XSTREAM.setClassLoader(ToolSerializer.class.getClassLoader());
 		secureXStream(JSON_XSTREAM);
 		processAnnotations(JSON_XSTREAM);
+		JSON_XSTREAM.registerConverter(new com.thoughtworks.xstream.converters.Converter() {
+			@Override
+			public boolean canConvert(Class type) {
+				return type.equals(String.class);
+			}
+
+			@Override
+			public void marshal(Object source, HierarchicalStreamWriter writer, com.thoughtworks.xstream.converters.MarshallingContext context) {
+				writer.setValue((String) source);
+			}
+
+			@Override
+			public Object unmarshal(HierarchicalStreamReader reader, com.thoughtworks.xstream.converters.UnmarshallingContext context) {
+				return reader.getValue();
+			}
+		}, XStream.PRIORITY_VERY_HIGH);
 		
 	}
 	public static XStream getXMLXStream() {
