@@ -27,16 +27,23 @@ import java.util.Comparator;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
  * @author sgs
  *
  */
-@XStreamAlias("kwic")
+
+@XStreamConverter(Kwic.KwicConverter.class)
 public class Kwic implements Serializable {
 	
 	public enum Sort {
@@ -68,22 +75,22 @@ public class Kwic implements Serializable {
 		}
 	}
 	
-	int docIndex;
+	private int docIndex;
 	
-	String query;
+	private String query;
 	
-	String term;
+	private String term;
 	
 	@XStreamOmitField
 	String normalizedAnalyzedMiddle = null;
 	
-	int position;
+	private int position;
 	
-	String left;
+	private String left;
 	
-	String middle;
+	private String middle;
 	
-	String right;
+	private String right;
 	
 	@XStreamOmitField
 	String leftNormalizedReverseSort = null;
@@ -318,7 +325,44 @@ public class Kwic implements Serializable {
 		return docIndex;
 	}
 
+	public String getQuery() {
+		return query;
+	}
 	public String getTerm() {
 		return term;
+	}
+
+	public static class KwicConverter implements Converter {
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public boolean canConvert(Class type) {
+			return Kwic.class.isAssignableFrom(type);
+		}
+
+		@Override
+		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+			Kwic kwic = (Kwic) source;
+
+			writer.startNode("kwic");
+
+			ToolSerializer.setNumericNode(writer, "docIndex", kwic.getDocIndex());
+			ToolSerializer.setStringNode(writer, "query", kwic.getQuery());
+			ToolSerializer.setStringNode(writer, "term", kwic.getTerm());
+			ToolSerializer.setNumericNode(writer, "position", kwic.getPosition());
+			ToolSerializer.setStringNode(writer, "left", kwic.getLeft());
+			ToolSerializer.setStringNode(writer, "middle", kwic.getMiddle());
+			ToolSerializer.setStringNode(writer, "right", kwic.getRight());
+			
+
+			writer.endNode();
+		}
+
+		@Override
+		public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
 	}
 }
