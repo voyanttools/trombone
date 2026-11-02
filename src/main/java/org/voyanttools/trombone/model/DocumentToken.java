@@ -3,10 +3,20 @@
  */
 package org.voyanttools.trombone.model;
 
+import org.voyanttools.trombone.tool.util.ToolSerializer;
+
+import com.thoughtworks.xstream.annotations.XStreamConverter;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+
 /**
  * @author sgs
  *
  */
+@XStreamConverter(DocumentToken.DocumentTokenConverter.class)
 public class DocumentToken implements Comparable<DocumentToken> {
 	
 	private String docId;
@@ -57,6 +67,10 @@ public class DocumentToken implements Comparable<DocumentToken> {
 	public int getDocIndex() {
 		return docIndex;
 	}
+
+	public String getDocId() {
+		return docId;
+	}
 	
 	public TokenType getTokenType() {
 		return tokenType;
@@ -103,5 +117,39 @@ public class DocumentToken implements Comparable<DocumentToken> {
 	}
 	public String getPos() {
 		return pos;
+	}
+
+	public static class DocumentTokenConverter implements Converter {
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public boolean canConvert(Class type) {
+			return DocumentToken.class.isAssignableFrom(type);
+		}
+
+		@Override
+		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+			DocumentToken docToken = (DocumentToken) source;
+			
+			writer.startNode("token");
+
+			ToolSerializer.setStringNode(writer, "term", docToken.getTerm());
+			ToolSerializer.setStringNode(writer, "tokenType", docToken.getTokenType().name());
+			ToolSerializer.setStringNode(writer, "docId", docToken.getDocId());
+			ToolSerializer.setNumericNode(writer, "docIndex", docToken.getDocIndex());
+			ToolSerializer.setNumericNode(writer, "rawFreq", docToken.getRawFreq());
+			ToolSerializer.setNumericNode(writer, "position", docToken.getPosition());
+			ToolSerializer.setNumericNode(writer, "startOffset", docToken.getStartOffset());
+			ToolSerializer.setNumericNode(writer, "endOffset", docToken.getEndOffset());
+
+			writer.endNode();
+		}
+
+		@Override
+		public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
 	}
 }

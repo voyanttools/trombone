@@ -303,9 +303,7 @@ public class DocumentTokens extends AbstractCorpusTool implements ConsumptiveToo
 	        
 			ToolSerializer.startNode(writer, "tokens", List.class);
 	        for (DocumentToken documentToken : documentTokens.getDocumentTokens()) {
-		        writer.startNode("token");
 		        context.convertAnother(documentToken);
-		        writer.endNode();
 	        }
 	        ToolSerializer.endNode(writer);
 		}
