@@ -270,6 +270,12 @@ public class ToolSerializer implements RunnableTool {
 			writer.endNode();
 		}
 	}
+
+	public static void setStringNode(HierarchicalStreamWriter writer, String nodeName, String value) {
+		startNode(writer, nodeName, String.class);
+		writer.setValue(value);
+		endNode(writer);
+	}
 	
 	public static void setNumericNode(HierarchicalStreamWriter writer, String nodeName, float value) {
 		startNode(writer, nodeName, Float.class);
