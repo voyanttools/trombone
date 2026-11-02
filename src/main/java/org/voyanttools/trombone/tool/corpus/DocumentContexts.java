@@ -14,14 +14,22 @@ import org.voyanttools.trombone.lucene.CorpusMapper;
 import org.voyanttools.trombone.model.Keywords;
 import org.voyanttools.trombone.model.Kwic;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.tool.util.ToolSerializer;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.FlexibleQueue;
 import org.voyanttools.trombone.util.Stripper;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 @XStreamAlias("documentContexts")
+@XStreamConverter(DocumentContexts.DocumentContextsConverter.class)
 public class DocumentContexts extends AbstractContextTerms implements ConsumptiveTool {
 
 	private List<Kwic> contexts = new ArrayList<Kwic>();
@@ -210,6 +218,36 @@ public class DocumentContexts extends AbstractContextTerms implements Consumptiv
 	@Override
 	protected void runAllTerms(CorpusMapper corpusMapper, Keywords stopwords) throws IOException {
 		runQueries(corpusMapper, stopwords, new String[0]); // doesn't make much sense without queries
+	}
+
+	public static class DocumentContextsConverter implements Converter {
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public boolean canConvert(Class type) {
+			return DocumentContexts.class.isAssignableFrom(type);
+		}
+
+		@Override
+		public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+			DocumentContexts dc = (DocumentContexts) source;
+
+			ToolSerializer.setNumericNode(writer, "total", dc.getTotal());
+
+			List<Kwic> kwics = dc.getContexts();
+			ToolSerializer.startNode(writer, "contexts", List.class);
+			for (Kwic kwic : kwics) {
+				context.convertAnother(kwic);
+			}
+			ToolSerializer.endNode(writer);
+		}
+
+		@Override
+		public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
 	}
 
 }

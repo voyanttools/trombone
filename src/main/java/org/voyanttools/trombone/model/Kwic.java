@@ -354,7 +354,6 @@ public class Kwic implements Serializable {
 			ToolSerializer.setStringNode(writer, "middle", kwic.getMiddle());
 			ToolSerializer.setStringNode(writer, "right", kwic.getRight());
 			
-
 			writer.endNode();
 		}
 
