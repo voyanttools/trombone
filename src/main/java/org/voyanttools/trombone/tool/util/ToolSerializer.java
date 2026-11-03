@@ -32,6 +32,7 @@ import java.util.Map;
 import org.voyanttools.trombone.util.FlexibleParameters;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.ExtendedHierarchicalStreamWriterHelper;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
@@ -259,7 +260,7 @@ public class ToolSerializer implements RunnableTool {
 		if (writer.underlyingWriter() instanceof JsonWriter) {
 			((JsonWriter)writer.underlyingWriter()).startNode(nodeName, clazz);
 		} else {
-			writer.startNode(nodeName);
+			ExtendedHierarchicalStreamWriterHelper.startNode(writer, nodeName, clazz);
 		}
 	}
 	
