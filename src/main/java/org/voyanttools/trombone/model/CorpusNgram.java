@@ -204,18 +204,10 @@ public class CorpusNgram {
 			boolean withDistributions = Boolean.TRUE.equals(context.get("withDistributions"));
 			
 			writer.startNode("ngram");
-	        
-	        writer.startNode("term");
-			writer.setValue(corpusNgram.getTerm());
-			writer.endNode();
 
-	        ToolSerializer.startNode(writer, "rawFreq", Integer.class);
-			writer.setValue(String.valueOf(corpusNgram.getRawFreq()));
-			ToolSerializer.endNode(writer);
-
-			ToolSerializer.startNode(writer, "length", Integer.class);
-			writer.setValue(String.valueOf(corpusNgram.getLength()));
-			ToolSerializer.endNode(writer);
+			ToolSerializer.setStringNode(writer, "term", corpusNgram.getTerm());
+			ToolSerializer.setNumericNode(writer, "rawFreq", corpusNgram.getRawFreq());
+			ToolSerializer.setNumericNode(writer, "length", corpusNgram.getLength());
 
         	if (withDistributions) {
         		ToolSerializer.startNode(writer, "distributions", List.class);
