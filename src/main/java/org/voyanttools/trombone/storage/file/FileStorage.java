@@ -411,11 +411,6 @@ public class FileStorage implements Storage {
 	public NlpFactory getNlpAnnotatorFactory() {
 		return nlpAnnotatorFactory;
 	}
-	
-	public File getLocalSourcesDirectory() {
-		File rootData = storageLocation.getParentFile();
-		return new File(rootData, "trombone-local-sources");
-	}
 
 	public File getLocalResourcesDirectory() {
 		File rootData = storageLocation.getParentFile();

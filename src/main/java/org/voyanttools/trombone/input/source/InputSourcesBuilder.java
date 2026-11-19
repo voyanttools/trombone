@@ -64,15 +64,6 @@ public class InputSourcesBuilder {
 	}
 	
 	private List<InputSource> getInputSources(Storage storage, FlexibleParameters params) throws IOException {
-		File localFileSource = null;
-		if (storage instanceof FileStorage && params.containsKey("localSource")) {
-			String name = new File(params.getParameterValue("localSource")).getName();
-			if (name.isEmpty()==false && name.contains("/")==false && name.contains(".")==false) {
-				File sources = ((FileStorage) storage).getLocalSourcesDirectory();
-				localFileSource = new File(sources, new File(name).getName());
-				if (localFileSource.exists()==false) {localFileSource=null;}
-			}
-		}
 		List<InputSource> inputSources = new ArrayList<InputSource>();
 		for (String file : params.getParameterValues("file")) {
 			inputSources.addAll(getInputSources(new File(file)));
@@ -96,23 +87,6 @@ public class InputSourcesBuilder {
 			}
 			catch (URISyntaxException e) {
 				throw new IllegalArgumentException("The URI provided by the parameters has a problem: "+uriString, e);
-			}
-			if (localFileSource!=null) { // check for a local source
-				String path = uri.getPath(); // look at the provided URL
-				if (path.contains("..")==false) {
-					String name = localFileSource.getName(); // consider only the path
-					String dirname = "/"+name+"/";
-					// find the starting point: after the local source directory name, if there, or the last portion if not
-					int start = path.contains(dirname) ? path.lastIndexOf(dirname)+dirname.length()-1 :  path.lastIndexOf("/");
-					String file = path.substring(start+1); // grab path
-					if (file.isEmpty()==false) { // make sure we have value
-						File localFile = new File(localFileSource, file); // construct a file
-						if (localFile.exists()) { // we have a match!
-							inputSources.addAll(getInputSources(localFile));
-							continue; // don't add URI too
-						}
-					}
-				}
 			}
 			inputSources.add(new UriInputSource(uri));
 		}
