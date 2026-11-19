@@ -143,7 +143,7 @@ public class LuceneIndexerTest {
 	@Test
 	public void testGreek() throws IOException {
 		// FIXME: this works properly for file storage (typical use) but not memory storage where values remain the same
-		Storage storage = new FileStorage(TestHelper.getTemporaryTestStorageDirectory());
+		FileStorage storage = new FileStorage(TestHelper.getTemporaryTestStorageDirectory());
 		
 		FlexibleParameters parameters;
 		CorpusCreator creator;
@@ -154,7 +154,9 @@ public class LuceneIndexerTest {
 		parameters = new FlexibleParameters();
 		String[] files = new String[]{"voyant_test_el.txt","voyant_test_grc_oxia.txt","voyant_test_grc_tonos_nfc.txt"};
 		for (int i=0; i<files.length; i++) {
-			files[i] =  TestHelper.getResource("i18n/"+File.separator+files[i]).getAbsolutePath();
+			String path = TestHelper.getResource("i18n/"+File.separator+files[i]).getAbsolutePath();
+			File destFile = TestHelper.copyFileToTemporaryTestStorageDirectory(storage, path);
+			files[i] = destFile.getAbsolutePath();
 		}
 		parameters.setParameter("file", files);
 		creator = new CorpusCreator(storage, parameters);

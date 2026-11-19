@@ -5,10 +5,12 @@ package org.voyanttools.trombone.tool.corpus;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
 
@@ -28,7 +30,13 @@ public class CorpusSegmentTermsTest {
 
 	public void test(Storage storage) throws IOException {
 		//  add the testing file to the storage
-		FlexibleParameters parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr")});
+		FlexibleParameters parameters;
+		if (storage instanceof FileStorage) {
+			File file = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource("udhr").getAbsolutePath());
+			parameters = new FlexibleParameters(new String[]{"file="+file});
+		} else {
+			parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr")});
+		}
 		CorpusCreator creator = new CorpusCreator(storage, parameters);
 		creator.run();
 		

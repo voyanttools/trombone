@@ -4,9 +4,11 @@ import org.junit.Test;
 import org.voyanttools.trombone.model.FOGIndex;
 import org.voyanttools.trombone.model.FOGIndexTest;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -26,8 +28,21 @@ public class DocumentFOGIndexTest {
 
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+FOGIndexTest.TEXT_EN}), FOGIndexTest.EXPECTED_FOG_INDEX_EN);
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+FOGIndexTest.TEXT_FR}), FOGIndexTest.EXPECTED_FOG_INDEX_FR);
-            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_EN)}), EXPECTED_EN_FOG_INDEX);
-            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_FR)}), EXPECTED_FR_FOG_INDEX);
+            FlexibleParameters parameters;
+            if (storage instanceof FileStorage) {
+                File file = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource(FILE_PATH_EN).getAbsolutePath());
+                parameters = new FlexibleParameters(new String[]{"file="+file});
+            } else {
+                parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_EN)});
+            }
+            testWithGivenParameters(storage, parameters, EXPECTED_EN_FOG_INDEX);
+            if (storage instanceof FileStorage) {
+                File file = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource(FILE_PATH_FR).getAbsolutePath());
+                parameters = new FlexibleParameters(new String[]{"file="+file});
+            } else {
+                parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_FR)});
+            }
+            testWithGivenParameters(storage, parameters, EXPECTED_FR_FOG_INDEX);
         }
     }
 

@@ -3,10 +3,12 @@ package org.voyanttools.trombone.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.tool.corpus.CorpusManager;
 import org.voyanttools.trombone.tool.corpus.CorpusTerms;
 import org.voyanttools.trombone.util.FlexibleParameters;
@@ -23,7 +25,13 @@ public class CategoriesTest {
 	}
 	
 	private void testCategories(Storage storage) throws IOException {
-		FlexibleParameters parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr/udhr-en.txt")});
+		FlexibleParameters parameters;
+		if (storage instanceof FileStorage) {
+			File file = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource("udhr/udhr-en.txt").getAbsolutePath());
+			parameters = new FlexibleParameters(new String[]{"file="+file});
+		} else {
+			parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr/udhr-en.txt")});
+		}
 		Corpus corpus = CorpusManager.getCorpus(storage, parameters);
 	
 		Categories categories;

@@ -2,14 +2,14 @@ package org.voyanttools.trombone.tool.corpus;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
 import org.voyanttools.trombone.model.DocumentCollocate;
 import org.voyanttools.trombone.storage.Storage;
-import org.voyanttools.trombone.tool.corpus.CorpusCreator;
-import org.voyanttools.trombone.tool.corpus.DocumentCollocates;
+import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
 
@@ -25,7 +25,13 @@ public class DocumentCollocatesTest {
 
 	public void test(Storage storage) throws IOException {
 		// add the testing file to the storage
-		FlexibleParameters parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr/udhr-en.txt")});
+		FlexibleParameters parameters;
+		if (storage instanceof FileStorage) {
+			File file = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource("udhr/udhr-en.txt").getAbsolutePath());
+			parameters = new FlexibleParameters(new String[]{"file="+file});
+		} else {
+			parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource("udhr/udhr-en.txt")});
+		}
 		CorpusCreator creator = new CorpusCreator(storage, parameters);
 		creator.run();
 		parameters.setParameter("corpus", creator.getStoredId());

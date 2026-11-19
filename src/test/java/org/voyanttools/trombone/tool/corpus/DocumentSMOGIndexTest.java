@@ -4,9 +4,11 @@ import org.junit.Test;
 import org.voyanttools.trombone.model.SMOGIndex;
 import org.voyanttools.trombone.model.SMOGIndexTest;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -25,8 +27,21 @@ public class DocumentSMOGIndexTest {
             System.out.println("Testing with "+storage.getClass().getSimpleName()+": "+storage.getLuceneManager().getClass().getSimpleName());
 
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+SMOGIndexTest.TEXT}), SMOGIndexTest.EXPECTED_SMOG_INDEX);
-            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_FR)}), EXPECTED_FR_SMOG_INDEX);
-            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_EN)}), EXPECTED_EN_SMOG_INDEX);
+            FlexibleParameters parameters;
+            if (storage instanceof FileStorage) {
+                File file = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource(FILE_PATH_FR).getAbsolutePath());
+                parameters = new FlexibleParameters(new String[]{"file="+file});
+            } else {
+                parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_FR)});
+            }
+            testWithGivenParameters(storage, parameters, EXPECTED_FR_SMOG_INDEX);
+            if (storage instanceof FileStorage) {
+                File file = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource(FILE_PATH_EN).getAbsolutePath());
+                parameters = new FlexibleParameters(new String[]{"file="+file});
+            } else {
+                parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_EN)});
+            }
+            testWithGivenParameters(storage, parameters, EXPECTED_EN_SMOG_INDEX);
         }
     }
 

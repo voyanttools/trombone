@@ -4,9 +4,11 @@ import org.junit.Test;
 import org.voyanttools.trombone.model.DaleChallIndex;
 import org.voyanttools.trombone.model.DaleChallIndexTest;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -25,16 +27,27 @@ public class DocumentDaleChallIndexTest {
 
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+DaleChallIndexTest.TEXT_1}), DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_1);
             testWithGivenParameters(storage, new FlexibleParameters(new String[]{"string="+DaleChallIndexTest.TEXT_2}), DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_2);
-            testWithGivenParameters(storage, new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_EN)}), EXPECTED_EN_DALE_CHALL_INDEX);
+            FlexibleParameters parameters;
+            if (storage instanceof FileStorage) {
+                File file = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource(FILE_PATH_EN).getAbsolutePath());
+                parameters = new FlexibleParameters(new String[]{"file="+file});
+            } else {
+                parameters = new FlexibleParameters(new String[]{"file="+TestHelper.getResource(FILE_PATH_EN)});
+            }
+            testWithGivenParameters(storage, parameters, EXPECTED_EN_DALE_CHALL_INDEX);
         }
     }
 
     @Test
     public void testWithGivenEasyWordsList() throws IOException {
-        String easyWordsPath = "./src/test/resources/org/voyanttools/trombone/texts/readability/easywords.en.txt";
-
         for (Storage storage : TestHelper.getDefaultTestStorages()) {
             System.out.println("Testing with "+storage.getClass().getSimpleName()+": "+storage.getLuceneManager().getClass().getSimpleName());
+
+            String easyWordsPath = "./src/test/resources/org/voyanttools/trombone/texts/readability/easywords.en.txt";
+            if (storage instanceof FileStorage) {
+                File file = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, easyWordsPath);
+                easyWordsPath = file.getAbsolutePath();
+            }
 
             testWithGivenParameters(
                     storage,
@@ -52,10 +65,14 @@ public class DocumentDaleChallIndexTest {
                     }),
                     DaleChallIndexTest.EXPECTED_DALE_CHALL_INDEX_2
             );
+            File filePathEn = TestHelper.getResource(FILE_PATH_EN);
+            if (storage instanceof FileStorage) {
+                filePathEn = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource(FILE_PATH_EN).getAbsolutePath());
+            }
             testWithGivenParameters(
                     storage,
                     new FlexibleParameters(new String[]{
-                            "file="+TestHelper.getResource(FILE_PATH_EN),
+                            "file="+filePathEn,
                             "easyWordsFile="+easyWordsPath
                     }),
                     EXPECTED_EN_DALE_CHALL_INDEX

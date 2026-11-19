@@ -3,12 +3,14 @@ package org.voyanttools.trombone.tool.corpus;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
 import org.voyanttools.trombone.model.DocumentToken;
 import org.voyanttools.trombone.storage.Storage;
+import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.tool.build.RealCorpusCreator;
 import org.voyanttools.trombone.util.FlexibleParameters;
 import org.voyanttools.trombone.util.TestHelper;
@@ -65,10 +67,15 @@ public class DocumentTokensTest {
 
 	public void testLanguages(Storage storage) throws IOException {
 
-		FlexibleParameters parameters;
-		
-		parameters = new FlexibleParameters();
-		parameters.addParameter("file",  new String[]{TestHelper.getResource("udhr/udhr-en.txt").getPath(),TestHelper.getResource("udhr/udhr-es.txt").getPath(),TestHelper.getResource("udhr/udhr-fr.txt").getPath()});
+		FlexibleParameters parameters = new FlexibleParameters();
+		if (storage instanceof FileStorage) {
+			File file1 = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource("udhr/udhr-en.txt").getAbsolutePath());
+			File file2 = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource("udhr/udhr-es.txt").getAbsolutePath());
+			File file3 = TestHelper.copyFileToTemporaryTestStorageDirectory((FileStorage)storage, TestHelper.getResource("udhr/udhr-fr.txt").getAbsolutePath());
+			parameters.addParameter("file", new String[]{file1.getAbsolutePath(), file2.getAbsolutePath(), file3.getAbsolutePath()});
+		} else {
+			parameters.addParameter("file", new String[]{TestHelper.getResource("udhr/udhr-en.txt").getPath(),TestHelper.getResource("udhr/udhr-es.txt").getPath(),TestHelper.getResource("udhr/udhr-fr.txt").getPath()});
+		}
 		parameters.addParameter("string", "我们第一届全国人民代表大会第一次会议");
 		
 		RealCorpusCreator creator = new RealCorpusCreator(storage, parameters);

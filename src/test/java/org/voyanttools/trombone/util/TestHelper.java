@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.voyanttools.trombone.storage.Storage;
 import org.voyanttools.trombone.storage.file.FileStorage;
 import org.voyanttools.trombone.storage.memory.MemoryStorage;
@@ -71,6 +72,17 @@ public class TestHelper {
 	
 	public static File getResource(String relativeToTexts) throws IOException {
 		return new File(getResourcesPath(), relativeToTexts);
+	}
+
+	public static File copyFileToTemporaryTestStorageDirectory(FileStorage storage, String filePath) throws IOException {
+		File srcFile = new File(filePath);
+		File destFile = new File(storage.getStorageLocation(), filePath);
+		if (srcFile.isDirectory()) {
+			FileUtils.copyDirectory(srcFile, destFile);
+		} else {
+			FileUtils.copyFile(srcFile, destFile);
+		}
+		return destFile;
 	}
 
 }
