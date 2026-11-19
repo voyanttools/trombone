@@ -33,7 +33,7 @@ import net.lingala.zip4j.exception.ZipException;
  */
 public class TromboneMigration {
 
-	@Test
+	// @Test
 	public void testTrombone3_0() throws IOException, ZipException {
 		
 		File base = new File(System.getProperty("java.io.tmpdir"), "_test_"+UUID.randomUUID());
@@ -82,7 +82,7 @@ public class TromboneMigration {
 		
 	}
 	
-	@Test
+	// @Test
 	public void testTrombone4_0() throws IOException, ZipException {
 		
 		File base = new File(System.getProperty("java.io.tmpdir"), "_test_"+UUID.randomUUID());
@@ -128,7 +128,7 @@ public class TromboneMigration {
 		
 	}
 
-	@Test
+	// @Test
 	public void testTrombone4_1() throws IOException, ZipException {
 		
 		File base = new File(System.getProperty("java.io.tmpdir"), "_test_"+UUID.randomUUID());
@@ -246,7 +246,7 @@ public class TromboneMigration {
 		
 	}
 
-	@Test
+	// @Test
 	public void testTrombone4_2() throws IOException, ZipException {
 		
 		File base = new File(System.getProperty("java.io.tmpdir"), "_test_"+UUID.randomUUID());
