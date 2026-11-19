@@ -64,7 +64,7 @@ public class GitNotebookManagerTest {
 
 	static void reindex(FileStorage storage) throws IOException {
 		File notebookFile = TestHelper.getResource("json/notebook.json");
-		File notebookStorage = new File(storage.storageLocation, Storage.Location.notebook.toString());
+		File notebookStorage = new File(storage.getStorageLocation(), Storage.Location.notebook.toString());
 		FileUtils.copyFileToDirectory(notebookFile, notebookStorage);
 		
 		FlexibleParameters parameters = new FlexibleParameters(new String[] {"action=reindex"});

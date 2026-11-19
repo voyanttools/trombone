@@ -71,8 +71,8 @@ public class FileMigrationFactory {
 	}
 	
 	private static File[] getRecoveredStorageDirectories(FileStorage storage) {
-		final String storageFilename = storage.storageLocation.getName();
-		File storageParentFile = storage.storageLocation.getParentFile();
+		final String storageFilename = storage.getStorageLocation().getName();
+		File storageParentFile = storage.getStorageLocation().getParentFile();
 		File[] files = storageParentFile.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {

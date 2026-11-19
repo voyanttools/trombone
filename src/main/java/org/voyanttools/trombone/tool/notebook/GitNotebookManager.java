@@ -348,7 +348,7 @@ public class GitNotebookManager extends AbstractTool {
 		if (repoManager == null) {
 			try {
 				if (storage instanceof FileStorage) {
-					repoManager = new RepositoryManager(((FileStorage)storage).storageLocation);
+					repoManager = new RepositoryManager(((FileStorage)storage).getStorageLocation());
 				} else {
 					// TODO memory storage version
 					throw new IOException("Only FileStorage is supported for RepositoryManager");

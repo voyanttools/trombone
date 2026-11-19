@@ -43,8 +43,6 @@ import java.util.UUID;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.voyanttools.trombone.lucene.LuceneManager;
@@ -81,7 +79,7 @@ public class FileStorage implements Storage {
 	/**
 	 * the actual base directory used for storage
 	 */
-	public File storageLocation;
+	private File storageLocation;
 	
 	/**
 	 * the handler for InputSource operations
@@ -275,6 +273,10 @@ public class FileStorage implements Storage {
 		default:
 			return new File(storageLocation,"object-storage");
 		}
+	}
+
+	public File getStorageLocation() {
+		return storageLocation;
 	}
 	
 	public File getResourceFile(String id, Location location) {

@@ -60,7 +60,7 @@ public abstract class AbstractFileMigrator implements FileMigrator {
 
 	
 	protected File getRootDataDirectory() {
-		return storage.storageLocation.getParentFile();
+		return storage.getStorageLocation().getParentFile();
 	}
 
 	// this is package level for testing
