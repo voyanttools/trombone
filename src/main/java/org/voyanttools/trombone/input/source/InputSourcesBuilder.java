@@ -27,6 +27,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -74,7 +77,7 @@ public class InputSourcesBuilder {
 
 		for (String file : params.getParameterValues("upload")) {
 			File f = new File(file);
-			File safeFile = resolveSafeFile(storage, f);
+			File safeFile = resolveSafeFile(getTemporaryUploadsPath(), f.getCanonicalPath());
 			InputSource inputSource = new FileInputSource(safeFile);
 			inputSource.getMetadata().setLocation(safeFile.getName());
 			inputSources.add(inputSource);
@@ -164,5 +167,10 @@ public class InputSourcesBuilder {
 		}
 
 		return targetPath.toFile();
+	}
+
+	public static Path getTemporaryUploadsPath() {
+		String tmpDir = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("java.io.tmpdir"));
+		return Paths.get(tmpDir, "tmp.voyant.uploads");
 	}
 }
